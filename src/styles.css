@@ -1,0 +1,374 @@
+@import "tailwindcss";
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Confianza design system.
+ * Royal Lavender + Luxury Gold on ivory. All colours are oklch tokens.
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+
+  /* Brand extras */
+  --color-gold: var(--gold);
+  --color-rose-gold: var(--rose-gold);
+  --color-champagne: var(--champagne);
+  --color-pearl: var(--pearl);
+  --color-soft-lavender: var(--soft-lavender);
+  --color-warm-beige: var(--warm-beige);
+  --color-ink: var(--ink);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 1rem;
+
+  /* #FFFDFC */
+  --background: oklch(0.994 0.003 60);
+  /* #4B4453 */
+  --foreground: oklch(0.402 0.028 305);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.402 0.028 305);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.402 0.028 305);
+  /* #6D4C9B Royal Lavender */
+  --primary: oklch(0.472 0.144 300.5);
+  --primary-foreground: oklch(0.985 0.005 300);
+  /* #C9A227 Luxury Gold */
+  --secondary: oklch(0.727 0.128 93);
+  --secondary-foreground: oklch(0.24 0.03 305);
+  /* #F8F4F8 Ivory */
+  --accent: oklch(0.968 0.006 320);
+  --accent-foreground: oklch(0.402 0.028 305);
+  --muted: oklch(0.968 0.006 320);
+  --muted-foreground: oklch(0.55 0.02 305);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0.005 300);
+  --border: oklch(0.912 0.012 310);
+  --input: oklch(0.912 0.012 310);
+  --ring: oklch(0.472 0.144 300.5);
+
+  /* #2B2138 dark */
+  --ink: oklch(0.244 0.043 305);
+  --gold: oklch(0.727 0.128 93);
+  --rose-gold: oklch(0.79 0.07 40);
+  --champagne: oklch(0.93 0.035 85);
+  --pearl: oklch(0.98 0.004 300);
+  --soft-lavender: oklch(0.91 0.038 305);
+  --warm-beige: oklch(0.93 0.02 80);
+
+  --gradient-royal: linear-gradient(135deg, oklch(0.472 0.144 300.5), oklch(0.6 0.13 320));
+  --gradient-gold: linear-gradient(135deg, oklch(0.727 0.128 93), oklch(0.86 0.09 88));
+  --shadow-luxe: 0 24px 60px -24px color-mix(in oklab, var(--primary) 45%, transparent);
+  --shadow-soft: 0 12px 40px -18px color-mix(in oklab, var(--ink) 30%, transparent);
+
+  --sidebar: oklch(0.244 0.043 305);
+  --sidebar-foreground: oklch(0.96 0.005 300);
+  --sidebar-primary: oklch(0.472 0.144 300.5);
+  --sidebar-primary-foreground: oklch(0.985 0.005 300);
+  --sidebar-accent: oklch(0.31 0.045 305);
+  --sidebar-accent-foreground: oklch(0.96 0.005 300);
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: oklch(0.727 0.128 93);
+}
+
+/* "Luxury" (dark) theme selectable from the navbar toggle. */
+.dark {
+  --background: oklch(0.208 0.038 305);
+  --foreground: oklch(0.95 0.008 305);
+  --card: oklch(0.26 0.04 305);
+  --card-foreground: oklch(0.95 0.008 305);
+  --popover: oklch(0.26 0.04 305);
+  --popover-foreground: oklch(0.95 0.008 305);
+  --primary: oklch(0.66 0.14 300.5);
+  --primary-foreground: oklch(0.16 0.03 305);
+  --accent: oklch(0.3 0.045 305);
+  --accent-foreground: oklch(0.95 0.008 305);
+  --muted: oklch(0.3 0.045 305);
+  --muted-foreground: oklch(0.75 0.02 305);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 16%);
+  --pearl: oklch(0.3 0.045 305);
+  --soft-lavender: oklch(0.36 0.05 305);
+  --warm-beige: oklch(0.32 0.03 80);
+  --shadow-soft: 0 12px 40px -18px oklch(0 0 0 / 60%);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5.5rem;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+}
+
+/* ---------- Utilities ---------- */
+
+@utility gradient-royal {
+  background-image: var(--gradient-royal);
+}
+
+@utility gradient-gold {
+  background-image: var(--gradient-gold);
+}
+
+@utility text-gold-gradient {
+  background-image: var(--gradient-gold);
+  background-clip: text;
+  color: transparent;
+}
+
+@utility glass-card {
+  background-color: color-mix(in oklab, var(--card) 72%, transparent);
+  backdrop-filter: blur(18px);
+  border: 1px solid color-mix(in oklab, var(--primary) 12%, transparent);
+  box-shadow: var(--shadow-soft);
+}
+
+@utility glass-dark {
+  background-color: oklch(0.244 0.043 305 / 55%);
+  backdrop-filter: blur(16px);
+  border: 1px solid oklch(1 0 0 / 14%);
+}
+
+@utility shadow-luxe {
+  box-shadow: var(--shadow-luxe);
+}
+
+@utility btn-luxe {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  padding: 0.9rem 2rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease,
+    opacity 0.35s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-luxe);
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, oklch(1 0 0 / 45%) 10%, transparent 60%);
+    opacity: 0;
+    transform: scale(0.2);
+    transition: transform 0.6s ease, opacity 0.6s ease;
+  }
+
+  &:active::after {
+    opacity: 1;
+    transform: scale(2.4);
+    transition: 0s;
+  }
+}
+
+@utility section-pad {
+  padding-block: clamp(4rem, 9vw, 8.5rem);
+}
+
+@utility hover-zoom-img {
+  transition: transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  &:hover {
+    transform: scale(1.08);
+  }
+}
+
+/* Elegant script-like divider */
+@utility rule-gold {
+  height: 1px;
+  width: 4.5rem;
+  background-image: var(--gradient-gold);
+}
+
+/* ---------- Animations (CSS only) ---------- */
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(36px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes zoom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes ken-burns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.12);
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+
+@utility animate-fade-in {
+  animation: fade-in 0.9s ease both;
+}
+
+@utility animate-slide-up {
+  animation: slide-up 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@utility animate-zoom-in {
+  animation: zoom-in 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@utility animate-ken-burns {
+  animation: ken-burns 9s ease-out both;
+}
+
+@utility animate-marquee {
+  animation: marquee 26s linear infinite;
+}
+
+@utility skeleton {
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--muted) 80%, transparent) 25%,
+    color-mix(in oklab, var(--soft-lavender) 70%, transparent) 50%,
+    color-mix(in oklab, var(--muted) 80%, transparent) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+/* Reveal-on-scroll base state, toggled by the useReveal hook. */
+.reveal {
+  opacity: 0;
+  transform: translateY(34px);
+  transition:
+    opacity 0.9s cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

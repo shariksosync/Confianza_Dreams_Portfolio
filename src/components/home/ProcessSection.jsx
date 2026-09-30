@@ -1,0 +1,89 @@
+﻿"use client";
+
+import {
+  MessageSquareHeart,
+  CalendarCheck,
+  Palette,
+  Hammer,
+  PartyPopper,
+  Sparkles,
+} from "lucide-react";
+import { useSite } from "../../context/SiteContext";
+import SectionHeading from "../ui/SectionHeading";
+
+const STEP_ICONS = [
+  MessageSquareHeart,
+  CalendarCheck,
+  Palette,
+  Hammer,
+  PartyPopper,
+];
+
+export default function ProcessSection() {
+  const { process } = useSite();
+
+  const steps = process?.length
+    ? process
+    : [
+        { id: 1, title: "Consultation", text: "We listen to your story, guest list, budget and non-negotiables." },
+        { id: 2, title: "Planning", text: "Venues, vendors, budgets and a master timeline you can actually read." },
+        { id: 3, title: "Design", text: "Mood boards, colour palettes and decor layouts approved before we build." },
+        { id: 4, title: "Execution", text: "Our crews take over the venue while you get ready in peace." },
+        { id: 5, title: "Celebration", text: "You stay a guest at your own wedding. We handle everything else." },
+      ];
+
+  return (
+    <section className="section-pad relative bg-accent/30 overflow-hidden">
+      <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+        <SectionHeading
+          eyebrow="The Wedding Journey"
+          title="From First Meeting to Forever Memories"
+          subtitle="A transparent, stress-free path crafted so you and your families can cherish every second leading up to the celebration."
+        />
+
+        {/* Process Timeline Steps */}
+        <div className="reveal mt-16 relative">
+          {/* Connector line for desktop */}
+          <div className="hidden lg:block absolute top-1/2 left-10 right-10 h-0.5 -translate-y-8 bg-gradient-to-r from-primary/30 via-secondary/60 to-primary/30 z-0" />
+
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5 relative z-10">
+            {steps.map((step, idx) => {
+              const IconComponent = STEP_ICONS[idx % STEP_ICONS.length] || Sparkles;
+              return (
+                <div
+                  key={step.id || idx}
+                  className="group glass-card rounded-3xl p-6 text-center transition-all duration-500 hover:-translate-y-2 hover:shadow-luxe flex flex-col items-center justify-between"
+                >
+                  <div className="flex flex-col items-center">
+                    {/* Step Number & Icon Circle */}
+                    <div className="relative mb-5">
+                      <div className="gradient-royal grid h-16 w-16 place-items-center rounded-full text-primary-foreground shadow-luxe transition-transform duration-500 group-hover:scale-110 group-hover:bg-secondary">
+                        <IconComponent className="h-7 w-7 text-champagne" />
+                      </div>
+                      <span className="absolute -top-2 -right-2 grid h-6 w-6 place-items-center rounded-full gradient-gold text-[0.65rem] font-bold text-ink shadow-md">
+                        0{idx + 1}
+                      </span>
+                    </div>
+
+                    <h3 className="font-display text-lg text-ink transition-colors group-hover:text-primary">
+                      {step.title}
+                    </h3>
+
+                    <p className="mt-2.5 text-xs text-muted-foreground leading-relaxed">
+                      {step.text}
+                    </p>
+                  </div>
+
+                  <div className="mt-5 text-[0.65rem] font-semibold uppercase tracking-widest text-secondary/80">
+                    Step 0{idx + 1}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
