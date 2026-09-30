@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
@@ -6,7 +6,20 @@ import { Search, Sparkles, Eye, ArrowRight, MapPin } from "lucide-react";
 import { useSite } from "../../context/SiteContext";
 import SectionHeading from "../ui/SectionHeading";
 import Lightbox from "../ui/Lightbox";
-import { portfolioCategories } from "../../mock/portfolio";
+
+const PORTFOLIO_CATEGORIES = [
+  "All",
+  "Wedding",
+  "Haldi",
+  "Mehendi",
+  "Reception",
+  "Destination",
+  "Decor",
+  "Outdoor",
+  "Indoor",
+  "Luxury Stage",
+  "Floral Decor",
+];
 
 export default function PortfolioSection({ isStandalone = false }) {
   const { portfolio } = useSite();
@@ -15,19 +28,7 @@ export default function PortfolioSection({ isStandalone = false }) {
   const [visibleCount, setVisibleCount] = useState(isStandalone ? 12 : 8);
   const [lightboxIndex, setLightboxIndex] = useState(null);
 
-  const categories = portfolioCategories || [
-    "All",
-    "Wedding",
-    "Haldi",
-    "Mehendi",
-    "Reception",
-    "Destination",
-    "Decor",
-    "Outdoor",
-    "Indoor",
-    "Luxury Stage",
-    "Floral Decor",
-  ];
+  const categories = PORTFOLIO_CATEGORIES;
 
   const filteredItems = useMemo(() => {
     return (portfolio || []).filter((item) => {

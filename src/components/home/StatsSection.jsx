@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useSite } from "../../context/SiteContext";
 import { useCountUp } from "../../hooks/useCountUp";
@@ -30,15 +30,9 @@ export default function StatsSection() {
   const { stats } = useSite();
 
   const statIcons = [Trophy, Heart, Palmtree, Clock];
+  const items = stats || [];
 
-  const items = stats?.length
-    ? stats
-    : [
-        { id: 1, value: 500, suffix: "+", label: "Events" },
-        { id: 2, value: 350, suffix: "+", label: "Happy Couples" },
-        { id: 3, value: 40, suffix: "+", label: "Destination Weddings" },
-        { id: 4, value: 7, suffix: "+", label: "Years Experience" },
-      ];
+  if (items.length === 0) return null;
 
   return (
     <section className="relative overflow-hidden bg-ink py-20 text-background">

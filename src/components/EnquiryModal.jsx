@@ -53,17 +53,20 @@ export default function EnquiryModal({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      addMessage({
+    try {
+      await addMessage({
         ...formData,
         createdAt: new Date().toISOString(),
       });
-      setLoading(false);
       setSubmitted(true);
-    }, 600);
+    } catch (err) {
+      console.error("Enquiry submission error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleResetAndClose = () => {

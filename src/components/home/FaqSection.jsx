@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -10,46 +10,7 @@ export default function FaqSection() {
   const { faq, contact } = useSite();
   const [openId, setOpenId] = useState(1);
 
-  const items = faq?.length
-    ? faq
-    : [
-        {
-          id: 1,
-          question: "How far in advance should we book Confianza?",
-          answer:
-            "Six to twelve months is ideal for a full wedding, and three months for a single function. We do take on shorter timelines when our calendar allows.",
-        },
-        {
-          id: 2,
-          question: "Do you handle destination weddings outside Maharashtra?",
-          answer:
-            "Yes. We regularly produce weddings in Udaipur, Jaipur, Goa, Alibaug and Kerala, and we handle guest travel, stays and local permissions.",
-        },
-        {
-          id: 3,
-          question: "Can we book only decor or only execution?",
-          answer:
-            "Absolutely. Our services are modular â€” planning, decor, execution and entertainment can be booked individually or together.",
-        },
-        {
-          id: 4,
-          question: "How is your pricing structured?",
-          answer:
-            "Planning is charged as a percentage of the event budget or a flat fee, while decor and production are quoted per design. You receive one transparent sheet with no hidden costs.",
-        },
-        {
-          id: 5,
-          question: "Do you work with our existing vendors?",
-          answer:
-            "Happily. We coordinate with family-preferred caterers, priests and photographers, and fill any gaps from our vetted network.",
-        },
-        {
-          id: 6,
-          question: "What happens if it rains?",
-          answer:
-            "Every outdoor plan we build ships with a covered contingency layout, standby crews and a weather call schedule 72 hours before the function.",
-        },
-      ];
+  const items = faq || [];
 
   const toggle = (id) => setOpenId((prev) => (prev === id ? null : id));
 
@@ -63,41 +24,49 @@ export default function FaqSection() {
         />
 
         {/* Accordion List */}
-        <div className="reveal mt-14 space-y-4">
-          {items.map((item) => {
-            const isOpen = openId === item.id;
-            return (
-              <div
-                key={item.id}
-                className="glass-card rounded-2xl border border-border overflow-hidden transition-all duration-300"
-              >
-                <button
-                  type="button"
-                  onClick={() => toggle(item.id)}
-                  aria-expanded={isOpen}
-                  className="w-full flex items-center justify-between p-5 sm:p-6 text-left transition hover:text-primary"
+        {items.length === 0 ? (
+          <div className="reveal mt-14 glass-card rounded-3xl p-10 text-center text-muted-foreground border border-border">
+            <HelpCircle className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
+            <h3 className="font-display text-lg text-ink font-semibold">No FAQs Available</h3>
+            <p className="text-xs text-muted-foreground mt-1">Frequently asked questions will appear here once added in the admin panel.</p>
+          </div>
+        ) : (
+          <div className="reveal mt-14 space-y-4">
+            {items.map((item) => {
+              const isOpen = openId === item.id;
+              return (
+                <div
+                  key={item.id}
+                  className="glass-card rounded-2xl border border-border overflow-hidden transition-all duration-300"
                 >
-                  <span className="font-display text-base sm:text-lg text-ink pr-4">
-                    {item.question}
-                  </span>
-                  <div
-                    className={`grid h-8 w-8 shrink-0 place-items-center rounded-full border border-border text-foreground transition-transform duration-300 ${
-                      isOpen ? "rotate-180 bg-primary text-primary-foreground border-primary" : ""
-                    }`}
+                  <button
+                    type="button"
+                    onClick={() => toggle(item.id)}
+                    aria-expanded={isOpen}
+                    className="w-full flex items-center justify-between p-5 sm:p-6 text-left transition hover:text-primary"
                   >
-                    <ChevronDown className="h-4 w-4" />
-                  </div>
-                </button>
+                    <span className="font-display text-base sm:text-lg text-ink pr-4">
+                      {item.question}
+                    </span>
+                    <div
+                      className={`grid h-8 w-8 shrink-0 place-items-center rounded-full border border-border text-foreground transition-transform duration-300 ${
+                        isOpen ? "rotate-180 bg-primary text-primary-foreground border-primary" : ""
+                      }`}
+                    >
+                      <ChevronDown className="h-4 w-4" />
+                    </div>
+                  </button>
 
-                {isOpen && (
-                  <div className="animate-slide-up px-5 sm:px-6 pb-6 pt-1 text-xs sm:text-sm leading-relaxed text-muted-foreground border-t border-border/40">
-                    {item.answer}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                  {isOpen && (
+                    <div className="animate-slide-up px-5 sm:px-6 pb-6 pt-1 text-xs sm:text-sm leading-relaxed text-muted-foreground border-t border-border/40">
+                      {item.answer}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Still have questions prompt */}
         <div className="reveal mt-12 glass-card rounded-3xl p-6 sm:p-8 text-center border border-primary/20 flex flex-col sm:flex-row items-center justify-between gap-6">

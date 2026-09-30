@@ -1,23 +1,22 @@
-﻿"use client";
+"use client";
 
 import { Sparkles, Building2 } from "lucide-react";
-import { clientLogos } from "../../mock/testimonials";
+
+const DEFAULT_PARTNERS = [
+  "Taj Hotels",
+  "The Westin",
+  "JW Marriott",
+  "Novotel",
+  "Hyatt Regency",
+  "Della Resorts",
+  "Radisson Blu",
+  "Le Méridien",
+  "The Ritz-Carlton",
+  "Conrad Pune",
+];
 
 export default function PartnerMarqueeSection() {
-  const partners = clientLogos?.length
-    ? clientLogos
-    : [
-        "Taj Hotels",
-        "The Westin",
-        "JW Marriott",
-        "Novotel",
-        "Hyatt Regency",
-        "Della Resorts",
-        "Radisson Blu",
-        "Le MÃ©ridien",
-        "The Ritz-Carlton",
-        "Conrad Pune",
-      ];
+  const partners = DEFAULT_PARTNERS;
 
   // Double the array for seamless endless marquee
   const marqueeList = [...partners, ...partners];

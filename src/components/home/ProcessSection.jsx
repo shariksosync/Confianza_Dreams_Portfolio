@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   MessageSquareHeart,
@@ -22,15 +22,8 @@ const STEP_ICONS = [
 export default function ProcessSection() {
   const { process } = useSite();
 
-  const steps = process?.length
-    ? process
-    : [
-        { id: 1, title: "Consultation", text: "We listen to your story, guest list, budget and non-negotiables." },
-        { id: 2, title: "Planning", text: "Venues, vendors, budgets and a master timeline you can actually read." },
-        { id: 3, title: "Design", text: "Mood boards, colour palettes and decor layouts approved before we build." },
-        { id: 4, title: "Execution", text: "Our crews take over the venue while you get ready in peace." },
-        { id: 5, title: "Celebration", text: "You stay a guest at your own wedding. We handle everything else." },
-      ];
+  const steps = process || [];
+  if (steps.length === 0) return null;
 
   return (
     <section className="section-pad relative bg-accent/30 overflow-hidden">

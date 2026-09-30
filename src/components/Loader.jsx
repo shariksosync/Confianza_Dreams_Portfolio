@@ -20,9 +20,13 @@ export default function Loader() {
       }`}
     >
       <div className="flex flex-col items-center gap-5">
-        <span className="gradient-royal animate-zoom-in grid h-20 w-20 place-items-center rounded-full font-display text-3xl text-primary-foreground shadow-luxe">
-          C
-        </span>
+        <div className="relative animate-zoom-in h-20 w-20 rounded-full overflow-hidden shadow-luxe ring-2 ring-secondary/60 bg-ink flex items-center justify-center">
+          <img
+            src="/logo.png"
+            alt="Confianza Logo"
+            className="h-full w-full object-cover"
+          />
+        </div>
         <span className="font-display text-lg tracking-[0.3em] text-ink">CONFIANZA</span>
         <span className="skeleton h-0.5 w-40 rounded-full" />
       </div>

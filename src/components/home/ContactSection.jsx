@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Phone,
   Mail,
@@ -16,57 +16,85 @@ import { useSite } from "../../context/SiteContext";
 import SectionHeading from "../ui/SectionHeading";
 
 export default function ContactSection({ isStandalone = false }) {
-  const { contact, addMessage } = useSite();
+  const { contact, services, addMessage } = useSite();
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
     email: "",
     eventDate: "",
-    service: "Full Wedding Planning",
-    budget: "â‚¹5L - â‚¹15L",
+    service: "",
+    budget: "₹5L - ₹15L",
     message: "",
   });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const servicesList = [
-    "Full Wedding Planning",
-    "Wedding Decor & Floral Styling",
-    "Destination Wedding Coordination",
-    "On-Day Wedding Execution",
-    "Haldi & Mehendi Rituals",
-    "Grand Reception Production",
-    "Corporate & Entertainment Events",
+  const defaultServicesList = [
+    "Full-Service Luxury Wedding Planning",
+    "Hospitality & Guest Concierge Management",
+    "Bespoke Mandap & Spatial Production",
+    "Ritual & Cultural Ceremony Direction",
+    "Dedicated Shadow Management (Bride & Groom)",
+    "Food & Beverage (F&B) Orchestration",
+    "Artist, Sufi Band & Celebrity Management",
+    "Master Show Running & Ground Direction",
   ];
+
+  const availableServices =
+    services && services.length > 0
+      ? services.map((s) => s.title)
+      : defaultServicesList;
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const queryService = params.get("service");
+      if (queryService) {
+        setFormData((prev) => ({
+          ...prev,
+          service: queryService,
+          message: prev.message || `I am interested in inquiring about ${queryService}.`,
+        }));
+        return;
+      }
+    }
+    if (!formData.service && availableServices.length > 0) {
+      setFormData((prev) => ({ ...prev, service: availableServices[0] }));
+    }
+  }, [services]);
 
   const budgetTiers = [
-    "Below â‚¹5 Lakhs",
-    "â‚¹5L - â‚¹15 Lakhs",
-    "â‚¹15L - â‚¹30 Lakhs",
-    "â‚¹30L - â‚¹60 Lakhs",
-    "â‚¹60 Lakhs+ (Royal / Destination)",
+    "Below ₹5 Lakhs",
+    "₹5L - ₹15 Lakhs",
+    "₹15L - ₹30 Lakhs",
+    "₹30L - ₹60 Lakhs",
+    "₹60 Lakhs+ (Royal / Destination)",
   ];
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      addMessage({
+    try {
+      await addMessage({
         ...formData,
+        service: formData.service || availableServices[0],
         createdAt: new Date().toISOString(),
       });
-      setLoading(false);
       setSubmitted(true);
       setFormData({
         name: "",
         phone: "",
         email: "",
         eventDate: "",
-        service: "Full Wedding Planning",
-        budget: "â‚¹5L - â‚¹15L",
+        service: availableServices[0] || "",
+        budget: "₹5L - ₹15L",
         message: "",
       });
-    }, 600);
+    } catch (err) {
+      console.error("Consultation form error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -283,7 +311,7 @@ export default function ContactSection({ isStandalone = false }) {
                         onChange={(e) => setFormData({ ...formData, service: e.target.value })}
                         className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-xs sm:text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                       >
-                        {servicesList.map((s) => (
+                        {availableServices.map((s) => (
                           <option key={s} value={s}>
                             {s}
                           </option>

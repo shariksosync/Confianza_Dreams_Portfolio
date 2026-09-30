@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Instagram, Heart, ExternalLink } from "lucide-react";
 import { useSite } from "../../context/SiteContext";
@@ -7,16 +7,8 @@ import SectionHeading from "../ui/SectionHeading";
 export default function InstagramSection() {
   const { instagram, contact } = useSite();
 
-  const posts = instagram?.length
-    ? instagram
-    : [
-        { id: 1, image: "/images/hero-1.jpg", likes: 842 },
-        { id: 2, image: "/images/mehendi.jpg", likes: 611 },
-        { id: 3, image: "/images/stage.jpg", likes: 730 },
-        { id: 4, image: "/images/floral.jpg", likes: 522 },
-        { id: 5, image: "/images/outdoor.jpg", likes: 468 },
-        { id: 6, image: "/images/hero-2.jpg", likes: 905 },
-      ];
+  const posts = instagram || [];
+  if (posts.length === 0) return null;
 
   const instaUrl = contact.instagram || "https://www.instagram.com/confianza_events";
 

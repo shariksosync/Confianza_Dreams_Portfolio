@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { Sparkles, Compass, HeartHandshake, CheckCircle2, ArrowRight } from "lucide-react";
@@ -17,7 +17,7 @@ export default function AboutSection() {
       <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
         <SectionHeading
           eyebrow="Our Story & Philosophy"
-          title={about.heading || "A Pune Studio Devoted to Weddings That Feel Personal"}
+          title={about.homepageHeading || "A Pune Studio Devoted to Weddings That Feel Personal"}
           subtitle="Where raw emotion meets royal finesse. We shape unforgettable weddings designed uniquely for you."
         />
 
@@ -32,12 +32,12 @@ export default function AboutSection() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/30 to-transparent p-6 sm:p-8 flex flex-col justify-end">
                 <span className="text-[0.68rem] uppercase tracking-[0.25em] text-secondary font-medium">
-                  Since 2018 â€¢ Warje, Pune
+                  Since 2018 • Warje, Pune
                 </span>
                 <p className="mt-2 font-display text-xl sm:text-2xl text-background font-normal">
                   "Every love story deserves a stage as breathtaking as the journey itself."
                 </p>
-                <p className="mt-2 text-xs text-champagne/90">â€” Ashish Wankhede, Founder</p>
+                <p className="mt-2 text-xs text-champagne/90">— Ashish Wankhede, Founder</p>
               </div>
             </div>
 
@@ -65,7 +65,8 @@ export default function AboutSection() {
             <div className="glass-card rounded-3xl p-6 sm:p-8 border border-border">
               <h3 className="font-display text-2xl text-ink">The Confianza Story</h3>
               <p className="mt-4 text-sm sm:text-base leading-relaxed text-muted-foreground">
-                {about.story}
+                {about.homepageStory ||
+                  "Confianza began in 2018 with one belief — a wedding should sound like the couple, not like a catalogue. What started as a two-person decor team in Warje is now a full-service house planning, designing and executing weddings across India."}
               </p>
 
               <div className="mt-6 pt-6 border-t border-border/60 grid sm:grid-cols-2 gap-4">

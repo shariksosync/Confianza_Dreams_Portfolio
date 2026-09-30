@@ -17,9 +17,13 @@ export default function Footer() {
       <div className="mx-auto grid max-w-7xl gap-12 px-5 py-16 lg:grid-cols-4 lg:px-10">
         <div>
           <div className="flex items-center gap-3">
-            <span className="gradient-gold grid h-11 w-11 place-items-center rounded-full font-display text-lg text-ink">
-              C
-            </span>
+            <div className="relative h-11 w-11 shrink-0 rounded-full overflow-hidden ring-2 ring-secondary/60 shadow-md bg-ink flex items-center justify-center">
+              <img
+                src="/logo.png"
+                alt="Confianza Logo"
+                className="h-full w-full object-cover"
+              />
+            </div>
             <span className="font-display text-xl text-background">Confianza</span>
           </div>
           <p className="mt-5 text-sm leading-relaxed text-background/65">

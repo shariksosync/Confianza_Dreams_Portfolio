@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { Check, Sparkles, ArrowRight } from "lucide-react";
@@ -6,36 +6,9 @@ import { useSite } from "../../context/SiteContext";
 import SectionHeading from "../ui/SectionHeading";
 
 export default function PackagesSection() {
-  const { packages } = useSite();
+  const { packages, loading, ready } = useSite();
 
-  const packageList = packages?.length
-    ? packages
-    : [
-        {
-          id: 1,
-          name: "Intimate",
-          price: "â‚¹1.5L",
-          tag: "Up to 100 guests",
-          features: ["Single function", "Decor & floral design", "Vendor coordination", "On-day execution team"],
-          featured: false,
-        },
-        {
-          id: 2,
-          name: "Signature",
-          price: "â‚¹4.5L",
-          tag: "Most Chosen Experience",
-          features: ["Up to 3 functions", "Full planning & design", "Entertainment curation", "Dedicated planner", "Guest management"],
-          featured: true,
-        },
-        {
-          id: 3,
-          name: "Destination",
-          price: "On request",
-          tag: "Anywhere in India & Beyond",
-          features: ["Venue scouting trips", "Travel & stay logistics", "Multi-day production", "Permissions & licensing", "Full crew on site"],
-          featured: false,
-        },
-      ];
+  const packageList = packages || [];
 
   return (
     <section className="section-pad relative bg-background overflow-hidden">
@@ -46,7 +19,32 @@ export default function PackagesSection() {
           subtitle="Whether you envision an intimate family ceremony or a multi-day royal palace affair, our tiers are designed for clarity and absolute excellence."
         />
 
-        <div className="reveal mt-16 grid gap-8 lg:grid-cols-3 items-stretch">
+        {loading && !ready ? (
+          <div className="mt-16 grid gap-8 lg:grid-cols-3 items-stretch">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="glass-card rounded-3xl p-8 border border-border/80 space-y-4">
+                <div className="h-4 w-1/4 skeleton rounded" />
+                <div className="h-8 w-3/4 skeleton rounded" />
+                <div className="h-6 w-1/2 skeleton rounded" />
+                <div className="h-px w-full bg-border my-4" />
+                <div className="space-y-2">
+                  <div className="h-4 w-full skeleton rounded" />
+                  <div className="h-4 w-5/6 skeleton rounded" />
+                  <div className="h-4 w-2/3 skeleton rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : packageList.length === 0 ? (
+          <div className="reveal is-visible mt-16 glass-card rounded-3xl p-12 text-center text-muted-foreground border border-border max-w-2xl mx-auto">
+            <Sparkles className="h-10 w-10 mx-auto text-secondary/50 mb-3" />
+            <h3 className="font-display text-xl text-ink font-semibold">0 Packages Available</h3>
+            <p className="text-xs text-muted-foreground mt-1.5">
+              No wedding packages are currently listed. Configure wedding planning packages in the Admin Panel to display them here.
+            </p>
+          </div>
+        ) : (
+          <div className="reveal is-visible mt-16 grid gap-8 lg:grid-cols-3 items-stretch">
           {packageList.map((pkg, idx) => (
             <div
               key={pkg.id || idx}
@@ -143,6 +141,7 @@ export default function PackagesSection() {
             </div>
           ))}
         </div>
+        )}
       </div>
     </section>
   );

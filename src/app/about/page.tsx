@@ -1,145 +1,77 @@
 "use client";
 
 import Link from "next/link";
-import { Heart, Compass, ArrowRight } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import SiteLayout from "@/layouts/SiteLayout";
-import SectionHeading from "@/components/ui/SectionHeading";
+import FounderFeatureSection from "@/components/about/FounderFeatureSection";
 import TeamSection from "@/components/home/TeamSection";
+import ManagementVerticalsSection from "@/components/about/ManagementVerticalsSection";
+import LogoRepresentationSection from "@/components/about/LogoRepresentationSection";
+import VisionMissionSection from "@/components/about/VisionMissionSection";
+import CoreValuesSection from "@/components/about/CoreValuesSection";
+import HowWeWorkSection from "@/components/about/HowWeWorkSection";
 import PartnerMarqueeSection from "@/components/home/PartnerMarqueeSection";
 import { useSite } from "@/context/SiteContext";
 
 export default function AboutPage() {
-  const { about, contact } = useSite() as any;
+  const { about } = useSite();
 
   return (
     <SiteLayout revealKey="about-page">
-      {/* Hero Banner */}
+      {/* 1. Hero Header Banner */}
       <section className="relative bg-ink pt-32 pb-20 sm:pt-40 sm:pb-24 text-background overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-25">
           <img
-            src="/images/hero-1.jpg"
+            src={about?.headerBanner?.image || "/images/hero-1.jpg"}
             alt="Confianza wedding heritage"
             className="h-full w-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/80 to-ink/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/85 to-ink/50" />
         </div>
 
         <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8 lg:px-10 text-center">
-          <span className="text-[0.68rem] uppercase tracking-[0.34em] text-secondary font-medium">
-            Since 2018 • Warje, Pune
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-1 text-xs uppercase tracking-[0.32em] text-secondary font-medium backdrop-blur-md">
+            <Sparkles className="h-3.5 w-3.5 text-secondary" />
+            <span>{about?.headerBanner?.badge || "Since 2018 • Warje, Pune"}</span>
           </span>
-          <h1 className="mt-3 font-display text-4xl sm:text-5xl lg:text-6xl text-background font-normal">
-            Where Weddings Become Stories
+          <h1 className="mt-4 font-display text-4xl sm:text-5xl lg:text-6xl text-background font-normal">
+            {about?.headerBanner?.title || about?.heading || "Where Weddings Become Stories"}
           </h1>
           <div className="rule-gold mx-auto my-5" />
           <p className="mx-auto max-w-2xl text-sm sm:text-base text-background/80 font-light leading-relaxed">
-            Founded with a belief that no two love stories are identical, Confianza crafts bespoke, royal, and effortlessly managed wedding celebrations across India.
+            {about?.headerBanner?.subtitle ||
+              about?.story ||
+              "At Confianza, we're the romantic and elegant wedding experts who bring love stories to life with passion and precision. For us, your event is no less than our own."}
           </p>
         </div>
       </section>
 
-      {/* Founder Letter & Brand Story */}
-      <section className="section-pad relative bg-background">
-        <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
-          <div className="grid gap-12 lg:grid-cols-12 lg:items-center">
-            <div className="reveal lg:col-span-5 relative">
-              <div className="overflow-hidden rounded-3xl border border-primary/20 shadow-luxe">
-                <img
-                  src="/images/couple.jpg"
-                  alt="Ashish Wankhede, Founder of Confianza"
-                  className="w-full object-cover h-[460px]"
-                />
-              </div>
-              <div className="absolute -bottom-6 -right-4 glass-card rounded-2xl p-5 border border-secondary/30 shadow-luxe max-w-xs">
-                <span className="text-[0.65rem] uppercase tracking-widest text-secondary font-bold">
-                  Founder &amp; Creative Lead
-                </span>
-                <h4 className="font-display text-base text-ink font-semibold mt-0.5">
-                  {contact?.owner || "Ashish Wankhede"}
-                </h4>
-                <p className="text-xs text-muted-foreground mt-1">
-                  "We don't just decorate halls; we architect emotional memories that outlast generations."
-                </p>
-              </div>
-            </div>
+      {/* 2. Founder & Leadership Feature Section */}
+      <FounderFeatureSection />
 
-            <div className="reveal lg:col-span-7 space-y-6">
-              <span className="text-[0.68rem] uppercase tracking-[0.3em] text-primary font-semibold">
-                Our Genesis &amp; Evolution
-              </span>
-              <h2 className="font-display text-3xl sm:text-4xl text-ink leading-tight">
-                {about?.heading || "A Pune Studio Devoted to Weddings That Feel Personal"}
-              </h2>
-              <div className="rule-gold" />
-              <p className="text-sm sm:text-base leading-relaxed text-muted-foreground font-light">
-                {about?.story}
-              </p>
-              <p className="text-sm sm:text-base leading-relaxed text-muted-foreground font-light">
-                Over the last seven years, what began as a dedicated local decor workshop near Warje Jakat Naka in Pune has expanded into an acclaimed full-scale wedding planning house. We orchestrate royal palace weddings in Udaipur and Jaipur, beachfront celebrations in Goa and Alibaug, and grand indoor ballroom galas across Maharashtra.
-              </p>
-
-              <div className="grid sm:grid-cols-2 gap-4 pt-4">
-                <div className="glass-card rounded-2xl p-5 border border-primary/15">
-                  <Heart className="h-5 w-5 text-primary mb-2" />
-                  <h4 className="font-display text-base text-ink">Our Mission</h4>
-                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                    {about?.mission}
-                  </p>
-                </div>
-                <div className="glass-card rounded-2xl p-5 border border-secondary/20">
-                  <Compass className="h-5 w-5 text-secondary mb-2" />
-                  <h4 className="font-display text-base text-ink">Our Vision</h4>
-                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                    {about?.vision}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Year-by-Year Heritage Timeline */}
-      <section className="section-pad relative bg-accent/30 overflow-hidden">
-        <div className="mx-auto max-w-5xl px-5 sm:px-8 lg:px-10">
-          <SectionHeading
-            eyebrow="Milestones of Growth"
-            title="The Confianza Timeline"
-            subtitle="How we grew from a boutique two-person decor collective to delivering 500+ landmark celebrations."
-          />
-
-          <div className="reveal mt-16 relative border-l-2 border-primary/20 ml-4 sm:ml-32 space-y-10">
-            {(about?.timeline || []).map((item: any, idx: number) => (
-              <div key={item.year || idx} className="relative pl-6 sm:pl-10 group">
-                {/* Year Marker Badge */}
-                <div className="absolute -left-[17px] top-1 grid h-8 w-8 place-items-center rounded-full gradient-royal text-primary-foreground text-xs font-bold shadow-md ring-4 ring-background">
-                  ✦
-                </div>
-                <div className="sm:absolute sm:-left-32 sm:top-1 sm:text-right sm:w-24">
-                  <span className="font-display text-2xl font-bold text-gold-gradient">
-                    {item.year}
-                  </span>
-                </div>
-
-                <div className="glass-card rounded-2xl p-5 border border-border transition-all duration-300 group-hover:border-primary/40 group-hover:-translate-y-0.5">
-                  <p className="text-sm text-foreground/90 font-medium">
-                    {item.text}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Team Showcase */}
+      {/* 3. Meet Our Visionaries & Coordinators */}
       <TeamSection />
 
-      {/* Partner Marquee */}
+      {/* 4. The Story Behind Our Emblem */}
+      <LogoRepresentationSection />
+
+      {/* 5. Our Vision & Our Mission */}
+      <VisionMissionSection />
+
+      {/* 6. Our Core Values */}
+      <CoreValuesSection />
+
+      {/* 7. How Do We Work */}
+      <HowWeWorkSection />
+
+      {/* 8. Our 10 Core Management Verticals */}
+      <ManagementVerticalsSection />
+
+      {/* Hospitality Partners Marquee */}
       <PartnerMarqueeSection />
 
-      {/* Bottom Consultation Banner */}
-      <section className="relative bg-ink py-20 text-background overflow-hidden text-center">
+      {/* Bottom Consultation Booking CTA */}
+      <section className="relative bg-ink py-20 text-background overflow-hidden text-center border-t border-white/10">
         <div className="relative z-10 mx-auto max-w-3xl px-5">
           <span className="text-[0.68rem] uppercase tracking-[0.3em] text-secondary font-medium">
             Begin With A Conversation

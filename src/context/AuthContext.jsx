@@ -2,43 +2,65 @@
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 
-const KEY = "confianza:admin:v1";
-const CREDENTIALS = { username: "admin", password: "admin123" };
-
 const AuthContext = createContext(null);
 
-/** Frontend-only admin session, persisted in LocalStorage. */
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [ready, setReady] = useState(false);
 
+  // Verify server session on load
   useEffect(() => {
+    async function checkAuth() {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.authenticated && data.user) {
+            setUser(data.user);
+          }
+        }
+      } catch (err) {
+        console.error("Session verification error:", err);
+      } finally {
+        setReady(true);
+      }
+    }
+    checkAuth();
+  }, []);
+
+  const login = useCallback(async (username, password) => {
     try {
-      const raw = window.localStorage.getItem(KEY);
-      if (raw) setUser(JSON.parse(raw));
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success && data.user) {
+        setUser(data.user);
+        return { success: true };
+      }
+      return { success: false, error: data.error || "Invalid username or password" };
+    } catch (err) {
+      return { success: false, error: err?.message || "Network error logging in" };
+    }
+  }, []);
+
+  const logout = useCallback(async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
     } catch {
       /* ignore */
+    } finally {
+      setUser(null);
     }
-    setReady(true);
-  }, []);
-
-  const login = useCallback((username, password) => {
-    if (username === CREDENTIALS.username && password === CREDENTIALS.password) {
-      const session = { username, at: new Date().toISOString() };
-      window.localStorage.setItem(KEY, JSON.stringify(session));
-      setUser(session);
-      return true;
-    }
-    return false;
-  }, []);
-
-  const logout = useCallback(() => {
-    window.localStorage.removeItem(KEY);
-    setUser(null);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, ready, login, logout }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ user, ready, login, logout }}>
+      {children}
+    </AuthContext.Provider>
   );
 }
 

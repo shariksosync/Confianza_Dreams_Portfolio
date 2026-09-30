@@ -22,6 +22,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
   title: "Confianza Event's and Entertainment — Luxury Wedding Planner in Pune",
   description:
     "Where Weddings Become Stories. Luxury wedding planning, decor, execution and destination weddings in Pune and across India.",
@@ -31,13 +32,21 @@ export const metadata: Metadata = {
     description:
       "Luxury wedding planning, bespoke decor, and flawless execution for weddings that become timeless stories.",
     type: "website",
+    images: ["/logo.png"],
   },
   twitter: {
     card: "summary_large_image",
     site: "@confianza_events",
+    images: ["/logo.png"],
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/favicon.png", type: "image/png" },
+      { url: "/logo.png", type: "image/png" },
+    ],
+    apple: [{ url: "/logo.png" }],
+    shortcut: ["/favicon.ico"],
   },
 };
 

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   Users,
@@ -26,17 +26,8 @@ const ICONS = {
 export default function WhyChooseUsSection() {
   const { why } = useSite();
 
-  const reasons = why?.length
-    ? why
-    : [
-        { icon: "Users", title: "Experienced Team", text: "Seven years and 500+ events of on-ground expertise." },
-        { icon: "Heart", title: "Personalized Planning", text: "Every wedding designed around your story, never a template." },
-        { icon: "Sparkles", title: "Creative Designs", text: "Original concepts, mood boards and 3D decor previews." },
-        { icon: "Wallet", title: "Budget Friendly", text: "Transparent costing with options at every price point." },
-        { icon: "Clock", title: "On-time Execution", text: "Detailed run sheets and crews that start before sunrise." },
-        { icon: "Crown", title: "Premium Vendors", text: "A vetted network of India's finest partners." },
-        { icon: "Plane", title: "Destination Expertise", text: "Travel, stays and permissions handled end to end." },
-      ];
+  const reasons = why || [];
+  if (reasons.length === 0) return null;
 
   return (
     <section className="section-pad relative overflow-hidden bg-ink text-background">
