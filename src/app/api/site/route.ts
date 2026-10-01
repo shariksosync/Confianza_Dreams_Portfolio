@@ -20,18 +20,25 @@ export async function GET(req: Request) {
 
     const [siteDoc, services, portfolio, gallery, packages, testimonials, team, faq, blogs] =
       await Promise.all([
-        SiteContent.findOne({ key: "confianza_main" }).lean(),
+        SiteContent.findOne({ key: { $in: ["confianza_main", "main"] } }).lean(),
         Service.find({}).sort({ order: 1 }).lean(),
         Portfolio.find({}).sort({ order: 1 }).lean(),
         Gallery.find({}).sort({ order: 1 }).lean(),
         Package.find({}).sort({ order: 1 }).lean(),
-        Testimonial.find({}).sort({ order: 1 }).lean(),
+        Testimonial.find({}).sort({ order: 1, createdAt: -1 }).lean(),
         Team.find({}).sort({ order: 1 }).lean(),
         Faq.find({}).sort({ order: 1 }).lean(),
         Blog.find({}).sort({ order: 1 }).lean(),
       ]);
 
     const base: any = siteDoc || {};
+    const rawTestimonials = testimonials || [];
+    const approvedTestimonials = rawTestimonials.filter(
+      (t: any) => t.status === "approved" || !t.status
+    );
+    const pendingTestimonialsCount = rawTestimonials.filter(
+      (t: any) => t.status === "pending"
+    ).length;
 
     const aggregated = {
       settings: base.settings || {},
@@ -49,9 +56,20 @@ export async function GET(req: Request) {
       stationery: base.stationery || [],
       servicesCta: base.servicesCta || {},
       portfolio: portfolio || [],
+      portfolioHeader: base.portfolioHeader || {},
+      portfolioSection: base.portfolioSection || {},
+      portfolioCategories: base.portfolioCategories || [],
+      portfolioCta: base.portfolioCta || {},
       gallery: gallery || [],
       packages: packages || [],
-      testimonials: testimonials || [],
+      testimonials: approvedTestimonials,
+      allTestimonials: rawTestimonials,
+      testimonialsPendingCount: pendingTestimonialsCount,
+      testimonialsHeader: base.testimonialsHeader || {},
+      testimonialsCategories: base.testimonialsCategories || [],
+      testimonialsExperience: base.testimonialsExperience || [],
+      testimonialsFaq: base.testimonialsFaq || [],
+      testimonialsCta: base.testimonialsCta || {},
       team: team || [],
       faq: faq || [],
       blogs: blogs || [],
@@ -140,7 +158,7 @@ export async function PUT(req: Request) {
         await Testimonial.insertMany(
           value.map((v, idx) => ({
             ...v,
-            id: Number(v.id) || Date.now() + idx,
+            id: String(v.id || Date.now() + idx),
             order: idx + 1,
           }))
         );

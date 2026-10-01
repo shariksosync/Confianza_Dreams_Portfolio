@@ -61,9 +61,131 @@ const initialEmptyState = {
   },
   why: [],
   portfolio: [],
+  portfolioHeader: {
+    badge: "500+ Stories & Counting",
+    eyebrow: "OUR SIGNATURE WORKS",
+    title: "The Wedding Portfolio",
+    subtitle:
+      "A curated gallery of our mandap concepts, floral installations, destination beach setups, and grand reception stages created across India.",
+    image: "/images/hero-2.jpg",
+    stats: ["500+ Weddings", "15+ Cities Across India", "100% On-Time Cue Execution"],
+  },
+  portfolioSection: {
+    eyebrow: "Our Signature Works",
+    title: "Moments of Grandeur & Intimacy",
+    subtitle:
+      "Explore a curated portfolio of mandaps, opulent ballrooms, sunny haldi courtyards, and destination weddings executed across India.",
+  },
+  portfolioCategories: [
+    { id: "destination", name: "Destination Weddings", slug: "destination", order: 1 },
+    { id: "mandap", name: "Mandap & Rituals", slug: "mandap", order: 2 },
+    { id: "haldi", name: "Haldi & Mehendi", slug: "haldi", order: 3 },
+    { id: "reception", name: "Opulent Receptions", slug: "reception", order: 4 },
+    { id: "floral", name: "Floral & Spatial Decor", slug: "floral", order: 5 },
+    { id: "sangeet", name: "Sangeet & Stage", slug: "sangeet", order: 6 },
+    { id: "hospitality", name: "Hospitality & Suites", slug: "hospitality", order: 7 },
+  ],
+  portfolioCta: {
+    eyebrow: "WHERE WEDDINGS BECOME STORIES",
+    headline: "Want Your Wedding to Be Our Next Masterpiece?",
+    subtitle:
+      "Connect directly with Ashish Wankhede and Rutik Pund to review your venue options, custom 3D decor concepts, and complete management timeline.",
+    buttonText: "Book Your Free Consultation",
+    buttonLink: "/contact",
+    notice: "Free Consultation • No Obligation",
+    perks: [
+      "Personalized 1-on-1 Vision Mapping",
+      "Direct Founder Interaction (Ashish & Rutik)",
+      "Realistic 3D Decor CAD Renderings",
+      "Clear & Transparent Line-Item Estimates",
+    ],
+  },
   gallery: [],
   instagram: [],
   testimonials: [],
+  allTestimonials: [],
+  testimonialsPendingCount: 0,
+  testimonialsHeader: {
+    badge: "Couples & Families",
+    eyebrow: "Words of Gratitude",
+    title: "Stories of Love, Captured Forever",
+    subtitle:
+      "Read first-hand accounts of couples and families who entrusted their most sacred wedding milestones to Confianza's aesthetic vision and care.",
+    image: "https://res.cloudinary.com/tridevsosync/image/upload/v1790838224/confianza_portfolio/portfolio_hero_banner.jpg",
+    stats: [
+      "5.0 Average Couple Rating ★",
+      "500+ Celebrations Across India",
+      "100% On-Time Cue Execution",
+      "0% Day-Of Stress with Shadow Management",
+    ],
+  },
+  testimonialsCategories: [
+    { id: "royal-destination", name: "Royal & Destination Weddings", slug: "royal-destination", order: 1 },
+    { id: "mandap-rituals", name: "Mandap & Rituals", slug: "mandap-rituals", order: 2 },
+    { id: "haldi-sangeet", name: "Haldi & Sangeet", slug: "haldi-sangeet", order: 3 },
+    { id: "receptions", name: "Opulent Receptions", slug: "receptions", order: 4 },
+    { id: "video-reviews", name: "Video Reviews & Reels", slug: "video-reviews", order: 5 },
+    { id: "corporate-events", name: "Corporate Celebrations", slug: "corporate-events", order: 6 },
+  ],
+  testimonialsExperience: [
+    {
+      id: "shadow-mgmt",
+      title: "Shadow Management",
+      subtitle: "Dedicated Bride & Groom Liaison",
+      description: "A personal shadow coordinator attends to every personal need, attire touch-up, refreshment, and family coordination behind the scenes.",
+      icon: "Users",
+      badge: "Signature Care",
+    },
+    {
+      id: "ritual-mgmt",
+      title: "Sacred Ritual Coordination",
+      subtitle: "Flawless Pandit & Samagri Prep",
+      description: "Complete management of traditional Vedic rituals (Baraat, Milni, Saptapadi, Havan) ensuring exact customs and priest requirements are honored.",
+      icon: "Sparkles",
+      badge: "Cultural Precision",
+    },
+    {
+      id: "production-decor",
+      title: "3D CAD Decor & Production",
+      subtitle: "100% Design-to-Reality Fidelity",
+      description: "From custom stage carpentry to imported floral conditioning and ambient warm lighting, every spatial element matches the 3D CAD design.",
+      icon: "Layers",
+      badge: "Spatial Artistry",
+    },
+    {
+      id: "show-runner",
+      title: "Show Runner Timeline Execution",
+      subtitle: "Zero-Glitch Stage Management",
+      description: "The Show Runner acts as the single point-of-contact for artists, DJs, sound technicians, and entry pyrotechnics with millisecond timing.",
+      icon: "Award",
+      badge: "Live Direction",
+    },
+  ],
+  testimonialsFaq: [
+    {
+      question: "How do I submit our wedding review and photographs?",
+      answer: "Click the 'Share Your Love Story' button on this page. You can share your story, select your star rating, and upload your high-resolution wedding photos directly from your phone or computer.",
+    },
+    {
+      question: "Can we include our cinematic wedding teaser or Instagram Reel?",
+      answer: "Yes! You can paste your YouTube, Vimeo, Google Drive, or Instagram Reel link in the video link field. Our team will feature the interactive video player on your review card.",
+    },
+    {
+      question: "Why does my review say 'Awaiting Admin Moderation'?",
+      answer: "To protect client privacy and ensure genuine testimonials, all public submissions are reviewed and verified by Ashish Wankhede & the Confianza editorial team before going live.",
+    },
+    {
+      question: "How long does review verification take?",
+      answer: "Our team typically verifies and publishes new couple stories within 12 to 24 hours.",
+    },
+  ],
+  testimonialsCta: {
+    badge: "Share Your Love Story",
+    headline: "Were You A Confianza Couple or Guest?",
+    subtitle: "We would love to hear your memories, candid moments, and reflections of your celebration.",
+    buttonText: "Submit Your Love Story",
+    secondaryButtonText: "Book A Consultation",
+  },
   blogs: [],
   faq: [],
   team: [],
@@ -109,10 +231,12 @@ export function SiteProvider({ children }) {
   const [ready, setReady] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  const [refreshing, setRefreshing] = useState(false);
+
   // Fetch live site data (with fresh dynamic timestamp)
   const refreshData = useCallback(async (opts = {}) => {
     try {
-      setLoading(true);
+      setRefreshing(true);
       const url = `/api/site?t=${Date.now()}${opts.fresh ? "&fresh=true" : ""}`;
       const siteRes = await fetch(url, { cache: "no-store" });
 
@@ -142,9 +266,12 @@ export function SiteProvider({ children }) {
           console.warn("Could not fetch inquiries:", inqErr);
         }
       }
+      return { success: true };
     } catch (err) {
       console.error("Failed to load site data from MongoDB API:", err);
+      return { success: false, error: err };
     } finally {
+      setRefreshing(false);
       setLoading(false);
       setReady(true);
     }
@@ -192,10 +319,19 @@ export function SiteProvider({ children }) {
     let nextVal;
     setData((prev) => {
       nextVal = typeof value === "function" ? value(prev[key]) : value;
-      return {
+      const updatedData = {
         ...prev,
         [key]: nextVal,
       };
+
+      // Keep both testimonials arrays in sync
+      if (key === "testimonials" && Array.isArray(nextVal)) {
+        updatedData.testimonials = nextVal.filter((t) => t.status === "approved" || !t.status);
+        updatedData.allTestimonials = nextVal;
+        updatedData.testimonialsPendingCount = nextVal.filter((t) => t.status === "pending").length;
+      }
+
+      return updatedData;
     });
 
     try {
@@ -205,12 +341,18 @@ export function SiteProvider({ children }) {
         body: JSON.stringify({ key, value: nextVal }),
       });
       const resJson = await res.json();
+
+      // Trigger background synchronization so all components reflect authoritative server state
+      setTimeout(() => {
+        refreshData({ fresh: true, includeInquiries: true });
+      }, 50);
+
       return resJson;
     } catch (err) {
       console.error(`Failed to persist slice ${key} to MongoDB:`, err);
       throw err;
     }
-  }, []);
+  }, [refreshData]);
 
   /** Submit new client inquiry to MongoDB and trigger Nodemailer */
   const addMessage = useCallback(async (msg) => {
@@ -248,6 +390,8 @@ export function SiteProvider({ children }) {
       data,
       ready,
       loading,
+      refreshing,
+      refresh: refreshData,
       refreshData,
       refreshInquiries,
       update,
@@ -257,7 +401,7 @@ export function SiteProvider({ children }) {
       theme,
       setTheme,
     }),
-    [data, ready, loading, refreshData, refreshInquiries, update, messages, addMessage, removeMessage, theme]
+    [data, ready, loading, refreshing, refreshData, refreshInquiries, update, messages, addMessage, removeMessage, theme]
   );
 
   return <SiteContext.Provider value={value}>{children}</SiteContext.Provider>;

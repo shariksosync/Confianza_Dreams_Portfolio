@@ -11,6 +11,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: "No file provided" }, { status: 400 });
     }
 
+    const MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024; // 2 MB
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      return NextResponse.json(
+        { success: false, error: "Photo exceeds the 2 MB limit. Please select an image under 2 MB." },
+        { status: 400 }
+      );
+    }
+
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 

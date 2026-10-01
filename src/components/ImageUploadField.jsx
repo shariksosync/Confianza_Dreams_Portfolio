@@ -20,7 +20,6 @@ export default function ImageUploadField({
   description = "",
 }) {
   const [uploading, setUploading] = useState(false);
-  const [uploadPhase, setUploadPhase] = useState("idle"); // "idle" | "uploading" | "preloading" | "ready"
   const [progressPercent, setProgressPercent] = useState(0);
   const [error, setError] = useState("");
   const [dragActive, setDragActive] = useState(false);
@@ -35,9 +34,16 @@ export default function ImageUploadField({
       return;
     }
 
+    // Enforce 2 Megabytes limit
+    const MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024; // 2 MB
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+      setError(`Selected photograph is ${sizeMb} MB. Maximum allowed file size is 2 MB. Please choose an image under 2 MB.`);
+      return;
+    }
+
     setUploading(true);
-    setUploadPhase("uploading");
-    setProgressPercent(20);
+    setProgressPercent(5);
     setError("");
 
     try {
@@ -45,10 +51,15 @@ export default function ImageUploadField({
       formData.append("file", file);
       formData.append("folder", folder);
 
-      // Progress animation step
+      // Smooth simulated progress ticker up to ~85%
       const progressTimer = setInterval(() => {
-        setProgressPercent((prev) => (prev < 65 ? prev + 15 : prev));
-      }, 300);
+        setProgressPercent((prev) => {
+          if (prev < 40) return prev + 6;
+          if (prev < 75) return prev + 4;
+          if (prev < 88) return prev + 1;
+          return prev;
+        });
+      }, 150);
 
       const res = await fetch("/api/upload", {
         method: "POST",
@@ -56,42 +67,38 @@ export default function ImageUploadField({
       });
 
       clearInterval(progressTimer);
-      setProgressPercent(75);
 
       const data = await res.json();
       if (res.ok && data.success && data.url) {
-        // Phase 2: Preload in-browser memory so image is ready with 0ms latency
-        setUploadPhase("preloading");
-        setProgressPercent(90);
+        setProgressPercent(92);
 
+        // Preload in-browser memory so image renders immediately
         await new Promise((resolve) => {
           const img = new Image();
           img.src = data.url;
           img.onload = () => resolve(true);
           img.onerror = () => resolve(false);
-          setTimeout(() => resolve(true), 3000); // 3s safety timeout
+          setTimeout(() => resolve(true), 2500);
         });
 
         setProgressPercent(100);
-        setUploadPhase("ready");
         onChange(data.url);
         setError("");
 
-        // Reset phase after short success confirmation
+        // Reset after clear 100% celebration
         setTimeout(() => {
-          setUploadPhase("idle");
           setUploading(false);
           setProgressPercent(0);
-        }, 1200);
+        }, 900);
       } else {
         setUploading(false);
-        setUploadPhase("idle");
+        setProgressPercent(0);
         setError(data.error || "Image upload failed. Please try again.");
       }
     } catch (err) {
       console.error("Upload error:", err);
       setUploading(false);
-      setUploadPhase("idle");
+      setProgressPercent(0);
       setError(err?.message || "Network error while uploading image.");
     }
   };
@@ -122,11 +129,22 @@ export default function ImageUploadField({
     }
   };
 
+  // Luxury non-technical status labels
+  const getStatusText = (pct) => {
+    if (pct >= 100) return "Photo Ready & Active!";
+    if (pct >= 85) return "Finalizing Photo...";
+    if (pct >= 35) return "Uploading Photo...";
+    return "Preparing Photograph...";
+  };
+
   return (
     <div className="space-y-2 text-xs">
       <div className="flex items-center justify-between">
         <label className="font-semibold text-foreground flex items-center gap-1.5">
           <span>{label}</span>
+          <span className="text-[0.62rem] text-muted-foreground font-normal px-1.5 py-0.5 rounded-md bg-muted/70">
+            Max 2 MB
+          </span>
         </label>
         {value && !uploading && (
           <span className="text-[0.68rem] text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-medium animate-fade-in">
@@ -149,33 +167,40 @@ export default function ImageUploadField({
             : "border-border/80 bg-card/50 hover:border-primary/40"
         } p-3.5 space-y-3 overflow-hidden`}
       >
-        {/* Full Container Luxury Loading HUD during active upload */}
+        {/* Full Container Luxury Loading HUD with 0 to 100 Progress */}
         {uploading && (
-          <div className="absolute inset-0 z-20 bg-ink/90 backdrop-blur-md flex flex-col items-center justify-center p-4 text-center text-background animate-fade-in space-y-3">
-            <div className="relative">
-              <div className="h-12 w-12 rounded-full border-2 border-secondary/30 border-t-secondary animate-spin flex items-center justify-center shadow-luxe" />
-              <CloudUpload className="h-5 w-5 text-secondary absolute inset-0 m-auto" />
+          <div className="absolute inset-0 z-20 bg-ink/92 backdrop-blur-md flex flex-col items-center justify-center p-4 text-center text-background animate-fade-in space-y-3">
+            <div className="relative flex items-center justify-center">
+              {progressPercent >= 100 ? (
+                <div className="h-13 w-13 rounded-full gradient-gold flex items-center justify-center shadow-luxe animate-scale-up">
+                  <CheckCircle2 className="h-7 w-7 text-ink" />
+                </div>
+              ) : (
+                <div className="relative">
+                  <div className="h-13 w-13 rounded-full border-2 border-secondary/30 border-t-secondary animate-spin flex items-center justify-center shadow-luxe" />
+                  <CloudUpload className="h-5 w-5 text-secondary absolute inset-0 m-auto" />
+                </div>
+              )}
             </div>
 
-            <div className="space-y-1 max-w-xs">
-              <span className="text-[0.68rem] uppercase tracking-[0.25em] text-secondary font-bold block">
-                {uploadPhase === "uploading"
-                  ? "1/3 Uploading to CDN"
-                  : uploadPhase === "preloading"
-                  ? "2/3 Optimizing & Preloading"
-                  : "3/3 Ready & Active!"}
-              </span>
-              <p className="text-xs text-background/90 font-medium">
-                {uploadPhase === "uploading"
-                  ? "Streaming high-resolution photo to Cloudinary CDN..."
-                  : uploadPhase === "preloading"
-                  ? "Preloading image assets for instant 1-click live view..."
-                  : "Image verified! Syncing preview..."}
+            <div className="space-y-0.5 max-w-xs">
+              <div className="flex items-center justify-center gap-2">
+                <span className="font-display text-2xl font-bold text-secondary">
+                  {progressPercent}%
+                </span>
+              </div>
+              <p className="text-xs font-semibold text-background">
+                {getStatusText(progressPercent)}
+              </p>
+              <p className="text-[0.68rem] text-background/70 font-light">
+                {progressPercent >= 100
+                  ? "Your image has been verified and synced."
+                  : "Securing high-resolution photo for live display."}
               </p>
             </div>
 
             {/* Shimmering Progress Bar */}
-            <div className="w-48 h-1.5 rounded-full bg-white/15 overflow-hidden ring-1 ring-white/20">
+            <div className="w-56 h-2 rounded-full bg-white/15 overflow-hidden ring-1 ring-white/20 shadow-inner">
               <div
                 className="h-full gradient-gold transition-all duration-300 rounded-full"
                 style={{ width: `${progressPercent}%` }}
@@ -284,7 +309,7 @@ export default function ImageUploadField({
             className="cursor-pointer py-3.5 px-4 border border-dashed border-border rounded-xl text-center hover:bg-card/80 transition group"
           >
             <p className="text-[0.72rem] text-muted-foreground group-hover:text-foreground transition">
-              <span className="font-semibold text-primary">Click to browse</span> or drag and drop a JPG / PNG / WebP from your device
+              <span className="font-semibold text-primary">Click to browse</span> or drag and drop JPG / PNG / WebP (up to 2 MB)
             </p>
           </div>
         )}

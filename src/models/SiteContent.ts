@@ -241,6 +241,93 @@ const SiteContentSchema = new Schema(
         { type: String },
       ],
     },
+    portfolioHeader: {
+      badge: { type: String, default: "500+ Stories & Counting" },
+      eyebrow: { type: String, default: "OUR SIGNATURE WORKS" },
+      title: { type: String, default: "The Wedding Portfolio" },
+      subtitle: {
+        type: String,
+        default:
+          "A curated gallery of our mandap concepts, floral installations, destination beach setups, and grand reception stages created across India.",
+      },
+      image: { type: String, default: "/images/hero-2.jpg" },
+      stats: [{ type: String }],
+    },
+    portfolioSection: {
+      eyebrow: { type: String, default: "Our Signature Works" },
+      title: { type: String, default: "Moments of Grandeur & Intimacy" },
+      subtitle: {
+        type: String,
+        default:
+          "Explore a curated portfolio of mandaps, opulent ballrooms, sunny haldi courtyards, and destination weddings executed across India.",
+      },
+    },
+    portfolioCategories: [
+      {
+        id: { type: String, required: true },
+        name: { type: String, required: true },
+        slug: { type: String, default: "" },
+        order: { type: Number, default: 0 },
+      },
+    ],
+    portfolioCta: {
+      eyebrow: { type: String, default: "WHERE WEDDINGS BECOME STORIES" },
+      headline: { type: String, default: "Want Your Wedding to Be Our Next Masterpiece?" },
+      subtitle: {
+        type: String,
+        default:
+          "Connect directly with Ashish Wankhede and Rutik Pund to review your venue options, custom 3D decor concepts, and complete management timeline.",
+      },
+      buttonText: { type: String, default: "Book Your Free Consultation" },
+      buttonLink: { type: String, default: "/contact" },
+      notice: { type: String, default: "Free Consultation • No Obligation" },
+      perks: [
+        { type: String },
+      ],
+    },
+    testimonialsHeader: {
+      badge: { type: String, default: "Couples & Families" },
+      eyebrow: { type: String, default: "Words of Gratitude" },
+      title: { type: String, default: "Stories of Love, Captured Forever" },
+      subtitle: {
+        type: String,
+        default:
+          "Read how our couples and their families experienced the ease, beauty, and grandeur of a Confianza managed wedding.",
+      },
+      image: { type: String, default: "https://res.cloudinary.com/tridevsosync/image/upload/v1790838224/confianza_portfolio/portfolio_hero_banner.jpg" },
+      stats: [{ type: String }],
+    },
+    testimonialsCategories: [
+      {
+        id: { type: String },
+        name: { type: String },
+        slug: { type: String },
+        order: { type: Number, default: 0 },
+      },
+    ],
+    testimonialsExperience: [
+      {
+        id: { type: String },
+        title: { type: String },
+        subtitle: { type: String },
+        description: { type: String },
+        icon: { type: String },
+        badge: { type: String },
+      },
+    ],
+    testimonialsFaq: [
+      {
+        question: { type: String },
+        answer: { type: String },
+      },
+    ],
+    testimonialsCta: {
+      badge: { type: String, default: "Share Your Love Story" },
+      headline: { type: String, default: "Were You A Confianza Couple or Guest?" },
+      subtitle: { type: String, default: "We would love to hear your memories, photos, and heartfelt reflections of your celebration." },
+      buttonText: { type: String, default: "Submit Your Review" },
+      secondaryButtonText: { type: String, default: "Book A Consultation" },
+    },
   },
   { timestamps: true, strict: false }
 );

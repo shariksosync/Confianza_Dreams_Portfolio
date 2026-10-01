@@ -7,7 +7,7 @@ import { useSite } from "../../context/SiteContext";
 import SectionHeading from "../ui/SectionHeading";
 
 export default function TestimonialsSection() {
-  const { testimonials } = useSite();
+  const { testimonials, testimonialsHeader } = useSite();
 
   const reviews = testimonials || [];
 
@@ -15,9 +15,12 @@ export default function TestimonialsSection() {
     <section id="testimonials" className="section-pad relative bg-background overflow-hidden">
       <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
         <SectionHeading
-          eyebrow="Words of Gratitude"
-          title="Stories of Love, Captured Forever"
-          subtitle="Read how our couples and their families experienced the ease, beauty, and grandeur of a Confianza managed wedding."
+          eyebrow={testimonialsHeader?.eyebrow || "Words of Gratitude"}
+          title={testimonialsHeader?.title || "Stories of Love, Captured Forever"}
+          subtitle={
+            testimonialsHeader?.subtitle ||
+            "Read how our couples and their families experienced the ease, beauty, and grandeur of a Confianza managed wedding."
+          }
         />
 
         {reviews.length === 0 ? (

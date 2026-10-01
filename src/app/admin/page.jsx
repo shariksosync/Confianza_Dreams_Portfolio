@@ -39,10 +39,52 @@ import {
   ChevronLeft,
   ChevronRight,
   Menu,
+  Search,
+  MapPin,
+  Star,
+  Play,
+  Phone,
+  MessageCircle,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useSite } from "@/context/SiteContext";
 import ImageUploadField from "@/components/ImageUploadField";
+
+function ModuleRefreshButton({ site, showSaved, label = "Refresh Database", className = "" }) {
+  const [localSpin, setLocalSpin] = useState(false);
+  const isSpinning = site?.refreshing || localSpin;
+
+  const handleManualRefresh = async () => {
+    try {
+      setLocalSpin(true);
+      if (typeof site?.refreshData === "function") {
+        await site.refreshData({ fresh: true, includeInquiries: true });
+      } else if (typeof site?.refresh === "function") {
+        await site.refresh({ fresh: true, includeInquiries: true });
+      }
+      if (typeof showSaved === "function") {
+        showSaved("Data synchronized with MongoDB Atlas successfully!");
+      }
+    } catch (err) {
+      console.error("Manual refresh error:", err);
+    } finally {
+      setTimeout(() => setLocalSpin(false), 600);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleManualRefresh}
+      disabled={isSpinning}
+      title="Fetch fresh data from MongoDB Atlas database"
+      className={`px-3.5 py-1.5 rounded-xl border border-secondary/50 bg-card hover:bg-card/90 text-foreground hover:text-secondary hover:border-secondary text-xs font-semibold flex items-center gap-2 shadow-xs transition-all duration-200 cursor-pointer disabled:opacity-60 shrink-0 ${className}`}
+    >
+      <RotateCcw className={`h-3.5 w-3.5 text-secondary ${isSpinning ? "animate-spin" : ""}`} />
+      <span className="tracking-wide">{isSpinning ? "Refreshing..." : label}</span>
+    </button>
+  );
+}
 
 export default function AdminPage() {
   const { user, login, logout, ready: authReady } = useAuth();
@@ -58,6 +100,7 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [saveToast, setSaveToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("Changes saved to MongoDB database successfully!");
 
   useEffect(() => {
     if (user && site.refreshInquiries) {
@@ -65,7 +108,12 @@ export default function AdminPage() {
     }
   }, [user]);
 
-  const showSaved = () => {
+  const showSaved = (msg) => {
+    if (typeof msg === "string") {
+      setToastMessage(msg);
+    } else {
+      setToastMessage("Changes saved to MongoDB database successfully!");
+    }
     setSaveToast(true);
     setTimeout(() => setSaveToast(false), 2500);
   };
@@ -166,6 +214,8 @@ export default function AdminPage() {
     );
   }
 
+  const pendingTestimonialsCount = (site.allTestimonials || site.testimonials || []).filter((t) => t.status === "pending").length;
+
   // Navigation Items
   const NAV_ITEMS = [
     { id: "overview", label: "Dashboard Overview", icon: LayoutDashboard },
@@ -176,7 +226,11 @@ export default function AdminPage() {
     { id: "services", label: "Services & Packages", icon: Briefcase },
     { id: "portfolio", label: "Portfolio Works", icon: ImageIcon },
     { id: "gallery", label: "Pinterest Gallery", icon: ImageIcon },
-    { id: "testimonials", label: "Testimonials", icon: MessageSquareQuote },
+    {
+      id: "testimonials",
+      label: pendingTestimonialsCount > 0 ? `Testimonials (${pendingTestimonialsCount} New)` : "Testimonials & Reviews",
+      icon: MessageSquareQuote,
+    },
     { id: "team", label: "Team & Staff", icon: Users },
     { id: "faq", label: "FAQ Manager", icon: HelpCircle },
     { id: "blogs", label: "Blog & Guides", icon: BookOpen },
@@ -190,7 +244,7 @@ export default function AdminPage() {
       {saveToast && (
         <div className="fixed bottom-6 right-6 z-50 animate-slide-up flex items-center gap-2 rounded-2xl gradient-royal text-primary-foreground px-5 py-3 shadow-luxe text-xs font-semibold">
           <CheckCircle className="h-4 w-4 text-secondary" />
-          <span>Changes saved to MongoDB database successfully!</span>
+          <span>{toastMessage}</span>
         </div>
       )}
 
@@ -342,13 +396,14 @@ export default function AdminPage() {
               </h1>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
+              <ModuleRefreshButton site={site} showSaved={showSaved} label="Refresh Database Data" />
               <Link
                 href="/"
                 target="_blank"
-                className="btn-luxe glass-card text-foreground text-xs py-2 px-4 border border-border"
+                className="btn-luxe glass-card text-foreground text-xs py-2 px-4 border border-border flex items-center gap-1.5"
               >
-                <Eye className="h-3.5 w-3.5" />
+                <Eye className="h-3.5 w-3.5 text-secondary" />
                 <span>Preview Live Site</span>
               </Link>
             </div>
@@ -357,7 +412,7 @@ export default function AdminPage() {
           {/* Dynamic Tab Body */}
           <div className="w-full">
             {activeTab === "overview" && (
-              <OverviewModule site={site} setActiveTab={setActiveTab} />
+              <OverviewModule site={site} setActiveTab={setActiveTab} showSaved={showSaved} />
             )}
 
             {activeTab === "inbox" && (
@@ -421,7 +476,7 @@ export default function AdminPage() {
 // -------------------------------------------------------------
 // MODULE 1: Overview
 // -------------------------------------------------------------
-function OverviewModule({ site, setActiveTab }) {
+function OverviewModule({ site, setActiveTab, showSaved }) {
   const cards = [
     { label: "New Inquiries", value: site.messages?.length || 0, tab: "inbox", icon: Inbox },
     { label: "Active Services", value: site.services?.length || 0, tab: "services", icon: Briefcase },
@@ -435,6 +490,15 @@ function OverviewModule({ site, setActiveTab }) {
 
   return (
     <div className="space-y-8">
+      {/* Overview Header with Refresh */}
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-1">
+        <div>
+          <h2 className="font-display text-xl text-ink font-semibold">Overview &amp; Quick Metrics</h2>
+          <p className="text-xs text-muted-foreground">Real-time statistics synchronized from MongoDB Atlas</p>
+        </div>
+        <ModuleRefreshButton site={site} showSaved={showSaved} label="Refresh Overview" />
+      </div>
+
       {/* Metrics Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((c) => {
@@ -509,11 +573,12 @@ function InboxModule({ site, showSaved }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="font-display text-xl text-ink">Received Booking &amp; Consultation Requests</h3>
-        <span className="text-xs text-muted-foreground font-medium">
-          Total Inquiries: {messages.length}
-        </span>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h3 className="font-display text-xl text-ink font-semibold">Received Booking &amp; Consultation Requests</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">Total Inquiries: {messages.length}</p>
+        </div>
+        <ModuleRefreshButton site={site} showSaved={showSaved} label="Refresh Inbox" />
       </div>
 
       {messages.length === 0 ? (
@@ -617,11 +682,14 @@ function SectionsManagerModule({ site, showSaved }) {
 
   return (
     <div className="glass-card rounded-3xl p-6 sm:p-8 border border-border space-y-6">
-      <div>
-        <h3 className="font-display text-xl text-ink">Homepage Section Customizer</h3>
-        <p className="text-xs text-muted-foreground mt-1">
-          Enable/disable sections or reorder them up and down. Changes reflect on the live homepage instantly.
-        </p>
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-border/50">
+        <div>
+          <h3 className="font-display text-xl text-ink font-semibold">Homepage Section Customizer</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Enable/disable sections or reorder them up and down. Changes reflect on the live homepage instantly.
+          </p>
+        </div>
+        <ModuleRefreshButton site={site} showSaved={showSaved} label="Refresh Sections" />
       </div>
 
       <div className="space-y-2.5">
@@ -698,7 +766,13 @@ function HeroEditorModule({ site, showSaved }) {
 
   return (
     <form onSubmit={handleSave} className="glass-card rounded-3xl p-6 sm:p-8 border border-border space-y-6">
-      <h3 className="font-display text-xl text-ink">Hero Section Content</h3>
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-border/50">
+        <div>
+          <h3 className="font-display text-xl text-ink font-semibold">Hero Section Content</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">Customize homepage hero slider headlines, badges, CTA buttons & images</p>
+        </div>
+        <ModuleRefreshButton site={site} showSaved={showSaved} label="Refresh Hero" />
+      </div>
 
       <div className="space-y-4 text-xs">
         <div>
@@ -984,21 +1058,24 @@ function AboutEditorModule({ site, showSaved }) {
   return (
     <div className="space-y-6">
       {/* Sub-tab navigation bar */}
-      <div className="flex flex-wrap gap-2 pb-2 border-b border-border/80">
-        {subTabs.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            onClick={() => setSubTab(t.id)}
-            className={`px-4 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-              subTab === t.id
-                ? "gradient-royal text-primary-foreground shadow-md"
-                : "glass-card text-foreground/75 hover:text-primary hover:bg-muted/60"
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-border/80">
+        <div className="flex flex-wrap gap-2">
+          {subTabs.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setSubTab(t.id)}
+              className={`px-4 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                subTab === t.id
+                  ? "gradient-royal text-primary-foreground shadow-md"
+                  : "glass-card text-foreground/75 hover:text-primary hover:bg-muted/60"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <ModuleRefreshButton site={site} showSaved={showSaved} label="Refresh About Data" />
       </div>
 
       {/* 1. FOUNDER'S VISION SUB-TAB (LUXURY SPLIT REDESIGN) */}
@@ -2658,8 +2735,10 @@ function ServicesEditorModule({ site, showSaved }) {
           </p>
         </div>
 
-        {/* 6 Sub-Tab Pills */}
-        <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-2xl bg-card border border-border shadow-xs">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <ModuleRefreshButton site={site} showSaved={showSaved} label="Refresh Services" />
+          {/* 6 Sub-Tab Pills */}
+          <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-2xl bg-card border border-border shadow-xs">
           {[
             { id: "services", label: `Services (${services.length})`, icon: Briefcase },
             { id: "categories", label: `Categories (${categories.length})`, icon: Layers },
@@ -2686,6 +2765,7 @@ function ServicesEditorModule({ site, showSaved }) {
               </button>
             );
           })}
+          </div>
         </div>
       </div>
 
@@ -3833,151 +3913,1554 @@ function ServicesEditorModule({ site, showSaved }) {
 // MODULE 7: Portfolio Editor
 // -------------------------------------------------------------
 function PortfolioEditorModule({ site, showSaved }) {
-  const [items, setItems] = useState(site.portfolio || []);
-  const [editing, setEditing] = useState(null);
+  const [subTab, setSubTab] = useState("portfolio-works"); // "portfolio-works" | "categories" | "header-banner" | "gratitude" | "cta-banner"
+  const [isSaving, setIsSaving] = useState(false);
 
-  const saveList = (newList) => {
-    setItems(newList);
-    site.update("portfolio", newList);
-    showSaved();
+  // 1. Portfolio items state
+  const [items, setItems] = useState(site.portfolio || []);
+  const [editingProject, setEditingProject] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedFilterCategory, setSelectedFilterCategory] = useState("All");
+
+  // 2. Categories state
+  const [categories, setCategories] = useState(site.portfolioCategories || []);
+  const [editingCategory, setEditingCategory] = useState(null);
+
+  // 3. Header banner state
+  const [headerData, setHeaderData] = useState(site.portfolioHeader || {
+    badge: "500+ Stories & Counting",
+    eyebrow: "OUR SIGNATURE WORKS",
+    title: "The Wedding Portfolio",
+    subtitle: "A curated gallery of our mandap concepts, floral installations, destination beach setups, and grand reception stages created across India.",
+    image: "/images/hero-2.jpg",
+    stats: ["500+ Weddings", "15+ Cities Across India", "100% On-Time Cue Execution"],
+  });
+
+  // 4. Section heading state (Moments of Grandeur)
+  const [sectionData, setSectionData] = useState(site.portfolioSection || {
+    eyebrow: "Our Signature Works",
+    title: "Moments of Grandeur & Intimacy",
+    subtitle: "Explore a curated portfolio of mandaps, opulent ballrooms, sunny haldi courtyards, and destination weddings executed across India.",
+  });
+
+  // 5. Gratitude / Testimonials state
+  const [testimonials, setTestimonials] = useState(site.testimonials || []);
+  const [testimonialsHeader, setTestimonialsHeader] = useState(site.testimonialsHeader || {
+    eyebrow: "Words of Gratitude",
+    title: "Stories of Love, Captured Forever",
+    subtitle: "Read how our couples and their families experienced the ease, beauty, and grandeur of a Confianza managed wedding.",
+  });
+  const [editingTestimonial, setEditingTestimonial] = useState(null);
+
+  // 6. Portfolio CTA state
+  const [ctaData, setCtaData] = useState(site.portfolioCta || {
+    eyebrow: "WHERE WEDDINGS BECOME STORIES",
+    headline: "Want Your Wedding to Be Our Next Masterpiece?",
+    subtitle: "Connect directly with Ashish Wankhede and Rutik Pund to review your venue options, custom 3D decor concepts, and complete management timeline.",
+    buttonText: "Book Your Free Consultation",
+    buttonLink: "/contact",
+    notice: "Free Consultation • No Commitment Required",
+    perks: [
+      "Personalized 1-on-1 Vision Mapping",
+      "Direct Founder Interaction (Ashish & Rutik)",
+      "Realistic 3D Decor CAD Renderings",
+      "Clear & Transparent Line-Item Estimates",
+    ],
+  });
+
+  // Sync state when context updates
+  useEffect(() => {
+    if (site.portfolio) setItems(site.portfolio);
+    if (site.portfolioCategories) setCategories(site.portfolioCategories);
+    if (site.portfolioHeader) setHeaderData(site.portfolioHeader);
+    if (site.portfolioSection) setSectionData(site.portfolioSection);
+    if (site.testimonials) setTestimonials(site.testimonials);
+    if (site.testimonialsHeader) setTestimonialsHeader(site.testimonialsHeader);
+    if (site.portfolioCta) setCtaData(site.portfolioCta);
+  }, [
+    site.portfolio,
+    site.portfolioCategories,
+    site.portfolioHeader,
+    site.portfolioSection,
+    site.testimonials,
+    site.testimonialsHeader,
+    site.portfolioCta,
+  ]);
+
+  // Save Handlers with async/await and isSaving feedback
+  const savePortfolioList = async (newList) => {
+    setIsSaving(true);
+    try {
+      setItems(newList);
+      await site.update("portfolio", newList);
+      showSaved();
+    } catch (e) {
+      console.error("Save portfolio error:", e);
+    } finally {
+      setIsSaving(false);
+    }
   };
+
+  const saveCategoriesList = async (newList) => {
+    setIsSaving(true);
+    try {
+      setCategories(newList);
+      await site.update("portfolioCategories", newList);
+      showSaved();
+    } catch (e) {
+      console.error("Save categories error:", e);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const saveHeader = async (updated) => {
+    setIsSaving(true);
+    try {
+      setHeaderData(updated);
+      await site.update("portfolioHeader", updated);
+      showSaved();
+    } catch (e) {
+      console.error("Save header error:", e);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const saveSection = async (updated) => {
+    setIsSaving(true);
+    try {
+      setSectionData(updated);
+      await site.update("portfolioSection", updated);
+      showSaved();
+    } catch (e) {
+      console.error("Save section error:", e);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const saveTestimonialsList = async (newList) => {
+    setIsSaving(true);
+    try {
+      setTestimonials(newList);
+      await site.update("testimonials", newList);
+      showSaved();
+    } catch (e) {
+      console.error("Save testimonials error:", e);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const saveTestimonialsHeader = async (updated) => {
+    setIsSaving(true);
+    try {
+      setTestimonialsHeader(updated);
+      await site.update("testimonialsHeader", updated);
+      showSaved();
+    } catch (e) {
+      console.error("Save testimonials header error:", e);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const saveCta = async (updated) => {
+    setIsSaving(true);
+    try {
+      setCtaData(updated);
+      await site.update("portfolioCta", updated);
+      showSaved();
+    } catch (e) {
+      console.error("Save CTA error:", e);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Sub-tabs configuration
+  const subTabs = [
+    { id: "portfolio-works", label: `Signature Works (${items.length})` },
+    { id: "categories", label: `Category Filter Pills (${categories.length})` },
+    { id: "header-banner", label: "Page Header Banner" },
+    { id: "gratitude", label: `Words of Gratitude (${testimonials.length})` },
+    { id: "cta-banner", label: "Consultation CTA Banner" },
+  ];
+
+  // Category names list for dropdowns
+  const categoryNames = categories.map((c) => (typeof c === "string" ? c : c.name || c.label)).filter(Boolean);
+
+  // Filtered portfolio list for admin view
+  const filteredAdminItems = items.filter((p) => {
+    const matchCat =
+      selectedFilterCategory === "All" ||
+      (p.category && p.category.toLowerCase() === selectedFilterCategory.toLowerCase());
+    const matchSearch =
+      !searchQuery.trim() ||
+      p.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.category?.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchCat && matchSearch;
+  });
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="font-display text-xl text-ink">Portfolio Projects ({items.length})</h3>
-        <button
-          type="button"
-          onClick={() =>
-            setEditing({
-              isNew: true,
-              title: "",
-              category: "Wedding",
-              image: "",
-              location: "Pune",
-            })
-          }
-          className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-4"
-        >
-          <Plus className="h-4 w-4" />
-          <span>Add Project</span>
-        </button>
+      {/* Sub-tab navigation bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-border/80">
+        <div className="flex flex-wrap gap-2">
+          {subTabs.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setSubTab(t.id)}
+              className={`px-4 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer ${
+                subTab === t.id
+                  ? "gradient-royal text-primary-foreground shadow-md"
+                  : "glass-card text-foreground/75 hover:text-primary hover:bg-muted/60"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <ModuleRefreshButton site={site} showSaved={showSaved} label="Refresh Portfolio" />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((p) => (
-          <div
-            key={p.id}
-            className="glass-card rounded-2xl overflow-hidden border border-border flex flex-col justify-between"
-          >
-            <div className="relative h-40">
-              <img src={p.image} alt={p.title} className="h-full w-full object-cover" />
-              <span className="absolute top-2 left-2 rounded-full bg-ink/80 px-2 py-0.5 text-[0.65rem] text-champagne">
-                {p.category}
-              </span>
+      {/* ------------------------------------------------------------- */}
+      {/* 1. SIGNATURE WORKS & MOMENTS OF GRANDEUR CATALOG SUB-TAB */}
+      {/* ------------------------------------------------------------- */}
+      {subTab === "portfolio-works" && (
+        <div className="space-y-6 animate-fade-in">
+          {/* Section Heading Editor Card */}
+          <div className="glass-card rounded-3xl p-6 sm:p-7 border border-border space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-border/60">
+              <div>
+                <div className="flex items-center gap-1.5 text-primary text-xs uppercase tracking-[0.25em] font-bold">
+                  <Sparkles className="h-4 w-4 text-secondary" />
+                  <span>Section Header Customizer</span>
+                </div>
+                <h3 className="font-display text-xl text-ink font-bold mt-1">
+                  Moments of Grandeur &amp; Intimacy Section
+                </h3>
+              </div>
+              <button
+                type="button"
+                disabled={isSaving}
+                onClick={() => saveSection(sectionData)}
+                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5 flex items-center gap-2 disabled:opacity-60 cursor-pointer shadow-sm"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin text-secondary" />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 text-secondary" />
+                    <span>Save Section Headings</span>
+                  </>
+                )}
+              </button>
             </div>
-            <div className="p-4">
-              <h4 className="font-display text-base text-ink font-semibold">{p.title}</h4>
-              <p className="text-xs text-muted-foreground mt-0.5">{p.location}</p>
-              <div className="mt-4 pt-3 border-t border-border flex justify-end gap-2">
+
+            <div className="grid sm:grid-cols-2 gap-4 text-xs">
+              <div>
+                <label className="font-semibold text-foreground block mb-1">Eyebrow Tag</label>
+                <input
+                  type="text"
+                  value={sectionData.eyebrow || ""}
+                  onChange={(e) => setSectionData({ ...sectionData, eyebrow: e.target.value })}
+                  className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs"
+                  placeholder="e.g. Our Signature Works"
+                />
+              </div>
+              <div>
+                <label className="font-semibold text-foreground block mb-1">Section Main Title</label>
+                <input
+                  type="text"
+                  value={sectionData.title || ""}
+                  onChange={(e) => setSectionData({ ...sectionData, title: e.target.value })}
+                  className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-semibold"
+                  placeholder="e.g. Moments of Grandeur & Intimacy"
+                />
+              </div>
+            </div>
+
+            <div className="text-xs">
+              <label className="font-semibold text-foreground block mb-1">Section Subtitle Narrative</label>
+              <textarea
+                rows={2}
+                value={sectionData.subtitle || ""}
+                onChange={(e) => setSectionData({ ...sectionData, subtitle: e.target.value })}
+                className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs leading-relaxed"
+                placeholder="Explore a curated portfolio of mandaps, opulent ballrooms..."
+              />
+            </div>
+          </div>
+
+          {/* Project Catalog Header & Actions */}
+          <div className="glass-card rounded-3xl p-6 sm:p-7 border border-border space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-border/60">
+              <div>
+                <h3 className="font-display text-xl text-ink font-bold">
+                  Portfolio Works Showcase ({items.length})
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Manage real wedding showcases rendered on <span className="text-primary font-semibold">/portfolio</span> and the Homepage. Deleting all items will strictly display 0 items.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => setEditing({ ...p })}
-                  className="p-1.5 rounded-lg border border-border hover:bg-muted text-xs"
+                  onClick={() =>
+                    setEditingProject({
+                      isNew: true,
+                      title: "",
+                      category: categoryNames[0] || "Destination Weddings",
+                      location: "Pune, Maharashtra",
+                      image: "",
+                      description: "",
+                      featured: false,
+                    })
+                  }
+                  className="btn-luxe gradient-royal text-primary-foreground text-xs py-2.5 px-5 flex items-center gap-2 cursor-pointer shadow-luxe"
                 >
-                  <Edit2 className="h-3.5 w-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => saveList(items.filter((x) => x.id !== p.id))}
-                  className="p-1.5 rounded-lg border border-border hover:bg-destructive/10 text-destructive text-xs"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
+                  <Plus className="h-4 w-4 text-secondary" />
+                  <span>Add New Project</span>
                 </button>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
 
-      {editing && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/80 p-4">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (editing.isNew) {
-                saveList([...items, { ...editing, id: Date.now() }]);
-              } else {
-                saveList(items.map((x) => (x.id === editing.id ? editing : x)));
-              }
-              setEditing(null);
-            }}
-            className="glass-card max-w-md w-full rounded-3xl p-6 sm:p-8 space-y-4"
-          >
-            <div className="flex justify-between items-center border-b pb-3">
-              <h4 className="font-display text-lg text-ink">
-                {editing.isNew ? "Add Portfolio Project" : "Edit Portfolio Project"}
-              </h4>
-              <button
-                type="button"
-                onClick={() => setEditing(null)}
-                className="text-muted-foreground"
+            {/* Search and Category Filter Bar inside Admin */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+              <div className="relative flex-1 max-w-sm">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Filter by title, venue or city..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full rounded-xl border border-border bg-card pl-9 pr-3 py-2 text-xs"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                {["All", ...categoryNames].map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setSelectedFilterCategory(cat)}
+                    className={`px-3 py-1 rounded-lg text-xs transition cursor-pointer shrink-0 ${
+                      selectedFilterCategory === cat
+                        ? "gradient-royal text-primary-foreground font-semibold"
+                        : "border border-border text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Portfolio Grid */}
+            {items.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-border p-12 text-center text-muted-foreground bg-card/30">
+                <Sparkles className="h-10 w-10 mx-auto text-secondary/60 mb-2" />
+                <p className="font-display text-base text-ink font-semibold">0 Portfolio Works in Database</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Click "Add New Project" above to create authentic wedding showcases with high-resolution photos.
+                </p>
+              </div>
+            ) : filteredAdminItems.length === 0 ? (
+              <div className="p-8 text-center text-muted-foreground rounded-2xl bg-card/30 border border-border">
+                <p className="text-xs">No projects matching your filter criteria.</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSelectedFilterCategory("All");
+                  }}
+                  className="mt-2 text-xs text-primary font-semibold hover:underline"
+                >
+                  Reset filters
+                </button>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {filteredAdminItems.map((p, idx) => (
+                  <div
+                    key={p.id || p._id || idx}
+                    className="glass-card rounded-2xl overflow-hidden border border-border flex flex-col justify-between hover:shadow-md transition group"
+                  >
+                    <div>
+                      <div className="relative h-44 w-full bg-ink/10 overflow-hidden">
+                        <img
+                          src={p.image || "/images/hero-1.jpg"}
+                          alt={p.title}
+                          className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          onError={(e) => {
+                            e.currentTarget.src = "/images/hero-1.jpg";
+                          }}
+                        />
+                        <span className="absolute top-2 left-2 rounded-full bg-ink/80 px-2.5 py-0.5 text-[0.65rem] text-secondary font-semibold backdrop-blur-md border border-white/10">
+                          {p.category}
+                        </span>
+                        {p.featured && (
+                          <span className="absolute top-2 right-2 rounded-full gradient-gold text-ink text-[0.62rem] font-bold px-2 py-0.5 shadow-sm">
+                            ★ Featured
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="p-4 space-y-1.5">
+                        <h4 className="font-display text-base text-ink font-bold leading-snug">{p.title}</h4>
+                        {p.location && (
+                          <p className="text-xs text-primary font-medium flex items-center gap-1">
+                            <MapPin className="h-3 w-3 text-secondary" />
+                            <span>{p.location}</span>
+                          </p>
+                        )}
+                        {p.description && (
+                          <p className="text-[0.72rem] text-muted-foreground line-clamp-2 mt-1 leading-relaxed">
+                            {p.description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="p-4 pt-2 border-t border-border flex items-center justify-between gap-2">
+                      <span className="text-[0.65rem] text-muted-foreground font-mono">
+                        ID: {String(p.id || idx + 1).slice(0, 10)}
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setEditingProject({ ...p })}
+                          className="p-1.5 rounded-lg border border-border hover:bg-muted text-xs text-primary flex items-center gap-1 cursor-pointer"
+                          title="Edit Project"
+                        >
+                          <Edit2 className="h-3.5 w-3.5" />
+                          <span>Edit</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (window.confirm(`Delete "${p.title}" from portfolio database?`)) {
+                              const updated = items.filter((x) => (x.id || x._id) !== (p.id || p._id));
+                              savePortfolioList(updated);
+                            }
+                          }}
+                          className="p-1.5 rounded-lg border border-border hover:bg-destructive/10 text-destructive text-xs flex items-center gap-1 cursor-pointer"
+                          title="Delete Project"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          <span>Delete</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Add / Edit Project Modal */}
+          {editingProject && (
+            <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/80 p-4">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const cleanProject = {
+                    ...editingProject,
+                    id: editingProject.id || `portfolio-${Date.now()}`,
+                  };
+                  delete cleanProject.isNew;
+
+                  let updated;
+                  if (editingProject.isNew) {
+                    updated = [cleanProject, ...items];
+                  } else {
+                    updated = items.map((x) =>
+                      (x.id && x.id === editingProject.id) || (x._id && x._id === editingProject._id)
+                        ? cleanProject
+                        : x
+                    );
+                  }
+                  savePortfolioList(updated);
+                  setEditingProject(null);
+                }}
+                className="glass-card max-w-lg w-full max-h-[90vh] overflow-y-auto rounded-3xl p-6 sm:p-8 space-y-4"
               >
-                <X className="h-5 w-5" />
-              </button>
+                <div className="flex justify-between items-center border-b pb-3">
+                  <h4 className="font-display text-lg text-ink font-bold">
+                    {editingProject.isNew ? "Add Portfolio Project" : "Edit Portfolio Project"}
+                  </h4>
+                  <button
+                    type="button"
+                    onClick={() => setEditingProject(null)}
+                    className="text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-foreground block mb-1">Project Title</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingProject.title || ""}
+                    onChange={(e) => setEditingProject({ ...editingProject, title: e.target.value })}
+                    className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-medium"
+                    placeholder="e.g. Lakeside Royal Mandap"
+                  />
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4 text-xs">
+                  <div>
+                    <label className="font-semibold text-foreground block mb-1">Category</label>
+                    <select
+                      value={editingProject.category || categoryNames[0] || "Destination Weddings"}
+                      onChange={(e) => setEditingProject({ ...editingProject, category: e.target.value })}
+                      className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs cursor-pointer"
+                    >
+                      {categoryNames.map((cName) => (
+                        <option key={cName} value={cName}>
+                          {cName}
+                        </option>
+                      ))}
+                      {!categoryNames.includes(editingProject.category) && editingProject.category && (
+                        <option value={editingProject.category}>{editingProject.category}</option>
+                      )}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-foreground block mb-1">Venue / City Location</label>
+                    <input
+                      type="text"
+                      value={editingProject.location || ""}
+                      onChange={(e) => setEditingProject({ ...editingProject, location: e.target.value })}
+                      className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs"
+                      placeholder="e.g. Udaipur, Rajasthan"
+                    />
+                  </div>
+                </div>
+
+                <ImageUploadField
+                  label="Project Showcase Photo"
+                  description="Upload a high-resolution wedding photograph from your device or paste a URL."
+                  value={editingProject.image || ""}
+                  onChange={(url) => setEditingProject({ ...editingProject, image: url })}
+                />
+
+                <div className="text-xs">
+                  <label className="font-semibold text-foreground block mb-1">
+                    Highlight Story / Concept Description
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={editingProject.description || ""}
+                    onChange={(e) => setEditingProject({ ...editingProject, description: e.target.value })}
+                    className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs leading-relaxed"
+                    placeholder="Describe the architectural concept, floral conditioning, or custom decor elements..."
+                  />
+                </div>
+
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="checkbox"
+                    id="featured-check"
+                    checked={Boolean(editingProject.featured)}
+                    onChange={(e) => setEditingProject({ ...editingProject, featured: e.target.checked })}
+                    className="rounded border-border text-secondary focus:ring-secondary cursor-pointer h-4 w-4"
+                  />
+                  <label htmlFor="featured-check" className="text-xs font-semibold text-foreground cursor-pointer">
+                    Mark as Featured Showcase Project
+                  </label>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-3 border-t">
+                  <button
+                    type="button"
+                    onClick={() => setEditingProject(null)}
+                    className="px-4 py-2 rounded-full border text-xs cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5 cursor-pointer shadow-md"
+                  >
+                    Save Project
+                  </button>
+                </div>
+              </form>
             </div>
-            <div>
-              <label className="text-xs font-medium block mb-1">Title</label>
-              <input
-                type="text"
-                required
-                value={editing.title}
-                onChange={(e) => setEditing({ ...editing, title: e.target.value })}
-                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-medium block mb-1">Category</label>
-              <input
-                type="text"
-                required
-                value={editing.category}
-                onChange={(e) => setEditing({ ...editing, category: e.target.value })}
-                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-medium block mb-1">Location / Venue</label>
-              <input
-                type="text"
-                required
-                value={editing.location}
-                onChange={(e) => setEditing({ ...editing, location: e.target.value })}
-                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
-              />
-            </div>
-            <ImageUploadField
-              label="Project Photo"
-              value={editing.image || ""}
-              onChange={(url) => setEditing({ ...editing, image: url })}
-            />
-            <div className="flex justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setEditing(null)}
-                className="px-4 py-2 rounded-full border text-xs"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5"
-              >
-                Save Project
-              </button>
-            </div>
-          </form>
+          )}
         </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* 2. CATEGORIES MANAGER SUB-TAB */}
+      {/* ------------------------------------------------------------- */}
+      {subTab === "categories" && (
+        <div className="space-y-6 animate-fade-in">
+          <div className="glass-card rounded-3xl p-6 sm:p-8 border border-border space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-border/60">
+              <div>
+                <h3 className="font-display text-xl text-ink font-bold">
+                  Portfolio Category Filter Pills ({categories.length})
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Manage the category pill filters displayed on the public <span className="text-primary font-semibold">/portfolio</span> and Homepage showcase.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setEditingCategory({
+                    isNew: true,
+                    name: "",
+                    slug: "",
+                    order: categories.length + 1,
+                  })
+                }
+                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2.5 px-4 flex items-center gap-2 cursor-pointer shadow-sm"
+              >
+                <Plus className="h-4 w-4 text-secondary" />
+                <span>Add Category</span>
+              </button>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {categories.map((cat, idx) => {
+                const cName = typeof cat === "string" ? cat : cat.name || cat.label;
+                const cId = typeof cat === "string" ? `cat-${idx}` : cat.id || `cat-${idx}`;
+                const count = items.filter(
+                  (p) => p.category && p.category.toLowerCase() === cName.toLowerCase()
+                ).length;
+
+                return (
+                  <div
+                    key={cId}
+                    className="glass-card rounded-2xl p-4 border border-border flex items-center justify-between gap-3 hover:shadow-sm transition"
+                  >
+                    <div className="truncate">
+                      <h4 className="font-display text-sm font-bold text-ink truncate">{cName}</h4>
+                      <span className="text-[0.68rem] text-muted-foreground font-medium">
+                        {count} linked {count === 1 ? "project" : "projects"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setEditingCategory({
+                            isNew: false,
+                            _origName: cName,
+                            name: cName,
+                            id: cId,
+                          })
+                        }
+                        className="p-1.5 rounded-lg border border-border hover:bg-muted text-xs text-primary cursor-pointer"
+                        title="Edit Category"
+                      >
+                        <Edit2 className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (window.confirm(`Delete category "${cName}"?`)) {
+                            const updated = categories.filter((_, i) => i !== idx);
+                            saveCategoriesList(updated);
+                          }
+                        }}
+                        className="p-1.5 rounded-lg border border-border hover:bg-destructive/10 text-destructive text-xs cursor-pointer"
+                        title="Delete Category"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Category Add/Edit Modal */}
+          {editingCategory && (
+            <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/80 p-4">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const cleanName = editingCategory.name.trim();
+                  if (!cleanName) return;
+
+                  const cleanCat = {
+                    id: editingCategory.id || `cat-${Date.now()}`,
+                    name: cleanName,
+                    slug: cleanName.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+                  };
+
+                  let updated;
+                  if (editingCategory.isNew) {
+                    updated = [...categories, cleanCat];
+                  } else {
+                    updated = categories.map((c) => {
+                      const currName = typeof c === "string" ? c : c.name || c.label;
+                      if (currName === editingCategory._origName) {
+                        return cleanCat;
+                      }
+                      return c;
+                    });
+                  }
+                  saveCategoriesList(updated);
+                  setEditingCategory(null);
+                }}
+                className="glass-card max-w-sm w-full rounded-3xl p-6 space-y-4"
+              >
+                <div className="flex justify-between items-center border-b pb-3">
+                  <h4 className="font-display text-base text-ink font-bold">
+                    {editingCategory.isNew ? "Add Category" : "Edit Category"}
+                  </h4>
+                  <button
+                    type="button"
+                    onClick={() => setEditingCategory(null)}
+                    className="text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-foreground block mb-1">
+                    Category Name / Label
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editingCategory.name || ""}
+                    onChange={(e) => setEditingCategory({ ...editingCategory, name: e.target.value })}
+                    className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs"
+                    placeholder="e.g. Royal Baraat & Entry"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-2 border-t">
+                  <button
+                    type="button"
+                    onClick={() => setEditingCategory(null)}
+                    className="px-4 py-2 rounded-full border text-xs cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5 cursor-pointer"
+                  >
+                    Save Category
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* 3. PORTFOLIO PAGE HEADER BANNER SUB-TAB */}
+      {/* ------------------------------------------------------------- */}
+      {subTab === "header-banner" && (
+        <div className="space-y-8 animate-fade-in">
+          <div className="grid lg:grid-cols-12 gap-8 items-start">
+            {/* Left Column: Form Editor */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                saveHeader(headerData);
+              }}
+              className="lg:col-span-6 glass-card rounded-3xl p-6 sm:p-8 border border-border space-y-5"
+            >
+              <div className="flex items-center justify-between pb-3 border-b border-border/60">
+                <div>
+                  <div className="flex items-center gap-1.5 text-primary text-xs uppercase tracking-[0.25em] font-bold">
+                    <Sparkles className="h-4 w-4 text-secondary" />
+                    <span>Top Hero Banner</span>
+                  </div>
+                  <h3 className="font-display text-xl text-ink font-bold mt-1">Portfolio Header Banner</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Customize the top hero banner title, subtitle, badge, and cover photo on <span className="text-primary font-semibold">/portfolio</span>.
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-foreground block mb-1">
+                  Eyebrow Badge Pill
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={headerData.badge || ""}
+                  onChange={(e) => setHeaderData({ ...headerData, badge: e.target.value })}
+                  className="w-full rounded-xl border border-border bg-card px-3.5 py-2.5 text-sm"
+                  placeholder="e.g. 500+ Stories & Counting"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-foreground block mb-1">
+                  Main Page Heading / Title
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={headerData.title || ""}
+                  onChange={(e) => setHeaderData({ ...headerData, title: e.target.value })}
+                  className="w-full rounded-xl border border-border bg-card px-3.5 py-2.5 text-sm font-semibold"
+                  placeholder="e.g. The Wedding Portfolio"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-foreground block mb-1">
+                  Subtitle Narrative / Description
+                </label>
+                <textarea
+                  rows={4}
+                  required
+                  value={headerData.subtitle || ""}
+                  onChange={(e) => setHeaderData({ ...headerData, subtitle: e.target.value })}
+                  className="w-full rounded-xl border border-border bg-card px-3.5 py-2.5 text-sm leading-relaxed"
+                  placeholder="A curated gallery of our mandap concepts, floral installations..."
+                />
+              </div>
+
+              <ImageUploadField
+                label="Header Background Cover Image"
+                value={headerData.image || "/images/hero-2.jpg"}
+                onChange={(url) => setHeaderData({ ...headerData, image: url })}
+              />
+
+              {/* Highlight Metric Pills */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-semibold text-foreground">
+                    Highlight Metric Tags (Pills)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setHeaderData({
+                        ...headerData,
+                        stats: [...(headerData.stats || []), "New Metric"],
+                      })
+                    }
+                    className="text-[0.7rem] text-primary font-bold hover:underline cursor-pointer"
+                  >
+                    + Add Metric
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  {(headerData.stats || []).map((stat, sIdx) => (
+                    <div key={sIdx} className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={stat}
+                        onChange={(e) => {
+                          const updated = [...headerData.stats];
+                          updated[sIdx] = e.target.value;
+                          setHeaderData({ ...headerData, stats: updated });
+                        }}
+                        className="flex-1 rounded-xl border border-border bg-card px-3 py-1.5 text-xs"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = headerData.stats.filter((_, i) => i !== sIdx);
+                          setHeaderData({ ...headerData, stats: updated });
+                        }}
+                        className="text-destructive p-1 cursor-pointer"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="btn-luxe gradient-royal w-full text-primary-foreground text-xs py-3 rounded-xl shadow-md flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin text-secondary" />
+                      <span>Saving to Database...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 text-secondary" />
+                      <span>Save Header Banner Changes</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+
+            {/* Right Column: Live Real-Time Preview Replica */}
+            <div className="lg:col-span-6 space-y-3 sticky top-6">
+              <div className="flex items-center justify-between px-2">
+                <span className="text-[0.68rem] uppercase tracking-[0.25em] text-primary font-bold flex items-center gap-1.5">
+                  <Eye className="h-3.5 w-3.5 text-secondary" /> Live /portfolio Header Preview
+                </span>
+                <span className="text-[0.62rem] text-muted-foreground font-mono">
+                  Exact Frontend Replica
+                </span>
+              </div>
+
+              <div className="relative bg-ink rounded-3xl p-8 sm:p-10 text-background overflow-hidden border border-secondary/30 shadow-2xl text-center">
+                <div className="absolute inset-0 z-0 opacity-25">
+                  <img
+                    src={headerData.image || "/images/hero-2.jpg"}
+                    alt="Portfolio Preview"
+                    className="h-full w-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = "/images/hero-2.jpg";
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/80 to-ink/40" />
+                </div>
+
+                <div className="relative z-10 space-y-4">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/20 px-3.5 py-1 text-[0.68rem] uppercase tracking-[0.3em] text-secondary font-medium backdrop-blur-md">
+                    <Sparkles className="h-3 w-3 text-secondary" />
+                    <span>{headerData.badge || "500+ Stories & Counting"}</span>
+                  </span>
+
+                  <h1 className="font-display text-2xl sm:text-3xl text-white font-normal leading-tight">
+                    {headerData.title || "The Wedding Portfolio"}
+                  </h1>
+
+                  <div className="rule-gold mx-auto my-3" />
+
+                  <p className="text-xs sm:text-sm text-background/80 font-light leading-relaxed max-w-md mx-auto">
+                    {headerData.subtitle ||
+                      "A curated gallery of our mandap concepts, floral installations, destination beach setups..."}
+                  </p>
+
+                  {Array.isArray(headerData.stats) && headerData.stats.length > 0 && (
+                    <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                      {headerData.stats.map((stat, sIdx) => (
+                        <span
+                          key={sIdx}
+                          className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[0.68rem] text-champagne backdrop-blur-md border border-white/15"
+                        >
+                          <span className="h-1.5 w-1.5 rounded-full bg-secondary" />
+                          <span>{stat}</span>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* 4. WORDS OF GRATITUDE / LOVE STORIES SUB-TAB */}
+      {/* ------------------------------------------------------------- */}
+      {subTab === "gratitude" && (
+        <div className="space-y-6 animate-fade-in">
+          {/* Header Section Editor */}
+          <div className="glass-card rounded-3xl p-6 sm:p-7 border border-border space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-border/60">
+              <div>
+                <div className="flex items-center gap-1.5 text-primary text-xs uppercase tracking-[0.25em] font-bold">
+                  <Sparkles className="h-4 w-4 text-secondary" />
+                  <span>Section Header Customizer</span>
+                </div>
+                <h3 className="font-display text-xl text-ink font-bold mt-1">
+                  Words of Gratitude Section
+                </h3>
+              </div>
+              <button
+                type="button"
+                disabled={isSaving}
+                onClick={() => saveTestimonialsHeader(testimonialsHeader)}
+                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5 flex items-center gap-2 disabled:opacity-60 cursor-pointer shadow-sm"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin text-secondary" />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 text-secondary" />
+                    <span>Save Section Headings</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-4 text-xs">
+              <div>
+                <label className="font-semibold text-foreground block mb-1">Eyebrow Tag</label>
+                <input
+                  type="text"
+                  value={testimonialsHeader.eyebrow || ""}
+                  onChange={(e) => setTestimonialsHeader({ ...testimonialsHeader, eyebrow: e.target.value })}
+                  className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs"
+                  placeholder="e.g. Words of Gratitude"
+                />
+              </div>
+              <div>
+                <label className="font-semibold text-foreground block mb-1">Main Section Title</label>
+                <input
+                  type="text"
+                  value={testimonialsHeader.title || ""}
+                  onChange={(e) => setTestimonialsHeader({ ...testimonialsHeader, title: e.target.value })}
+                  className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-semibold"
+                  placeholder="e.g. Stories of Love, Captured Forever"
+                />
+              </div>
+            </div>
+
+            <div className="text-xs">
+              <label className="font-semibold text-foreground block mb-1">Subtitle Narrative</label>
+              <textarea
+                rows={2}
+                value={testimonialsHeader.subtitle || ""}
+                onChange={(e) => setTestimonialsHeader({ ...testimonialsHeader, subtitle: e.target.value })}
+                className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs leading-relaxed"
+                placeholder="Read how our couples and their families experienced the ease, beauty..."
+              />
+            </div>
+          </div>
+
+          {/* Testimonials List Manager */}
+          <div className="glass-card rounded-3xl p-6 sm:p-7 border border-border space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-border/60">
+              <div>
+                <h3 className="font-display text-xl text-ink font-bold">
+                  Client Reviews &amp; Stories ({testimonials.length})
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Manage real couple testimonials rendered on <span className="text-primary font-semibold">/portfolio</span>, <span className="text-primary font-semibold">/testimonials</span>, and the Homepage.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setEditingTestimonial({
+                    isNew: true,
+                    name: "",
+                    location: "Pune",
+                    date: "2025",
+                    rating: 5,
+                    image: "",
+                    text: "",
+                    featured: true,
+                  })
+                }
+                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2.5 px-5 flex items-center gap-2 cursor-pointer shadow-luxe"
+              >
+                <Plus className="h-4 w-4 text-secondary" />
+                <span>Add Couple Story</span>
+              </button>
+            </div>
+
+            {testimonials.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-border p-12 text-center text-muted-foreground bg-card/30">
+                <Quote className="h-10 w-10 mx-auto text-secondary/60 mb-2" />
+                <p className="font-display text-base text-ink font-semibold">0 Testimonials in Database</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Click "Add Couple Story" above to add heartfelt client reviews.
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {testimonials.map((t, idx) => (
+                  <div
+                    key={t.id || t._id || idx}
+                    className="glass-card rounded-2xl p-5 border border-border flex flex-col justify-between hover:shadow-md transition"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={t.image || "/images/couple.jpg"}
+                            alt={t.name}
+                            className="h-12 w-12 rounded-full object-cover ring-2 ring-secondary/50"
+                            onError={(e) => {
+                              e.currentTarget.src = "/images/couple.jpg";
+                            }}
+                          />
+                          <div>
+                            <h4 className="font-display text-base font-bold text-ink">{t.name}</h4>
+                            <div className="flex items-center gap-2 text-[0.68rem] text-muted-foreground mt-0.5">
+                              <span className="flex items-center gap-1 text-primary">
+                                <MapPin className="h-3 w-3 text-secondary" />
+                                {t.location}
+                              </span>
+                              <span>•</span>
+                              <span>{t.date}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Stars */}
+                        <div className="flex items-center gap-0.5">
+                          {Array.from({ length: t.rating || 5 }).map((_, sIdx) => (
+                            <Star key={sIdx} className="h-3.5 w-3.5 fill-secondary text-secondary" />
+                          ))}
+                        </div>
+                      </div>
+
+                      <p className="text-xs text-foreground/85 italic leading-relaxed">
+                        "{t.text}"
+                      </p>
+                    </div>
+
+                    <div className="mt-4 pt-3 border-t border-border flex justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setEditingTestimonial({ ...t })}
+                        className="p-1.5 rounded-lg border border-border hover:bg-muted text-xs text-primary flex items-center gap-1 cursor-pointer"
+                      >
+                        <Edit2 className="h-3.5 w-3.5" />
+                        <span>Edit</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (window.confirm(`Delete review from "${t.name}"?`)) {
+                            const updated = testimonials.filter((x) => (x.id || x._id) !== (t.id || t._id));
+                            saveTestimonialsList(updated);
+                          }
+                        }}
+                        className="p-1.5 rounded-lg border border-border hover:bg-destructive/10 text-destructive text-xs flex items-center gap-1 cursor-pointer"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        <span>Delete</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Testimonial Add / Edit Modal */}
+          {editingTestimonial && (
+            <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/80 p-4">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const cleanTestimonial = {
+                    ...editingTestimonial,
+                    id: editingTestimonial.id || `test-${Date.now()}`,
+                  };
+                  delete cleanTestimonial.isNew;
+                  delete cleanTestimonial._customRelMode;
+                  delete cleanTestimonial._customCatMode;
+
+                  let updated;
+                  if (editingTestimonial.isNew) {
+                    updated = [cleanTestimonial, ...testimonials];
+                  } else {
+                    updated = testimonials.map((x) =>
+                      (x.id && x.id === editingTestimonial.id) || (x._id && x._id === editingTestimonial._id)
+                        ? cleanTestimonial
+                        : x
+                    );
+                  }
+                  saveTestimonialsList(updated);
+                  setEditingTestimonial(null);
+                }}
+                className="glass-card max-w-md w-full max-h-[90vh] overflow-y-auto rounded-3xl p-6 sm:p-8 space-y-4"
+              >
+                <div className="flex justify-between items-center border-b pb-3">
+                  <h4 className="font-display text-lg text-ink font-bold">
+                    {editingTestimonial.isNew ? "Add Couple Story" : "Edit Couple Story"}
+                  </h4>
+                  <button
+                    type="button"
+                    onClick={() => setEditingTestimonial(null)}
+                    className="text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-foreground block mb-1">Couple Names *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingTestimonial.name || ""}
+                    onChange={(e) => setEditingTestimonial({ ...editingTestimonial, name: e.target.value })}
+                    className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-medium"
+                    placeholder="e.g. Sneha & Rohan Kulkarni"
+                  />
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <label className="font-semibold text-foreground block mb-1">Relationship / Role</label>
+                    {(() => {
+                      const standardRoles = [
+                        "Bride & Groom",
+                        "Parents of the Bride",
+                        "Parents of the Groom",
+                        "Family Member / Relative",
+                        "Wedding Guest",
+                        "Corporate Host",
+                      ];
+                      const currentRel = editingTestimonial.relationship || "Bride & Groom";
+                      const isStandard = standardRoles.includes(currentRel);
+                      const isOtherSelected = editingTestimonial._customRelMode || (!isStandard && currentRel !== "");
+
+                      return (
+                        <div className="space-y-1.5">
+                          <select
+                            value={isOtherSelected ? "Other" : currentRel}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (val === "Other") {
+                                setEditingTestimonial({
+                                  ...editingTestimonial,
+                                  _customRelMode: true,
+                                  relationship: isStandard ? "" : currentRel,
+                                });
+                              } else {
+                                setEditingTestimonial({
+                                  ...editingTestimonial,
+                                  _customRelMode: false,
+                                  relationship: val,
+                                });
+                              }
+                            }}
+                            className="w-full rounded-xl border border-border bg-card px-3 py-1.5 text-xs cursor-pointer"
+                          >
+                            {standardRoles.map((role) => (
+                              <option key={role} value={role}>
+                                {role}
+                              </option>
+                            ))}
+                            <option value="Other">Other</option>
+                          </select>
+
+                          {isOtherSelected && (
+                            <input
+                              type="text"
+                              required
+                              value={editingTestimonial.relationship || ""}
+                              onChange={(e) => setEditingTestimonial({ ...editingTestimonial, relationship: e.target.value })}
+                              className="w-full rounded-xl border border-secondary/60 bg-card px-3 py-1.5 text-xs ring-1 ring-secondary/20 animate-fade-in"
+                              placeholder="e.g. Sister of the Bride, Family Friend, Groom's Cousin"
+                            />
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-foreground block mb-1">Event Category</label>
+                    {(() => {
+                      const standardCats = [
+                        "Royal & Destination Weddings",
+                        "Mandap & Rituals",
+                        "Haldi & Sangeet",
+                        "Opulent Receptions",
+                        "Corporate Celebrations",
+                      ];
+                      const currentCat = editingTestimonial.category || standardCats[0];
+                      const isStandard = standardCats.includes(currentCat);
+                      const isOtherSelected = editingTestimonial._customCatMode || (!isStandard && currentCat !== "");
+
+                      return (
+                        <div className="space-y-1.5">
+                          <select
+                            value={isOtherSelected ? "Other" : currentCat}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (val === "Other") {
+                                setEditingTestimonial({
+                                  ...editingTestimonial,
+                                  _customCatMode: true,
+                                  category: isStandard ? "" : currentCat,
+                                });
+                              } else {
+                                setEditingTestimonial({
+                                  ...editingTestimonial,
+                                  _customCatMode: false,
+                                  category: val,
+                                });
+                              }
+                            }}
+                            className="w-full rounded-xl border border-border bg-card px-3 py-1.5 text-xs cursor-pointer"
+                          >
+                            {standardCats.map((name) => (
+                              <option key={name} value={name}>
+                                {name}
+                              </option>
+                            ))}
+                            <option value="Other">Other</option>
+                          </select>
+
+                          {isOtherSelected && (
+                            <input
+                              type="text"
+                              required
+                              value={editingTestimonial.category || ""}
+                              onChange={(e) => setEditingTestimonial({ ...editingTestimonial, category: e.target.value })}
+                              className="w-full rounded-xl border border-secondary/60 bg-card px-3 py-1.5 text-xs ring-1 ring-secondary/20 animate-fade-in"
+                              placeholder="e.g. Sangeet Gala, Engagement, Anniversary Banquet"
+                            />
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <label className="font-semibold text-foreground block mb-1">Wedding Location</label>
+                    <input
+                      type="text"
+                      value={editingTestimonial.location || ""}
+                      onChange={(e) => setEditingTestimonial({ ...editingTestimonial, location: e.target.value })}
+                      className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs"
+                      placeholder="e.g. Udaipur & Pune"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-semibold text-foreground block mb-1">Wedding Date / Year</label>
+                    <input
+                      type="text"
+                      value={editingTestimonial.date || ""}
+                      onChange={(e) => setEditingTestimonial({ ...editingTestimonial, date: e.target.value })}
+                      className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs"
+                      placeholder="e.g. 14 Feb 2025"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-foreground block mb-1">
+                    Rating Stars (1 to 5)
+                  </label>
+                  <select
+                    value={editingTestimonial.rating || 5}
+                    onChange={(e) => setEditingTestimonial({ ...editingTestimonial, rating: Number(e.target.value) })}
+                    className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs cursor-pointer"
+                  >
+                    <option value={5}>★★★★★ (5 Stars - Exceptional)</option>
+                    <option value={4}>★★★★☆ (4 Stars - Very Good)</option>
+                    <option value={3}>★★★☆☆ (3 Stars - Good)</option>
+                  </select>
+                </div>
+
+                <ImageUploadField
+                  label="Couple Photo"
+                  value={editingTestimonial.image || ""}
+                  onChange={(url) => setEditingTestimonial({ ...editingTestimonial, image: url })}
+                />
+
+                <div className="text-xs">
+                  <label className="font-semibold text-foreground block mb-1">Testimonial Quote / Narrative</label>
+                  <textarea
+                    rows={4}
+                    required
+                    value={editingTestimonial.text || ""}
+                    onChange={(e) => setEditingTestimonial({ ...editingTestimonial, text: e.target.value })}
+                    className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs leading-relaxed"
+                    placeholder="Enter what the couple said about their wedding planning experience..."
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-3 border-t">
+                  <button
+                    type="button"
+                    onClick={() => setEditingTestimonial(null)}
+                    className="px-4 py-2 rounded-full border text-xs cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5 cursor-pointer shadow-md"
+                  >
+                    Save Review
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* 5. PORTFOLIO CTA BANNER SUB-TAB */}
+      {/* ------------------------------------------------------------- */}
+      {subTab === "cta-banner" && (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            saveCta(ctaData);
+          }}
+          className="glass-card rounded-3xl p-6 sm:p-8 border border-border space-y-6 animate-fade-in"
+        >
+          <div className="flex items-center justify-between pb-3 border-b border-border/60">
+            <div>
+              <div className="flex items-center gap-1.5 text-primary text-xs uppercase tracking-[0.25em] font-bold">
+                <Sparkles className="h-4 w-4 text-secondary" />
+                <span>Portfolio Consultation Action</span>
+              </div>
+              <h3 className="font-display text-xl text-ink font-bold mt-1">
+                Private Consultation CTA Banner
+              </h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Customize the luxury action card displayed at the bottom of the <span className="text-primary font-semibold">/portfolio</span> page.
+              </p>
+            </div>
+            <button
+              type="submit"
+              disabled={isSaving}
+              className="btn-luxe gradient-royal text-primary-foreground text-xs py-2.5 px-6 flex items-center gap-2 disabled:opacity-60 cursor-pointer shadow-sm"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin text-secondary" />
+                  <span>Saving...</span>
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 text-secondary" />
+                  <span>Save Consultation CTA</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-4 text-xs">
+            <div>
+              <label className="font-semibold text-foreground block mb-1">Eyebrow Badge</label>
+              <input
+                type="text"
+                value={ctaData.eyebrow || ""}
+                onChange={(e) => setCtaData({ ...ctaData, eyebrow: e.target.value })}
+                className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs uppercase tracking-wider"
+                placeholder="WHERE WEDDINGS BECOME STORIES"
+              />
+            </div>
+
+            <div>
+              <label className="font-semibold text-foreground block mb-1">Headline</label>
+              <input
+                type="text"
+                value={ctaData.headline || ""}
+                onChange={(e) => setCtaData({ ...ctaData, headline: e.target.value })}
+                className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-semibold"
+                placeholder="Want Your Wedding to Be Our Next Masterpiece?"
+              />
+            </div>
+          </div>
+
+          <div className="text-xs">
+            <label className="font-semibold text-foreground block mb-1">Subtitle Description</label>
+            <textarea
+              rows={3}
+              value={ctaData.subtitle || ""}
+              onChange={(e) => setCtaData({ ...ctaData, subtitle: e.target.value })}
+              className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs leading-relaxed"
+              placeholder="Connect directly with Ashish Wankhede and Rutik Pund to review your venue options..."
+            />
+          </div>
+
+          <div className="text-xs">
+            <label className="font-semibold text-foreground block mb-1">Primary Button Label</label>
+            <input
+              type="text"
+              value={ctaData.buttonText || ""}
+              onChange={(e) => setCtaData({ ...ctaData, buttonText: e.target.value, buttonLink: ctaData.buttonLink || "/contact" })}
+              className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs"
+              placeholder="Book Your Free Consultation"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-foreground block mb-1">Notice / Disclaimer</label>
+            <input
+              type="text"
+              value={ctaData.notice || ""}
+              onChange={(e) => setCtaData({ ...ctaData, notice: e.target.value })}
+              className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs"
+              placeholder="Free Consultation • No Commitment Required"
+            />
+          </div>
+
+          {/* Consultation Perks */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs font-semibold text-foreground">Consultation Perks &amp; Benefits</label>
+              <button
+                type="button"
+                onClick={() =>
+                  setCtaData({
+                    ...ctaData,
+                    perks: [...(ctaData.perks || []), "New Consultation Perk"],
+                  })
+                }
+                className="text-[0.7rem] text-primary font-bold hover:underline cursor-pointer"
+              >
+                + Add Perk
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              {(ctaData.perks || []).map((perk, pIdx) => (
+                <div key={pIdx} className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={perk}
+                    onChange={(e) => {
+                      const updated = [...ctaData.perks];
+                      updated[pIdx] = e.target.value;
+                      setCtaData({ ...ctaData, perks: updated });
+                    }}
+                    className="flex-1 rounded-xl border border-border bg-card px-3 py-1.5 text-xs"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const updated = ctaData.perks.filter((_, i) => i !== pIdx);
+                      setCtaData({ ...ctaData, perks: updated });
+                    }}
+                    className="text-destructive p-1 cursor-pointer"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </form>
       )}
     </div>
   );
@@ -3998,22 +5481,28 @@ function GalleryEditorModule({ site, showSaved }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="font-display text-xl text-ink">Pinterest Gallery Photos ({gallery.length})</h3>
-        <button
-          type="button"
-          onClick={() =>
-            setEditingPhoto({
-              isNew: true,
-              caption: "Grand Wedding Decor",
-              image: "",
-            })
-          }
-          className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-4"
-        >
-          <Plus className="h-4 w-4" />
-          <span>Add Photo</span>
-        </button>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h3 className="font-display text-xl text-ink font-semibold">Pinterest Gallery Photos ({gallery.length})</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">Manage public photo grid</p>
+        </div>
+        <div className="flex items-center gap-2.5">
+          <ModuleRefreshButton site={site} showSaved={showSaved} label="Refresh Gallery" />
+          <button
+            type="button"
+            onClick={() =>
+              setEditingPhoto({
+                isNew: true,
+                caption: "Grand Wedding Decor",
+                image: "",
+              })
+            }
+            className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-4 flex items-center gap-1.5 cursor-pointer"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Add Photo</span>
+          </button>
+        </div>
       </div>
 
       <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
@@ -4106,75 +5595,1453 @@ function GalleryEditorModule({ site, showSaved }) {
   );
 }
 
-// MODULE 8: Testimonials Editor
+// MODULE 8: Testimonials & Review Moderation Suite
 // -------------------------------------------------------------
 function TestimonialsEditorModule({ site, showSaved }) {
-  const [list, setList] = useState(site.testimonials || []);
+  const [subTab, setSubTab] = useState("moderation");
+  const [isSaving, setIsSaving] = useState(false);
 
-  const saveList = (newList) => {
-    setList(newList);
-    site.update("testimonials", newList);
+  // Local state for all reviews (both pending and approved) with immediate optimistic updates
+  const [allReviews, setAllReviews] = useState(site.allTestimonials || site.testimonials || []);
+
+  useEffect(() => {
+    if (site.allTestimonials || site.testimonials) {
+      setAllReviews(site.allTestimonials || site.testimonials || []);
+    }
+  }, [site.allTestimonials, site.testimonials]);
+
+  const pendingReviews = allReviews.filter((t) => t.status === "pending");
+  const publishedReviews = allReviews.filter((t) => t.status === "approved" || !t.status);
+
+  // Search and Filter states for Published Tab
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+
+  // Editing state for Reviews
+  const [editingReview, setEditingReview] = useState(null);
+
+  // Header Banner & Trust Stats
+  const [headerData, setHeaderData] = useState({
+    badge: site.testimonialsHeader?.badge || "Couples & Families",
+    eyebrow: site.testimonialsHeader?.eyebrow || "Words of Gratitude",
+    title: site.testimonialsHeader?.title || "Testimonials & Love Stories",
+    subtitle:
+      site.testimonialsHeader?.subtitle ||
+      "Read first-hand accounts of couples and families who entrusted their most sacred days to Confianza's care and aesthetic vision.",
+    image:
+      site.testimonialsHeader?.image ||
+      "https://res.cloudinary.com/tridevsosync/image/upload/v1790838224/confianza_portfolio/portfolio_hero_banner.jpg",
+    stats: site.testimonialsHeader?.stats || [
+      "5.0 Average Couple Rating ★",
+      "500+ Celebrations Across India",
+      "100% On-Time Cue Execution",
+      "0% Day-Of Stress with Shadow Management",
+    ],
+  });
+
+  // Categories
+  const [categories, setCategories] = useState(
+    site.testimonialsCategories || [
+      { id: "royal-destination", name: "Royal & Destination Weddings", slug: "royal-destination", order: 1 },
+      { id: "mandap-rituals", name: "Mandap & Rituals", slug: "mandap-rituals", order: 2 },
+      { id: "haldi-sangeet", name: "Haldi & Sangeet", slug: "haldi-sangeet", order: 3 },
+      { id: "receptions", name: "Opulent Receptions", slug: "receptions", order: 4 },
+      { id: "video-reviews", name: "Video Reviews & Reels", slug: "video-reviews", order: 5 },
+      { id: "corporate-events", name: "Corporate Celebrations", slug: "corporate-events", order: 6 },
+    ]
+  );
+  const [editingCategory, setEditingCategory] = useState(null);
+
+  // Experience Pillars from PDF
+  const [experiencePillars, setExperiencePillars] = useState(
+    site.testimonialsExperience || [
+      {
+        id: "shadow-mgmt",
+        title: "Shadow Management",
+        subtitle: "Dedicated Bride & Groom Liaison",
+        description:
+          "A personal shadow coordinator attends to every personal need, attire touch-up, refreshment, and family coordination behind the scenes.",
+        icon: "Users",
+        badge: "Signature Care",
+      },
+      {
+        id: "ritual-mgmt",
+        title: "Sacred Ritual Coordination",
+        subtitle: "Flawless Pandit & Samagri Prep",
+        description:
+          "Complete management of traditional Vedic rituals (Baraat, Milni, Saptapadi, Havan) ensuring exact customs and priest requirements are honored.",
+        icon: "Sparkles",
+        badge: "Cultural Precision",
+      },
+      {
+        id: "production-decor",
+        title: "3D CAD Decor & Production",
+        subtitle: "100% Design-to-Reality Fidelity",
+        description:
+          "From custom stage carpentry to imported floral conditioning and ambient warm lighting, every spatial element matches the 3D CAD design.",
+        icon: "Layers",
+        badge: "Spatial Artistry",
+      },
+      {
+        id: "show-runner",
+        title: "Show Runner Timeline Execution",
+        subtitle: "Zero-Glitch Stage Management",
+        description:
+          "The Show Runner acts as the single point-of-contact for artists, DJs, sound technicians, and entry pyrotechnics with millisecond timing.",
+        icon: "Award",
+        badge: "Live Direction",
+      },
+    ]
+  );
+
+  // FAQs
+  const [faqs, setFaqs] = useState(
+    site.testimonialsFaq || [
+      {
+        question: "How do I submit our wedding review and photographs?",
+        answer:
+          "Click the 'Share Your Love Story' button on this page. You can share your story, select your star rating, and upload your high-resolution wedding photos directly from your phone or computer.",
+      },
+      {
+        question: "Can we include our cinematic wedding teaser or Instagram Reel?",
+        answer:
+          "Yes! You can paste your YouTube, Vimeo, Google Drive, or Instagram Reel link in the video link field. Our team will feature the interactive video player on your review card.",
+      },
+      {
+        question: "Why does my review say 'Awaiting Admin Moderation'?",
+        answer:
+          "To protect client privacy and ensure genuine testimonials, all public submissions are reviewed and verified by Ashish Wankhede & the Confianza editorial team before going live.",
+      },
+      {
+        question: "How long does review verification take?",
+        answer: "Our team typically verifies and publishes new couple stories within 12 to 24 hours.",
+      },
+    ]
+  );
+
+  // 1-Click Moderation Actions
+  const handleModerate = async (action, id, data = null) => {
+    try {
+      if (action === "delete") {
+        setAllReviews((prev) => prev.filter((r) => r.id !== id && r._id !== id));
+      } else if (action === "approve") {
+        setAllReviews((prev) =>
+          prev.map((r) =>
+            r.id === id || r._id === id ? { ...r, status: "approved" } : r
+          )
+        );
+      }
+      const res = await fetch("/api/testimonials/moderate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, id, data }),
+      });
+      if (res.ok) {
+        showSaved();
+        if (typeof site.refreshData === "function") {
+          await site.refreshData({ fresh: true, includeInquiries: true });
+        } else if (typeof site.refresh === "function") {
+          await site.refresh({ fresh: true, includeInquiries: true });
+        }
+      }
+    } catch (err) {
+      console.error("Moderation action failed:", err);
+    }
+  };
+
+  // Save Reviews List
+  const saveReviewsList = async (newList) => {
+    setIsSaving(true);
+    setAllReviews(newList);
+    await site.update("testimonials", newList);
+    setIsSaving(false);
     showSaved();
   };
 
-  const addReview = () => {
-    const name = window.prompt("Couple Names (e.g. Maya & Aryan):");
-    if (!name) return;
-    const text = window.prompt("Review Quote:");
-    if (!text) return;
-    saveList([
-      ...list,
-      {
-        id: Date.now(),
-        name,
-        text,
-        location: "Pune",
-        date: "2025",
-        rating: 5,
-        image: "",
-      },
-    ]);
+  // Save Header & Trust Stats
+  const saveHeader = async (newHeader) => {
+    setIsSaving(true);
+    await site.update("testimonialsHeader", newHeader);
+    setIsSaving(false);
+    showSaved();
   };
+
+  // Save Categories
+  const saveCategories = async (newCategories) => {
+    setIsSaving(true);
+    await site.update("testimonialsCategories", newCategories);
+    setIsSaving(false);
+    showSaved();
+  };
+
+  // Save Experience & FAQs
+  const saveExperienceAndFaqs = async () => {
+    setIsSaving(true);
+    await site.update("testimonialsExperience", experiencePillars);
+    await site.update("testimonialsFaq", faqs);
+    setIsSaving(false);
+    showSaved();
+  };
+
+  // Filtered Published Reviews
+  const filteredPublished = publishedReviews.filter((t) => {
+    if (selectedCategory !== "All") {
+      if (selectedCategory === "Video Reviews & Reels") {
+        if (!t.videoUrl) return false;
+      } else {
+        const cat = t.category || "";
+        if (cat.toLowerCase() !== selectedCategory.toLowerCase()) return false;
+      }
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const nMatch = (t.name || "").toLowerCase().includes(q);
+      const lMatch = (t.location || "").toLowerCase().includes(q);
+      const txtMatch = (t.text || "").toLowerCase().includes(q);
+      if (!nMatch && !lMatch && !txtMatch) return false;
+    }
+    return true;
+  });
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="font-display text-xl text-ink">Client Reviews &amp; Testimonials ({list.length})</h3>
-        <button
-          type="button"
-          onClick={addReview}
-          className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-4"
-        >
-          <Plus className="h-4 w-4" />
-          <span>Add Testimonial</span>
-        </button>
+      {/* Sub-Navigation Tabs */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setSubTab("moderation")}
+            className={`px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 cursor-pointer ${
+              subTab === "moderation"
+                ? "gradient-royal text-primary-foreground shadow-md"
+                : "border border-border bg-card text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Sparkles className="h-3.5 w-3.5 text-secondary" />
+            <span>Pending Moderation Queue</span>
+            {pendingReviews.length > 0 && (
+              <span className="h-5 px-1.5 rounded-full gradient-gold text-ink text-[0.65rem] font-bold flex items-center justify-center animate-pulse">
+                {pendingReviews.length} New
+              </span>
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSubTab("published")}
+            className={`px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 cursor-pointer ${
+              subTab === "published"
+                ? "gradient-royal text-primary-foreground shadow-md"
+                : "border border-border bg-card text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <CheckCircle className="h-3.5 w-3.5 text-secondary" />
+            <span>Published Reviews ({publishedReviews.length})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSubTab("header")}
+            className={`px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 cursor-pointer ${
+              subTab === "header"
+                ? "gradient-royal text-primary-foreground shadow-md"
+                : "border border-border bg-card text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Sliders className="h-3.5 w-3.5 text-secondary" />
+            <span>Hero Banner &amp; Trust Stats</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSubTab("categories")}
+            className={`px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 cursor-pointer ${
+              subTab === "categories"
+                ? "gradient-royal text-primary-foreground shadow-md"
+                : "border border-border bg-card text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Layers className="h-3.5 w-3.5 text-secondary" />
+            <span>Categories ({categories.length})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSubTab("experience-faq")}
+            className={`px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 cursor-pointer ${
+              subTab === "experience-faq"
+                ? "gradient-royal text-primary-foreground shadow-md"
+                : "border border-border bg-card text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Award className="h-3.5 w-3.5 text-secondary" />
+            <span>Care Pillars &amp; FAQ</span>
+          </button>
+        </div>
+        <ModuleRefreshButton site={site} showSaved={showSaved} label="Refresh Testimonials" />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        {list.map((t) => (
-          <div key={t.id} className="glass-card rounded-2xl p-5 border border-border space-y-3">
-            <div className="flex justify-between items-start">
-              <div className="flex items-center gap-3">
-                <img src={t.image} alt={t.name} className="h-10 w-10 rounded-full object-cover" />
-                <div>
-                  <h4 className="font-display text-sm font-bold text-ink">{t.name}</h4>
-                  <span className="text-[0.68rem] text-muted-foreground">
-                    {t.location} â€¢ {t.date}
+      {/* ------------------------------------------------------------- */}
+      {/* SUB-TAB 1: PENDING MODERATION QUEUE */}
+      {/* ------------------------------------------------------------- */}
+      {subTab === "moderation" && (
+        <div className="space-y-6 animate-fade-in">
+          <div className="glass-card rounded-3xl p-6 sm:p-8 border border-border space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-border/60">
+              <div>
+                <h3 className="font-display text-xl text-ink font-bold flex items-center gap-2">
+                  <span>Public Review Submissions Awaiting Approval</span>
+                  <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full gradient-royal text-primary-foreground">
+                    {pendingReviews.length} Pending
                   </span>
-                </div>
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Reviews submitted by couples &amp; guests from <span className="text-primary font-semibold">/testimonials</span>. Once approved, they go live on the website.
+                </p>
               </div>
-              <button
-                type="button"
-                onClick={() => saveList(list.filter((x) => x.id !== t.id))}
-                className="text-destructive p-1"
+              <ModuleRefreshButton site={site} showSaved={showSaved} label="Refresh Queue" />
+            </div>
+
+            {pendingReviews.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-border p-12 text-center text-muted-foreground bg-card/30 space-y-2">
+                <CheckCircle2 className="h-10 w-10 mx-auto text-secondary" />
+                <p className="font-display text-base text-ink font-semibold">
+                  Moderation Queue is Clear!
+                </p>
+                <p className="text-xs text-muted-foreground max-w-md mx-auto">
+                  All submitted couple stories have been reviewed. New public reviews submitted on the site will appear here for 1-click verification.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {pendingReviews.map((rev) => (
+                  <div
+                    key={rev.id || rev._id}
+                    className="glass-card rounded-2xl p-6 border-2 border-secondary/40 bg-secondary/5 space-y-4 shadow-sm"
+                  >
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-3 border-b border-border">
+                      <div className="flex items-center gap-3.5">
+                        <img
+                          src={rev.image || "https://res.cloudinary.com/tridevsosync/image/upload/v1790838237/confianza_portfolio/testimonial_ananya_rohit_roy.jpg"}
+                          alt={rev.name}
+                          className="h-14 w-14 rounded-full object-cover ring-2 ring-secondary shadow-sm"
+                          onError={(e) => {
+                            e.currentTarget.src = "https://res.cloudinary.com/tridevsosync/image/upload/v1790838237/confianza_portfolio/testimonial_ananya_rohit_roy.jpg";
+                          }}
+                        />
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-display text-base font-bold text-ink">{rev.name}</h4>
+                            <span className="rounded-full bg-secondary/20 text-secondary text-[0.65rem] font-bold px-2 py-0.5">
+                              Pending Review
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                            <span className="text-primary font-medium">{rev.relationship || "Bride & Groom"}</span>
+                            <span>•</span>
+                            <span className="flex items-center gap-1">
+                              <MapPin className="h-3 w-3 text-secondary" />
+                              {rev.location || "Pune"}
+                            </span>
+                            <span>•</span>
+                            <span>{rev.date}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Stars */}
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: rev.rating || 5 }).map((_, sIdx) => (
+                          <Star key={sIdx} className="h-4 w-4 fill-secondary text-secondary" />
+                        ))}
+                        <span className="ml-1 text-xs font-bold text-ink">({rev.rating || 5}.0)</span>
+                      </div>
+                    </div>
+
+                    {/* Review Quote */}
+                    <div className="p-3.5 rounded-xl bg-card border border-border/80 text-xs sm:text-sm text-foreground italic leading-relaxed">
+                      "{rev.text}"
+                    </div>
+
+                    {/* Meta info & Video Link */}
+                    <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-3">
+                        <span className="bg-primary/10 text-primary px-2.5 py-0.5 rounded-md text-[0.68rem] font-semibold">
+                          Category: {rev.category || "General"}
+                        </span>
+                        {rev.videoUrl && (
+                          <a
+                            href={rev.videoUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 text-secondary font-bold hover:underline"
+                          >
+                            <Play className="h-3 w-3" />
+                            <span>Watch Video Link</span>
+                          </a>
+                        )}
+                        {rev.email && <span>Email: {rev.email}</span>}
+                      </div>
+
+                      {/* 1-Click Moderation Buttons */}
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setEditingReview({ ...rev, isModerationEdit: true })}
+                          className="px-3 py-1.5 rounded-lg border border-border hover:bg-muted text-xs text-primary font-medium flex items-center gap-1 cursor-pointer"
+                        >
+                          <Edit2 className="h-3.5 w-3.5" />
+                          <span>Edit Details</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (window.confirm(`Reject and delete review from "${rev.name}"?`)) {
+                              handleModerate("delete", rev.id || rev._id);
+                            }
+                          }}
+                          className="px-3 py-1.5 rounded-lg border border-destructive/30 hover:bg-destructive/10 text-xs text-destructive font-medium flex items-center gap-1 cursor-pointer"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          <span>Reject</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleModerate("approve", rev.id || rev._id)}
+                          className="btn-luxe gradient-royal text-primary-foreground text-xs py-1.5 px-4 rounded-lg flex items-center gap-1.5 cursor-pointer shadow-md font-bold"
+                        >
+                          <Check className="h-4 w-4 text-secondary" />
+                          <span>Approve &amp; Publish</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* SUB-TAB 2: PUBLISHED REVIEWS CRUD */}
+      {/* ------------------------------------------------------------- */}
+      {subTab === "published" && (
+        <div className="space-y-6 animate-fade-in">
+          <div className="glass-card rounded-3xl p-6 sm:p-8 border border-border space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-border/60">
+              <div>
+                <h3 className="font-display text-xl text-ink font-bold">
+                  Published Live Testimonials ({publishedReviews.length})
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Currently active couple stories rendered on <span className="text-primary font-semibold">/testimonials</span>, <span className="text-primary font-semibold">/portfolio</span>, and the Homepage.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2.5">
+                <ModuleRefreshButton site={site} showSaved={showSaved} label="Refresh Reviews" />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setEditingReview({
+                    isNew: true,
+                    name: "",
+                    partnerName: "",
+                    relationship: "Bride & Groom",
+                    location: "Pune",
+                    date: "2026",
+                    rating: 5,
+                    category: categories[0]?.name || "Royal & Destination Weddings",
+                    image: "https://res.cloudinary.com/tridevsosync/image/upload/v1790838237/confianza_portfolio/testimonial_ananya_rohit_roy.jpg",
+                    videoUrl: "",
+                    text: "",
+                    featured: true,
+                    status: "approved",
+                  })
+                }
+                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2.5 px-5 flex items-center gap-2 cursor-pointer shadow-luxe"
               >
-                <Trash2 className="h-4 w-4" />
+                <Plus className="h-4 w-4 text-secondary" />
+                <span>Add New Review</span>
               </button>
             </div>
-            <p className="text-xs text-foreground/80 italic">"{t.text}"</p>
           </div>
-        ))}
-      </div>
+
+          {/* Filter & Search */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+              <div className="relative flex-1 max-w-sm">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Filter by couple name or city..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full rounded-xl border border-border bg-card pl-9 pr-3 py-2 text-xs"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                {["All", ...categories.map((c) => (typeof c === "string" ? c : c.name))].map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`px-3 py-1 rounded-lg text-xs transition cursor-pointer shrink-0 ${
+                      selectedCategory === cat
+                        ? "gradient-royal text-primary-foreground font-semibold"
+                        : "border border-border text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Reviews Grid */}
+            {publishedReviews.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-border p-12 text-center text-muted-foreground bg-card/30 space-y-2">
+                <Quote className="h-10 w-10 mx-auto text-secondary/60 mb-2" />
+                <p className="font-display text-base text-ink font-semibold">0 Published Reviews in Database</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Click "Add New Review" above or approve pending submissions in the Moderation Queue.
+                </p>
+              </div>
+            ) : filteredPublished.length === 0 ? (
+              <div className="p-8 text-center text-muted-foreground rounded-2xl bg-card/30 border border-border">
+                <p className="text-xs">No reviews matching your filter criteria.</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSelectedCategory("All");
+                  }}
+                  className="mt-2 text-xs text-primary font-semibold hover:underline"
+                >
+                  Reset filters
+                </button>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {filteredPublished.map((t, idx) => (
+                  <div
+                    key={t.id || t._id || idx}
+                    className="glass-card rounded-2xl p-5 border border-border flex flex-col justify-between hover:shadow-md transition group space-y-3"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between pb-3 border-b border-border/60">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={t.image || "https://res.cloudinary.com/tridevsosync/image/upload/v1790838237/confianza_portfolio/testimonial_ananya_rohit_roy.jpg"}
+                            alt={t.name}
+                            className="h-12 w-12 rounded-full object-cover ring-2 ring-secondary/50"
+                            onError={(e) => {
+                              e.currentTarget.src = "https://res.cloudinary.com/tridevsosync/image/upload/v1790838237/confianza_portfolio/testimonial_ananya_rohit_roy.jpg";
+                            }}
+                          />
+                          <div>
+                            <h4 className="font-display text-base font-bold text-ink">{t.name}</h4>
+                            <div className="flex items-center gap-2 text-[0.68rem] text-muted-foreground mt-0.5">
+                              <span className="text-primary font-medium">{t.relationship || "Bride & Groom"}</span>
+                              <span>•</span>
+                              <span className="flex items-center gap-1">
+                                <MapPin className="h-3 w-3 text-secondary" />
+                                {t.location}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Stars */}
+                        <div className="flex items-center gap-0.5">
+                          {Array.from({ length: t.rating || 5 }).map((_, sIdx) => (
+                            <Star key={sIdx} className="h-3.5 w-3.5 fill-secondary text-secondary" />
+                          ))}
+                        </div>
+                      </div>
+
+                      {t.category && (
+                        <span className="inline-block mt-2 text-[0.65rem] uppercase tracking-wider text-primary font-semibold bg-primary/10 px-2 py-0.5 rounded">
+                          {t.category}
+                        </span>
+                      )}
+
+                      <p className="text-xs text-foreground/85 italic leading-relaxed mt-2">
+                        "{t.text}"
+                      </p>
+
+                      {t.videoUrl && (
+                        <div className="mt-2 flex items-center gap-1 text-[0.68rem] text-secondary font-semibold">
+                          <Play className="h-3 w-3" />
+                          <span className="truncate max-w-xs">{t.videoUrl}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="pt-3 border-t border-border flex items-center justify-between gap-2">
+                      <span className="text-[0.65rem] text-muted-foreground font-mono">
+                        Date: {t.date || "2026"}
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setEditingReview({ ...t })}
+                          className="p-1.5 rounded-lg border border-border hover:bg-muted text-xs text-primary flex items-center gap-1 cursor-pointer"
+                        >
+                          <Edit2 className="h-3.5 w-3.5" />
+                          <span>Edit</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (window.confirm(`Delete review from "${t.name}"?`)) {
+                              const updated = allReviews.filter((x) => (x.id || x._id) !== (t.id || t._id));
+                              saveReviewsList(updated);
+                            }
+                          }}
+                          className="p-1.5 rounded-lg border border-border hover:bg-destructive/10 text-destructive text-xs flex items-center gap-1 cursor-pointer"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          <span>Delete</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* SUB-TAB 3: HERO BANNER & TRUST STATS */}
+      {/* ------------------------------------------------------------- */}
+      {subTab === "header" && (
+        <div className="space-y-8 animate-fade-in">
+          <div className="grid lg:grid-cols-12 gap-8 items-start">
+            {/* Form Editor */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                saveHeader(headerData);
+              }}
+              className="lg:col-span-6 glass-card rounded-3xl p-6 sm:p-8 border border-border space-y-5"
+            >
+              <div className="flex items-center justify-between pb-3 border-b border-border/60">
+                <div>
+                  <div className="flex items-center gap-1.5 text-primary text-xs uppercase tracking-[0.25em] font-bold">
+                    <Sparkles className="h-4 w-4 text-secondary" />
+                    <span>Testimonials Hero Banner</span>
+                  </div>
+                  <h3 className="font-display text-xl text-ink font-bold mt-1">Page Hero &amp; Trust Strip</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Customize the hero header, cover image, and trust metrics on <span className="text-primary font-semibold">/testimonials</span>.
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-foreground block mb-1">
+                  Eyebrow Badge Pill
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={headerData.badge || ""}
+                  onChange={(e) => setHeaderData({ ...headerData, badge: e.target.value })}
+                  className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs"
+                  placeholder="e.g. Couples & Families"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-foreground block mb-1">
+                  Main Page Heading
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={headerData.title || ""}
+                  onChange={(e) => setHeaderData({ ...headerData, title: e.target.value })}
+                  className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-semibold"
+                  placeholder="e.g. Testimonials & Love Stories"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-foreground block mb-1">
+                  Subtitle Narrative
+                </label>
+                <textarea
+                  rows={3}
+                  required
+                  value={headerData.subtitle || ""}
+                  onChange={(e) => setHeaderData({ ...headerData, subtitle: e.target.value })}
+                  className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs leading-relaxed"
+                  placeholder="Read first-hand accounts of couples and families..."
+                />
+              </div>
+
+              <ImageUploadField
+                label="Header Background Cover Image"
+                value={headerData.image || "https://res.cloudinary.com/tridevsosync/image/upload/v1790838224/confianza_portfolio/portfolio_hero_banner.jpg"}
+                onChange={(url) => setHeaderData({ ...headerData, image: url })}
+              />
+
+              {/* Highlight Metric Pills */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-semibold text-foreground">
+                    Trust Metric Tags (Pills)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setHeaderData({
+                        ...headerData,
+                        stats: [...(headerData.stats || []), "New Trust Metric"],
+                      })
+                    }
+                    className="text-[0.7rem] text-primary font-bold hover:underline cursor-pointer"
+                  >
+                    + Add Metric
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  {(headerData.stats || []).map((stat, sIdx) => (
+                    <div key={sIdx} className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={stat}
+                        onChange={(e) => {
+                          const updated = [...headerData.stats];
+                          updated[sIdx] = e.target.value;
+                          setHeaderData({ ...headerData, stats: updated });
+                        }}
+                        className="flex-1 rounded-xl border border-border bg-card px-3 py-1.5 text-xs"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = headerData.stats.filter((_, i) => i !== sIdx);
+                          setHeaderData({ ...headerData, stats: updated });
+                        }}
+                        className="text-destructive p-1 cursor-pointer"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="btn-luxe gradient-royal w-full text-primary-foreground text-xs py-3 rounded-xl shadow-md flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin text-secondary" />
+                      <span>Saving to Database...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 text-secondary" />
+                      <span>Save Hero Banner Changes</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+
+            {/* Real-time Preview */}
+            <div className="lg:col-span-6 space-y-3 sticky top-6">
+              <div className="flex items-center justify-between px-2">
+                <span className="text-[0.68rem] uppercase tracking-[0.25em] text-primary font-bold flex items-center gap-1.5">
+                  <Eye className="h-3.5 w-3.5 text-secondary" /> Live /testimonials Hero Preview
+                </span>
+              </div>
+
+              <div className="relative bg-ink rounded-3xl p-8 sm:p-10 text-background overflow-hidden border border-secondary/30 shadow-2xl text-center">
+                <div className="absolute inset-0 z-0 opacity-25">
+                  <img
+                    src={headerData.image || "https://res.cloudinary.com/tridevsosync/image/upload/v1790838224/confianza_portfolio/portfolio_hero_banner.jpg"}
+                    alt="Testimonials Preview"
+                    className="h-full w-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src =
+                        "https://res.cloudinary.com/tridevsosync/image/upload/v1790838224/confianza_portfolio/portfolio_hero_banner.jpg";
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/80 to-ink/40" />
+                </div>
+
+                <div className="relative z-10 space-y-4">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/20 px-3.5 py-1 text-[0.68rem] uppercase tracking-[0.3em] text-secondary font-medium backdrop-blur-md">
+                    <Sparkles className="h-3 w-3 text-secondary" />
+                    <span>{headerData.badge || "Couples & Families"}</span>
+                  </span>
+
+                  <h1 className="font-display text-2xl sm:text-3xl text-white font-normal leading-tight">
+                    {headerData.title || "Testimonials & Love Stories"}
+                  </h1>
+
+                  <div className="rule-gold mx-auto my-3" />
+
+                  <p className="text-xs sm:text-sm text-background/80 font-light leading-relaxed max-w-md mx-auto">
+                    {headerData.subtitle}
+                  </p>
+
+                  {Array.isArray(headerData.stats) && headerData.stats.length > 0 && (
+                    <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                      {headerData.stats.map((stat, sIdx) => (
+                        <span
+                          key={sIdx}
+                          className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[0.68rem] text-champagne backdrop-blur-md border border-white/15"
+                        >
+                          <span className="h-1.5 w-1.5 rounded-full bg-secondary" />
+                          <span>{stat}</span>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* SUB-TAB 4: CATEGORIES MANAGER */}
+      {/* ------------------------------------------------------------- */}
+      {subTab === "categories" && (
+        <div className="space-y-6 animate-fade-in">
+          <div className="glass-card rounded-3xl p-6 sm:p-8 border border-border space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-border/60">
+              <div>
+                <h3 className="font-display text-xl text-ink font-bold">
+                  Testimonials Category Filter Pills ({categories.length})
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Manage the filter pills displayed on the public <span className="text-primary font-semibold">/testimonials</span> page.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setEditingCategory({
+                    isNew: true,
+                    name: "",
+                    slug: "",
+                    order: categories.length + 1,
+                  })
+                }
+                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2.5 px-4 flex items-center gap-2 cursor-pointer shadow-sm"
+              >
+                <Plus className="h-4 w-4 text-secondary" />
+                <span>Add Category</span>
+              </button>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {categories.map((cat, idx) => {
+                const cName = typeof cat === "string" ? cat : cat.name || cat.label;
+                const cId = typeof cat === "string" ? `cat-${idx}` : cat.id || `cat-${idx}`;
+                const count = allReviews.filter(
+                  (t) => t.category && t.category.toLowerCase() === cName.toLowerCase()
+                ).length;
+
+                return (
+                  <div
+                    key={cId}
+                    className="glass-card rounded-2xl p-4 border border-border flex items-center justify-between gap-3 hover:shadow-sm transition"
+                  >
+                    <div className="truncate">
+                      <h4 className="font-display text-sm font-bold text-ink truncate">{cName}</h4>
+                      <span className="text-[0.68rem] text-muted-foreground font-medium">
+                        {count} linked {count === 1 ? "review" : "reviews"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setEditingCategory({
+                            isNew: false,
+                            _origName: cName,
+                            name: cName,
+                            id: cId,
+                          })
+                        }
+                        className="p-1.5 rounded-lg border border-border hover:bg-muted text-xs text-primary cursor-pointer"
+                        title="Edit Category"
+                      >
+                        <Edit2 className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (window.confirm(`Delete category "${cName}"?`)) {
+                            const updated = categories.filter((_, i) => i !== idx);
+                            saveCategories(updated);
+                          }
+                        }}
+                        className="p-1.5 rounded-lg border border-border hover:bg-destructive/10 text-destructive text-xs cursor-pointer"
+                        title="Delete Category"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Add / Edit Category Modal */}
+          {editingCategory && (
+            <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/80 p-4">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const cleanName = editingCategory.name.trim();
+                  if (!cleanName) return;
+
+                  const cleanCat = {
+                    id: editingCategory.id || `cat-${Date.now()}`,
+                    name: cleanName,
+                    slug: cleanName.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+                  };
+
+                  let updated;
+                  if (editingCategory.isNew) {
+                    updated = [...categories, cleanCat];
+                  } else {
+                    updated = categories.map((c) => {
+                      const currName = typeof c === "string" ? c : c.name || c.label;
+                      if (currName === editingCategory._origName) return cleanCat;
+                      return c;
+                    });
+                  }
+                  saveCategories(updated);
+                  setEditingCategory(null);
+                }}
+                className="glass-card max-w-sm w-full rounded-3xl p-6 space-y-4"
+              >
+                <div className="flex justify-between items-center border-b pb-3">
+                  <h4 className="font-display text-base text-ink font-bold">
+                    {editingCategory.isNew ? "Add Category" : "Edit Category"}
+                  </h4>
+                  <button
+                    type="button"
+                    onClick={() => setEditingCategory(null)}
+                    className="text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-foreground block mb-1">
+                    Category Name / Label
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editingCategory.name || ""}
+                    onChange={(e) => setEditingCategory({ ...editingCategory, name: e.target.value })}
+                    className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs"
+                    placeholder="e.g. Royal Baraat &amp; Entry"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-2 border-t">
+                  <button
+                    type="button"
+                    onClick={() => setEditingCategory(null)}
+                    className="px-4 py-2 rounded-full border text-xs cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5 cursor-pointer"
+                  >
+                    Save Category
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* SUB-TAB 5: CARE EXPERIENCE & FAQ EDITOR */}
+      {/* ------------------------------------------------------------- */}
+      {subTab === "experience-faq" && (
+        <div className="space-y-6 animate-fade-in">
+          {/* Experience Pillars */}
+          <div className="glass-card rounded-3xl p-6 sm:p-8 border border-border space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-border/60">
+              <div>
+                <h3 className="font-display text-xl text-ink font-bold">
+                  The Confianza Experience Pillars (PDF Service Ethos)
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Core management pillars extracted from Confianza's official service manual.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={saveExperienceAndFaqs}
+                disabled={isSaving}
+                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2.5 px-5 flex items-center gap-2 cursor-pointer shadow-sm disabled:opacity-60"
+              >
+                {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4 text-secondary" />}
+                <span>Save Pillars &amp; FAQ</span>
+              </button>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              {experiencePillars.map((pillar, pIdx) => (
+                <div key={pIdx} className="p-4 rounded-2xl bg-card border border-border space-y-3">
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <label className="font-semibold block mb-1">Pillar Title</label>
+                      <input
+                        type="text"
+                        value={pillar.title}
+                        onChange={(e) => {
+                          const updated = [...experiencePillars];
+                          updated[pIdx].title = e.target.value;
+                          setExperiencePillars(updated);
+                        }}
+                        className="w-full rounded-xl border border-border bg-card px-3 py-1.5 text-xs font-semibold"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-semibold block mb-1">Badge Tag</label>
+                      <input
+                        type="text"
+                        value={pillar.badge || ""}
+                        onChange={(e) => {
+                          const updated = [...experiencePillars];
+                          updated[pIdx].badge = e.target.value;
+                          setExperiencePillars(updated);
+                        }}
+                        className="w-full rounded-xl border border-border bg-card px-3 py-1.5 text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="text-xs">
+                    <label className="font-semibold block mb-1">Subtitle</label>
+                    <input
+                      type="text"
+                      value={pillar.subtitle || ""}
+                      onChange={(e) => {
+                        const updated = [...experiencePillars];
+                        updated[pIdx].subtitle = e.target.value;
+                        setExperiencePillars(updated);
+                      }}
+                      className="w-full rounded-xl border border-border bg-card px-3 py-1.5 text-xs"
+                    />
+                  </div>
+
+                  <div className="text-xs">
+                    <label className="font-semibold block mb-1">Description</label>
+                    <textarea
+                      rows={2}
+                      value={pillar.description}
+                      onChange={(e) => {
+                        const updated = [...experiencePillars];
+                        updated[pIdx].description = e.target.value;
+                        setExperiencePillars(updated);
+                      }}
+                      className="w-full rounded-xl border border-border bg-card px-3 py-1.5 text-xs leading-relaxed"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* FAQs Editor */}
+          <div className="glass-card rounded-3xl p-6 sm:p-8 border border-border space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-border/60">
+              <div>
+                <h3 className="font-display text-xl text-ink font-bold">
+                  Testimonials FAQ Manager ({faqs.length})
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Frequently asked questions regarding wedding review submissions, videos, and photos.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setFaqs([
+                    ...faqs,
+                    {
+                      question: "New Question?",
+                      answer: "New answer explanation...",
+                    },
+                  ])
+                }
+                className="text-xs text-primary font-bold hover:underline cursor-pointer"
+              >
+                + Add FAQ Item
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {faqs.map((faq, fIdx) => (
+                <div key={fIdx} className="p-4 rounded-2xl bg-card border border-border space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <input
+                      type="text"
+                      value={faq.question}
+                      onChange={(e) => {
+                        const updated = [...faqs];
+                        updated[fIdx].question = e.target.value;
+                        setFaqs(updated);
+                      }}
+                      className="flex-1 rounded-xl border border-border bg-card px-3 py-1.5 text-xs font-semibold"
+                      placeholder="Question..."
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setFaqs(faqs.filter((_, i) => i !== fIdx))}
+                      className="text-destructive p-1 cursor-pointer"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <textarea
+                    rows={2}
+                    value={faq.answer}
+                    onChange={(e) => {
+                      const updated = [...faqs];
+                      updated[fIdx].answer = e.target.value;
+                      setFaqs(updated);
+                    }}
+                    className="w-full rounded-xl border border-border bg-card px-3 py-1.5 text-xs leading-relaxed"
+                    placeholder="Answer..."
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================= */}
+      {/* REVIEW ADD / EDIT MODAL */}
+      {/* ============================================================= */}
+      {editingReview && (
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/80 p-4 animate-fade-in">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const cleanReview = {
+                ...editingReview,
+                id: editingReview.id || `review-${Date.now()}`,
+                status: editingReview.status || "approved",
+              };
+              delete cleanReview.isNew;
+              delete cleanReview.isModerationEdit;
+              delete cleanReview._customRelMode;
+              delete cleanReview._customCatMode;
+
+              if (editingReview.isModerationEdit) {
+                // Moderate update & approve
+                handleModerate("update", editingReview.id || editingReview._id, {
+                  ...cleanReview,
+                  status: "approved",
+                });
+              } else {
+                let updated;
+                if (editingReview.isNew) {
+                  updated = [cleanReview, ...allReviews];
+                } else {
+                  updated = allReviews.map((x) =>
+                    (x.id && x.id === editingReview.id) || (x._id && x._id === editingReview._id)
+                      ? cleanReview
+                      : x
+                  );
+                }
+                saveReviewsList(updated);
+              }
+              setEditingReview(null);
+            }}
+            className="glass-card max-w-lg w-full max-h-[90vh] overflow-y-auto rounded-3xl p-6 sm:p-8 space-y-4"
+          >
+            <div className="flex justify-between items-center border-b pb-3">
+              <h4 className="font-display text-lg text-ink font-bold">
+                {editingReview.isNew
+                  ? "Add New Client Review"
+                  : editingReview.isModerationEdit
+                  ? "Edit & Approve Submission"
+                  : "Edit Review"}
+              </h4>
+              <button
+                type="button"
+                onClick={() => setEditingReview(null)}
+                className="text-muted-foreground hover:text-foreground cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-3 text-xs">
+              <div>
+                <label className="font-semibold text-foreground block mb-1">Couple / Client Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={editingReview.name || ""}
+                  onChange={(e) => setEditingReview({ ...editingReview, name: e.target.value })}
+                  className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-semibold"
+                  placeholder="e.g. Ananya & Rohit Roy"
+                />
+              </div>
+
+              <div>
+                <label className="font-semibold text-foreground block mb-1">Relationship / Role</label>
+                {(() => {
+                  const standardRoles = [
+                    "Bride & Groom",
+                    "Parents of the Bride",
+                    "Parents of the Groom",
+                    "Family Member / Relative",
+                    "Wedding Guest",
+                    "Corporate Host",
+                  ];
+                  const currentRel = editingReview.relationship || "Bride & Groom";
+                  const isStandard = standardRoles.includes(currentRel);
+                  const isOtherSelected = editingReview._customRelMode || (!isStandard && currentRel !== "");
+
+                  return (
+                    <div className="space-y-1.5">
+                      <select
+                        value={isOtherSelected ? "Other" : currentRel}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === "Other") {
+                            setEditingReview({
+                              ...editingReview,
+                              _customRelMode: true,
+                              relationship: isStandard ? "" : currentRel,
+                            });
+                          } else {
+                            setEditingReview({
+                              ...editingReview,
+                              _customRelMode: false,
+                              relationship: val,
+                            });
+                          }
+                        }}
+                        className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs cursor-pointer"
+                      >
+                        {standardRoles.map((role) => (
+                          <option key={role} value={role}>
+                            {role}
+                          </option>
+                        ))}
+                        <option value="Other">Other</option>
+                      </select>
+
+                      {isOtherSelected && (
+                        <input
+                          type="text"
+                          required
+                          value={editingReview.relationship || ""}
+                          onChange={(e) => setEditingReview({ ...editingReview, relationship: e.target.value })}
+                          className="w-full rounded-xl border border-secondary/60 bg-card px-3.5 py-2 text-xs ring-1 ring-secondary/20 animate-fade-in"
+                          placeholder="e.g. Sister of the Bride, Family Friend, Groom's Cousin"
+                        />
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-3 text-xs">
+              <div>
+                <label className="font-semibold text-foreground block mb-1">Event Category</label>
+                {(() => {
+                  const catNames = categories.map((c) => (typeof c === "string" ? c : c.name || c.label)).filter(Boolean);
+                  const currentCat = editingReview.category || catNames[0] || "Royal & Destination Weddings";
+                  const isStandard = catNames.includes(currentCat);
+                  const isOtherSelected = editingReview._customCatMode || (!isStandard && currentCat !== "");
+
+                  return (
+                    <div className="space-y-1.5">
+                      <select
+                        value={isOtherSelected ? "Other" : currentCat}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === "Other") {
+                            setEditingReview({
+                              ...editingReview,
+                              _customCatMode: true,
+                              category: isStandard ? "" : currentCat,
+                            });
+                          } else {
+                            setEditingReview({
+                              ...editingReview,
+                              _customCatMode: false,
+                              category: val,
+                            });
+                          }
+                        }}
+                        className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs cursor-pointer"
+                      >
+                        {catNames.map((name) => (
+                          <option key={name} value={name}>
+                            {name}
+                          </option>
+                        ))}
+                        <option value="Other">Other</option>
+                      </select>
+
+                      {isOtherSelected && (
+                        <input
+                          type="text"
+                          required
+                          value={editingReview.category || ""}
+                          onChange={(e) => setEditingReview({ ...editingReview, category: e.target.value })}
+                          className="w-full rounded-xl border border-secondary/60 bg-card px-3.5 py-2 text-xs ring-1 ring-secondary/20 animate-fade-in"
+                          placeholder="e.g. Sangeet Gala, Engagement, Anniversary Banquet"
+                        />
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+
+              <div>
+                <label className="font-semibold text-foreground block mb-1">Venue / City Location</label>
+                <input
+                  type="text"
+                  value={editingReview.location || ""}
+                  onChange={(e) => setEditingReview({ ...editingReview, location: e.target.value })}
+                  className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs"
+                  placeholder="e.g. Udaipur Destination Wedding"
+                />
+              </div>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-3 text-xs">
+              <div>
+                <label className="font-semibold text-foreground block mb-1">Star Rating (0 to 5)</label>
+                <select
+                  value={editingReview.rating || 5}
+                  onChange={(e) => setEditingReview({ ...editingReview, rating: Number(e.target.value) })}
+                  className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs cursor-pointer font-semibold"
+                >
+                  <option value={5}>★★★★★ (5 Stars - Exceptional)</option>
+                  <option value={4}>★★★★☆ (4 Stars - Wonderful)</option>
+                  <option value={3}>★★★☆☆ (3 Stars - Good)</option>
+                  <option value={2}>★★☆☆☆ (2 Stars - Average)</option>
+                  <option value={1}>★☆☆☆☆ (1 Star)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="font-semibold text-foreground block mb-1">Date / Year</label>
+                <input
+                  type="text"
+                  value={editingReview.date || ""}
+                  onChange={(e) => setEditingReview({ ...editingReview, date: e.target.value })}
+                  className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs"
+                  placeholder="e.g. November 2025"
+                />
+              </div>
+            </div>
+
+            <ImageUploadField
+              label="Couple Photograph"
+              value={editingReview.image || ""}
+              onChange={(url) => setEditingReview({ ...editingReview, image: url })}
+            />
+
+            <div className="text-xs">
+              <label className="font-semibold text-foreground block mb-1">Video Testimonial Link (Optional)</label>
+              <input
+                type="url"
+                value={editingReview.videoUrl || ""}
+                onChange={(e) => setEditingReview({ ...editingReview, videoUrl: e.target.value })}
+                className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-mono"
+                placeholder="https://www.youtube.com/watch?v=..."
+              />
+            </div>
+
+            <div className="text-xs">
+              <label className="font-semibold text-foreground block mb-1">Review Quote / Love Story Narrative *</label>
+              <textarea
+                rows={4}
+                required
+                value={editingReview.text || ""}
+                onChange={(e) => setEditingReview({ ...editingReview, text: e.target.value })}
+                className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs leading-relaxed"
+                placeholder="Enter what the couple said about their wedding..."
+              />
+            </div>
+
+            <div className="flex items-center gap-4 pt-1">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="rev-featured"
+                  checked={Boolean(editingReview.featured)}
+                  onChange={(e) => setEditingReview({ ...editingReview, featured: e.target.checked })}
+                  className="rounded border-border text-secondary focus:ring-secondary cursor-pointer h-4 w-4"
+                />
+                <label htmlFor="rev-featured" className="text-xs font-semibold text-foreground cursor-pointer">
+                  Featured Review
+                </label>
+              </div>
+
+              {editingReview.status === "pending" && (
+                <span className="text-[0.68rem] text-secondary font-bold bg-secondary/10 px-2 py-0.5 rounded">
+                  Will be approved &amp; published on save
+                </span>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2 pt-3 border-t">
+              <button
+                type="button"
+                onClick={() => setEditingReview(null)}
+                className="px-4 py-2 rounded-full border text-xs cursor-pointer hover:bg-muted"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-6 rounded-full cursor-pointer shadow-md font-bold"
+              >
+                {editingReview.isModerationEdit ? "Save & Approve" : "Save Review"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }
@@ -4207,31 +7074,34 @@ function TeamEditorModule({ site, showSaved }) {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h3 className="font-display text-xl text-ink">Executive Team Members ({team.length})</h3>
+          <h3 className="font-display text-xl text-ink font-semibold">Executive Team Members ({team.length})</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Manage visionaries & coordinators displayed on the homepage and about page.
+            Manage visionaries &amp; coordinators displayed on the homepage and about page.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() =>
-            setEditingMember({
-              name: "",
-              role: "",
-              email: "",
-              experience: "4+ Years",
-              specialties: [],
-              specialtiesText: "",
-              bio: "",
-              image: "",
-              isNew: true,
-            })
-          }
-          className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-4 flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          <span>Add Member</span>
-        </button>
+        <div className="flex items-center gap-2.5">
+          <ModuleRefreshButton site={site} showSaved={showSaved} label="Refresh Team" />
+          <button
+            type="button"
+            onClick={() =>
+              setEditingMember({
+                name: "",
+                role: "",
+                email: "",
+                experience: "4+ Years",
+                specialties: [],
+                specialtiesText: "",
+                bio: "",
+                image: "",
+                isNew: true,
+              })
+            }
+            className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-4 flex items-center gap-2 cursor-pointer"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Add Member</span>
+          </button>
+        </div>
       </div>
 
       {team.length === 0 ? (
@@ -4486,16 +7356,22 @@ function FaqEditorModule({ site, showSaved }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="font-display text-xl text-ink">FAQ Items ({faq.length})</h3>
-        <button
-          type="button"
-          onClick={addFaq}
-          className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-4"
-        >
-          <Plus className="h-4 w-4" />
-          <span>Add Question</span>
-        </button>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h3 className="font-display text-xl text-ink font-semibold">FAQ Items ({faq.length})</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">Manage frequently asked questions &amp; answers</p>
+        </div>
+        <div className="flex items-center gap-2.5">
+          <ModuleRefreshButton site={site} showSaved={showSaved} label="Refresh FAQ" />
+          <button
+            type="button"
+            onClick={addFaq}
+            className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-4 flex items-center gap-1.5 cursor-pointer"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Add Question</span>
+          </button>
+        </div>
       </div>
 
       <div className="space-y-3">
@@ -4552,26 +7428,32 @@ function BlogsEditorModule({ site, showSaved }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="font-display text-xl text-ink">Wedding Guides &amp; Blog Posts ({blogs.length})</h3>
-        <button
-          type="button"
-          onClick={() =>
-            setEditing({
-              isNew: true,
-              title: "",
-              category: "Wedding Tips",
-              date: "Today",
-              excerpt: "",
-              content: "",
-              image: "",
-            })
-          }
-          className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-4"
-        >
-          <Plus className="h-4 w-4" />
-          <span>Write Article</span>
-        </button>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h3 className="font-display text-xl text-ink font-semibold">Wedding Guides &amp; Blog Posts ({blogs.length})</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">Manage editorial articles, wedding tips &amp; guides</p>
+        </div>
+        <div className="flex items-center gap-2.5">
+          <ModuleRefreshButton site={site} showSaved={showSaved} label="Refresh Articles" />
+          <button
+            type="button"
+            onClick={() =>
+              setEditing({
+                isNew: true,
+                title: "",
+                category: "Wedding Tips",
+                date: "Today",
+                excerpt: "",
+                content: "",
+                image: "",
+              })
+            }
+            className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-4 flex items-center gap-1.5 cursor-pointer"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Write Article</span>
+          </button>
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -4721,7 +7603,13 @@ function ContactEditorModule({ site, showSaved }) {
 
   return (
     <form onSubmit={handleSave} className="glass-card rounded-3xl p-6 sm:p-8 border border-border space-y-6">
-      <h3 className="font-display text-xl text-ink">Contact Details &amp; Business Address</h3>
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-border/50">
+        <div>
+          <h3 className="font-display text-xl text-ink font-semibold">Contact Details &amp; Business Address</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">Manage phone numbers, WhatsApp, official email, and physical studio address</p>
+        </div>
+        <ModuleRefreshButton site={site} showSaved={showSaved} label="Refresh Contact" />
+      </div>
 
       <div className="grid sm:grid-cols-2 gap-4 text-xs">
         <div>
@@ -4856,7 +7744,13 @@ function SettingsEditorModule({ site, showSaved }) {
 
   return (
     <form onSubmit={handleSave} className="glass-card rounded-3xl p-6 sm:p-8 border border-border space-y-6">
-      <h3 className="font-display text-xl text-ink">Branding &amp; SEO Metadata</h3>
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-border/50">
+        <div>
+          <h3 className="font-display text-xl text-ink font-semibold">Branding &amp; SEO Metadata</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">Customize global site name, tagline, and search engine metadata</p>
+        </div>
+        <ModuleRefreshButton site={site} showSaved={showSaved} label="Refresh Settings" />
+      </div>
 
       <div className="space-y-4 text-xs">
         <div>

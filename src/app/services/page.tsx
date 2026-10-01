@@ -424,10 +424,10 @@ export default function ServicesPage() {
             {contact?.phone && (
               <a
                 href={`tel:${contact.phone}`}
-                className="btn-luxe glass-card text-background border border-white/20 hover:border-secondary transition py-3 px-6 text-xs font-semibold flex items-center gap-2"
+                className="btn-luxe bg-white/10 hover:bg-white/20 text-white border border-white/25 hover:border-secondary hover:text-secondary transition-all py-3 px-6 text-xs font-semibold flex items-center gap-2.5 backdrop-blur-md shadow-md group"
               >
-                <Phone className="h-3.5 w-3.5 text-secondary" />
-                <span>Call +91 {contact.phone}</span>
+                <Phone className="h-4 w-4 text-secondary group-hover:scale-110 transition-transform" />
+                <span className="tracking-wide">Call +91 {contact.phone}</span>
               </a>
             )}
           </div>
