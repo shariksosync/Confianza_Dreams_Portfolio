@@ -59,8 +59,11 @@ export async function GET(req: Request) {
       portfolioHeader: base.portfolioHeader || {},
       portfolioSection: base.portfolioSection || {},
       portfolioCategories: base.portfolioCategories || [],
-      portfolioCta: base.portfolioCta || {},
       gallery: gallery || [],
+      galleryHeader: base.galleryHeader || {},
+      galleryCategories: base.galleryCategories || [],
+      galleryHighlights: base.galleryHighlights || [],
+      galleryCta: base.galleryCta || {},
       packages: packages || [],
       testimonials: approvedTestimonials,
       allTestimonials: rawTestimonials,
@@ -70,6 +73,7 @@ export async function GET(req: Request) {
       testimonialsExperience: base.testimonialsExperience || [],
       testimonialsFaq: base.testimonialsFaq || [],
       testimonialsCta: base.testimonialsCta || {},
+      instagramHeader: base.instagramHeader || {},
       team: team || [],
       faq: faq || [],
       blogs: blogs || [],
@@ -112,95 +116,119 @@ export async function PUT(req: Request) {
       await Service.deleteMany({});
       if (value.length > 0) {
         await Service.insertMany(
-          value.map((v, idx) => ({
-            ...v,
-            id: String(v.id || `service-${Date.now()}-${idx}`),
-            order: idx + 1,
-          }))
+          value.map((v, idx) => {
+            const { _id, ...cleanV } = v;
+            return {
+              ...cleanV,
+              id: String(cleanV.id || `service-${Date.now()}-${idx}`),
+              order: idx + 1,
+            };
+          })
         );
       }
     } else if (key === "portfolio" && Array.isArray(value)) {
       await Portfolio.deleteMany({});
       if (value.length > 0) {
         await Portfolio.insertMany(
-          value.map((v, idx) => ({
-            ...v,
-            id: String(v.id || `portfolio-${Date.now()}-${idx}`),
-            order: idx + 1,
-          }))
+          value.map((v, idx) => {
+            const { _id, ...cleanV } = v;
+            return {
+              ...cleanV,
+              id: String(cleanV.id || `portfolio-${Date.now()}-${idx}`),
+              order: idx + 1,
+            };
+          })
         );
       }
     } else if (key === "gallery" && Array.isArray(value)) {
       await Gallery.deleteMany({});
       if (value.length > 0) {
         await Gallery.insertMany(
-          value.map((v, idx) => ({
-            ...v,
-            id: String(v.id || `gallery-${Date.now()}-${idx}`),
-            order: idx + 1,
-          }))
+          value.map((v, idx) => {
+            const { _id, ...cleanV } = v;
+            return {
+              ...cleanV,
+              id: String(cleanV.id || `gallery-${Date.now()}-${idx}`),
+              order: idx + 1,
+            };
+          })
         );
       }
     } else if (key === "packages" && Array.isArray(value)) {
       await Package.deleteMany({});
       if (value.length > 0) {
         await Package.insertMany(
-          value.map((v, idx) => ({
-            ...v,
-            id: Number(v.id) || idx + 1,
-            order: idx + 1,
-          }))
+          value.map((v, idx) => {
+            const { _id, ...cleanV } = v;
+            return {
+              ...cleanV,
+              id: Number(cleanV.id) || idx + 1,
+              order: idx + 1,
+            };
+          })
         );
       }
     } else if (key === "testimonials" && Array.isArray(value)) {
       await Testimonial.deleteMany({});
       if (value.length > 0) {
         await Testimonial.insertMany(
-          value.map((v, idx) => ({
-            ...v,
-            id: String(v.id || Date.now() + idx),
-            order: idx + 1,
-          }))
+          value.map((v, idx) => {
+            const { _id, ...cleanV } = v;
+            return {
+              ...cleanV,
+              id: String(cleanV.id || Date.now() + idx),
+              order: idx + 1,
+            };
+          })
         );
       }
     } else if (key === "team" && Array.isArray(value)) {
       await Team.deleteMany({});
       if (value.length > 0) {
         await Team.insertMany(
-          value.map((v, idx) => ({
-            ...v,
-            id: String(v.id || `team-${Date.now()}-${idx}`),
-            order: idx + 1,
-          }))
+          value.map((v, idx) => {
+            const { _id, ...cleanV } = v;
+            return {
+              ...cleanV,
+              id: String(cleanV.id || `team-${Date.now()}-${idx}`),
+              order: idx + 1,
+            };
+          })
         );
       }
     } else if (key === "faq" && Array.isArray(value)) {
       await Faq.deleteMany({});
       if (value.length > 0) {
         await Faq.insertMany(
-          value.map((v, idx) => ({
-            ...v,
-            id: Number(v.id) || idx + 1,
-            order: idx + 1,
-          }))
+          value.map((v, idx) => {
+            const { _id, ...cleanV } = v;
+            return {
+              ...cleanV,
+              id: Number(cleanV.id) || idx + 1,
+              order: idx + 1,
+            };
+          })
         );
       }
     } else if (key === "blogs" && Array.isArray(value)) {
       await Blog.deleteMany({});
       if (value.length > 0) {
         await Blog.insertMany(
-          value.map((v, idx) => ({
-            ...v,
-            id: String(v.id || `blog-${Date.now()}-${idx}`),
-            order: idx + 1,
-          }))
+          value.map((v, idx) => {
+            const { _id, ...cleanV } = v;
+            return {
+              ...cleanV,
+              id: String(cleanV.id || `blog-${Date.now()}-${idx}`),
+              order: idx + 1,
+            };
+          })
         );
       }
     } else {
-      // Top-level SiteContent slice (hero, about, contact, settings, why, stats, process, etc.)
+      // Top-level SiteContent slice (hero, about, contact, settings, why, stats, process, galleryHeader, etc.)
       await SiteContent.findOneAndUpdate(
-        { key: "confianza_main" },
-        { $set: { [key]: value } },
+        { key: { $in: ["confianza_main", "main"] } },
+        { $set: { [key]: value, updatedAt: new Date() }, $setOnInsert: { key: "confianza_main" } },
         { upsert: true, new: true }
       );
     }

@@ -40,9 +40,9 @@ export function useReveal(deps = []) {
       nodes.forEach((node) => {
         if (!observedNodes.has(node)) {
           observedNodes.add(node);
-          // Check if already in viewport
           const rect = node.getBoundingClientRect();
-          if (rect.top < window.innerHeight && rect.bottom > 0) {
+          // If in or near the viewport, or already scrolled past, make visible immediately
+          if (rect.top < window.innerHeight + 150) {
             node.classList.add("is-visible");
           } else {
             io.observe(node);

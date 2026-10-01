@@ -165,44 +165,44 @@ export default function ImageUploadField({
           dragActive
             ? "border-secondary bg-secondary/10 shadow-md"
             : "border-border/80 bg-card/50 hover:border-primary/40"
-        } p-3.5 space-y-3 overflow-hidden`}
+        } ${uploading ? "min-h-[110px]" : ""} p-3.5 space-y-3 overflow-hidden`}
       >
         {/* Full Container Luxury Loading HUD with 0 to 100 Progress */}
         {uploading && (
-          <div className="absolute inset-0 z-20 bg-ink/92 backdrop-blur-md flex flex-col items-center justify-center p-4 text-center text-background animate-fade-in space-y-3">
-            <div className="relative flex items-center justify-center">
+          <div className="absolute inset-0 z-20 bg-ink/95 backdrop-blur-md flex flex-col items-center justify-center p-3 text-center text-background animate-fade-in gap-2.5">
+            <div className="flex items-center justify-center gap-3 w-full max-w-sm px-2">
               {progressPercent >= 100 ? (
-                <div className="h-13 w-13 rounded-full gradient-gold flex items-center justify-center shadow-luxe animate-scale-up">
-                  <CheckCircle2 className="h-7 w-7 text-ink" />
+                <div className="h-9 w-9 rounded-full gradient-gold flex items-center justify-center shadow-luxe animate-scale-up shrink-0">
+                  <CheckCircle2 className="h-5 w-5 text-ink" />
                 </div>
               ) : (
-                <div className="relative">
-                  <div className="h-13 w-13 rounded-full border-2 border-secondary/30 border-t-secondary animate-spin flex items-center justify-center shadow-luxe" />
-                  <CloudUpload className="h-5 w-5 text-secondary absolute inset-0 m-auto" />
+                <div className="relative h-9 w-9 shrink-0 flex items-center justify-center">
+                  <div className="h-9 w-9 rounded-full border-2 border-secondary/30 border-t-secondary animate-spin" />
+                  <CloudUpload className="h-4 w-4 text-secondary absolute inset-0 m-auto" />
                 </div>
               )}
-            </div>
 
-            <div className="space-y-0.5 max-w-xs">
-              <div className="flex items-center justify-center gap-2">
-                <span className="font-display text-2xl font-bold text-secondary">
-                  {progressPercent}%
-                </span>
+              <div className="text-left flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-bold text-background truncate">
+                    {getStatusText(progressPercent)}
+                  </span>
+                  <span className="font-display text-base font-extrabold text-secondary shrink-0">
+                    {progressPercent}%
+                  </span>
+                </div>
+                <p className="text-[0.65rem] text-background/70 font-light truncate">
+                  {progressPercent >= 100
+                    ? "Verified & ready to display"
+                    : "Optimizing & uploading image..."}
+                </p>
               </div>
-              <p className="text-xs font-semibold text-background">
-                {getStatusText(progressPercent)}
-              </p>
-              <p className="text-[0.68rem] text-background/70 font-light">
-                {progressPercent >= 100
-                  ? "Your image has been verified and synced."
-                  : "Securing high-resolution photo for live display."}
-              </p>
             </div>
 
             {/* Shimmering Progress Bar */}
-            <div className="w-56 h-2 rounded-full bg-white/15 overflow-hidden ring-1 ring-white/20 shadow-inner">
+            <div className="w-full max-w-sm h-2 rounded-full bg-white/15 overflow-hidden ring-1 ring-white/20 shadow-inner px-0.5">
               <div
-                className="h-full gradient-gold transition-all duration-300 rounded-full"
+                className="h-full gradient-gold transition-all duration-300 rounded-full shadow-sm"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>

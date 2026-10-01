@@ -328,6 +328,61 @@ const SiteContentSchema = new Schema(
       buttonText: { type: String, default: "Submit Your Review" },
       secondaryButtonText: { type: String, default: "Book A Consultation" },
     },
+    galleryHeader: {
+      badge: { type: String, default: "Curated Visual Archive" },
+      eyebrow: { type: String, default: "VISUAL INSPIRATIONS" },
+      title: { type: String, default: "The Wedding Gallery" },
+      subtitle: {
+        type: String,
+        default:
+          "Immerse yourself in close-up details of floral centerpieces, bridal entries, fairy-lit courtyards, and grand lavender stages.",
+      },
+      image: { type: String, default: "https://res.cloudinary.com/tridevsosync/image/upload/v1790838224/confianza_heroes/gallery_hero_banner.jpg" },
+      stats: [{ type: String }],
+    },
+    galleryCategories: [
+      {
+        id: { type: String, required: true },
+        name: { type: String, required: true },
+        slug: { type: String, default: "" },
+        order: { type: Number, default: 0 },
+      },
+    ],
+    galleryHighlights: [
+      {
+        id: { type: String },
+        title: { type: String },
+        subtitle: { type: String },
+        description: { type: String },
+        icon: { type: String },
+        badge: { type: String },
+      },
+    ],
+    instagramHeader: {
+      eyebrow: { type: String, default: "Follow Our Journey" },
+      title: { type: String, default: "@confianza_events on Instagram" },
+      subtitle: {
+        type: String,
+        default:
+          "Behind-the-scenes reels, live setups in Udaipur, Pune, and Goa, and daily wedding decor inspiration.",
+      },
+      handle: { type: String, default: "@confianza_events" },
+      followerCount: { type: String, default: "10K+ Followers" },
+      url: { type: String, default: "https://www.instagram.com/confianza_events" },
+    },
+    galleryCta: {
+      eyebrow: { type: String, default: "WHERE WEDDINGS BECOME STORIES" },
+      headline: { type: String, default: "Envision Your Wedding in Our Visual Chronicle" },
+      subtitle: {
+        type: String,
+        default:
+          "Connect directly with founders Ashish Wankhede and Rutik Pund in Warje, Pune to design your bespoke 3D CAD wedding decor.",
+      },
+      buttonText: { type: String, default: "Book Your Free Consultation" },
+      buttonLink: { type: String, default: "/contact" },
+      notice: { type: String, default: "Free 1-on-1 Consultation • Direct Founder Interaction" },
+      perks: [{ type: String }],
+    },
   },
   { timestamps: true, strict: false }
 );

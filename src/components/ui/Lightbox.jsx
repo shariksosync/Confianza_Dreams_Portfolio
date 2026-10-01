@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect } from "react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
@@ -60,9 +60,9 @@ export default function Lightbox({ items, index, onClose, onPrev, onNext }) {
           alt={item.title || item.caption || ""}
           className="max-h-[76vh] w-full rounded-3xl object-contain"
         />
-        <figcaption className="mt-4 text-center text-sm tracking-wide text-background/80">
-          {item.title || item.caption}
-          {item.location ? ` â€” ${item.location}` : ""}
+        <figcaption className="mt-4 text-center text-sm font-medium tracking-wide text-background/90">
+          <span>{item.title || item.caption}</span>
+          {item.location ? <span className="text-secondary font-semibold"> • {item.location}</span> : null}
         </figcaption>
       </figure>
 

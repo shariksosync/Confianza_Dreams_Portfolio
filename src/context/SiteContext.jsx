@@ -101,7 +101,92 @@ const initialEmptyState = {
     ],
   },
   gallery: [],
+  galleryHeader: {
+    badge: "Curated Visual Archive",
+    eyebrow: "VISUAL INSPIRATIONS",
+    title: "The Wedding Gallery",
+    subtitle:
+      "Immerse yourself in close-up details of floral centerpieces, bridal entries, fairy-lit courtyards, and grand lavender stages.",
+    image: "https://res.cloudinary.com/tridevsosync/image/upload/v1790881511/confianza_heroes/gallery_hero_banner.jpg",
+    stats: [
+      "500+ Celebrations Across India",
+      "15+ Landmark Destination Cities",
+      "100% 3D CAD-to-Reality Fidelity",
+      "Zero-Glitch Stage Execution",
+    ],
+  },
+  galleryCategories: [
+    { id: "all", name: "All Archives", slug: "all", order: 1 },
+    { id: "mandap", name: "Mandap Architecture", slug: "mandap", order: 2 },
+    { id: "reception", name: "Opulent Receptions", slug: "reception", order: 3 },
+    { id: "haldi-sangeet", name: "Haldi & Sangeet", slug: "haldi-sangeet", order: 4 },
+    { id: "bridal-entries", name: "Bridal Entries & Portraits", slug: "bridal-entries", order: 5 },
+    { id: "destination", name: "Destination Venues", slug: "destination", order: 6 },
+    { id: "spatial-decor", name: "Spatial Decor & Floral Art", slug: "spatial-decor", order: 7 },
+  ],
+  galleryHighlights: [
+    {
+      id: "mandap-sanctum",
+      title: "Mandap Architecture & Vedic Sanctums",
+      subtitle: "Auspicious Engineering & Floral Art",
+      description:
+        "From custom temple pillars to floating lotus pools, our mandaps blend sacred Vedic geometry with opulent seasonal florals.",
+      icon: "Sparkles",
+      badge: "Vedic Precision",
+    },
+    {
+      id: "stage-production",
+      title: "Stage, Lighting & SFX Production",
+      subtitle: "3D CAD-to-Reality Fidelity",
+      description:
+        "Intelligent moving beam arrays, high-resolution curved LED walls, cold pyrotechnics, and hydraulic stages managed with millisecond cues.",
+      icon: "Layers",
+      badge: "Show Runner Direct",
+    },
+    {
+      id: "haldi-carnival",
+      title: "Themed Haldi & Mehendi Carnivals",
+      subtitle: "Joyous Yellow Blooms & Folk Artistry",
+      description:
+        "Phoolon ki Holi setups, handcrafted marigold canopies, brass urlis, artisanal mehendi cabanas, and energetic dhol tasha troupes.",
+      icon: "Award",
+      badge: "Cultural Extravaganza",
+    },
+    {
+      id: "luxe-tablescapes",
+      title: "Luxe Tablescapes & Hospitality Styling",
+      subtitle: "Intimate Ambiance & Event Branding",
+      description:
+        "Crystal chandeliers, candlelit floral centerpieces, customized luggage tags, itinerary jackets, and dedicated guest concierge suites.",
+      icon: "Users",
+      badge: "Concierge Elegance",
+    },
+  ],
+  galleryCta: {
+    eyebrow: "WHERE WEDDINGS BECOME STORIES",
+    headline: "Envision Your Wedding in Our Visual Chronicle",
+    subtitle:
+      "Connect directly with founders Ashish Wankhede and Rutik Pund in Warje, Pune to design your bespoke 3D CAD wedding decor.",
+    buttonText: "Book Your Free Consultation",
+    buttonLink: "/contact",
+    notice: "Free 1-on-1 Consultation • Direct Founder Interaction",
+    perks: [
+      "60–90 Min Vision & Budget Mapping",
+      "Direct Founder Interaction (Ashish & Rutik)",
+      "3D Spatial CAD Concept Previews",
+      "Clear Line-Item Vendor Estimates",
+    ],
+  },
   instagram: [],
+  instagramHeader: {
+    eyebrow: "Follow Our Journey",
+    title: "@confianza_events on Instagram",
+    subtitle:
+      "Behind-the-scenes reels, live setups in Udaipur, Pune, and Goa, and daily wedding decor inspiration.",
+    handle: "@confianza_events",
+    followerCount: "10K+ Followers",
+    url: "https://www.instagram.com/confianza_events",
+  },
   testimonials: [],
   allTestimonials: [],
   testimonialsPendingCount: 0,

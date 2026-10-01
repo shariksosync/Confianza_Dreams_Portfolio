@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -47,7 +47,7 @@ export default function HeroSection() {
         <div className="animate-fade-in inline-flex items-center gap-2 rounded-full border border-secondary/40 bg-secondary/10 px-4 py-1.5 backdrop-blur-md">
           <Sparkles className="h-3.5 w-3.5 text-secondary animate-pulse" />
           <span className="text-[0.68rem] sm:text-xs font-medium uppercase tracking-[0.3em] text-champagne">
-            {hero.eyebrow || "Luxury Wedding Planners â€¢ Pune"}
+            {hero.eyebrow || "Luxury Wedding Planners • Pune"}
           </span>
         </div>
 

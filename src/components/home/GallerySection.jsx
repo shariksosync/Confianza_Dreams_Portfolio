@@ -1,62 +1,193 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Eye, Sparkles, ArrowRight } from "lucide-react";
+import { Eye, Sparkles, ArrowRight, MapPin, Filter, Layers } from "lucide-react";
 import { useSite } from "../../context/SiteContext";
 import SectionHeading from "../ui/SectionHeading";
 import Lightbox from "../ui/Lightbox";
 
+const normalizeCategory = (str) =>
+  (str || "")
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]/g, "")
+    .trim();
+
+const isAllCategory = (cat) => {
+  if (!cat) return true;
+  const str = typeof cat === "string" ? cat : cat?.name || cat?.slug || cat?.id || "";
+  const norm = normalizeCategory(str);
+  return norm === "all" || norm === "allarchives" || norm === "";
+};
+
+const isCategoryMatch = (itemCategory, targetCategory) => {
+  if (isAllCategory(targetCategory)) return true;
+  const norm1 = normalizeCategory(itemCategory);
+  const norm2 = normalizeCategory(targetCategory);
+  return Boolean(norm1 && norm2 && norm1 === norm2);
+};
+
 export default function GallerySection({ isStandalone = false }) {
-  const { gallery } = useSite();
+  const { gallery, galleryCategories } = useSite();
+  const [activeCategory, setActiveCategory] = useState("all");
   const [lightboxIndex, setLightboxIndex] = useState(null);
 
-  const items = gallery || [];
+  const items = useMemo(() => {
+    return Array.isArray(gallery) ? gallery : [];
+  }, [gallery]);
 
-  const displayedItems = isStandalone ? items : items.slice(0, 8);
+  const categories = useMemo(() => {
+    const list =
+      Array.isArray(galleryCategories) && galleryCategories.length > 0
+        ? galleryCategories
+        : [
+            { id: "all", name: "All Archives", slug: "all" },
+            { id: "mandap", name: "Mandap Architecture", slug: "mandap" },
+            { id: "reception", name: "Opulent Receptions", slug: "reception" },
+            { id: "haldi-sangeet", name: "Haldi & Sangeet", slug: "haldi-sangeet" },
+            { id: "bridal-entries", name: "Bridal Entries & Portraits", slug: "bridal-entries" },
+            { id: "destination", name: "Destination Venues", slug: "destination" },
+            { id: "spatial-decor", name: "Spatial Decor & Floral Art", slug: "spatial-decor" },
+          ];
+    return list;
+  }, [galleryCategories]);
+
+  // Filter items based on active category
+  const filteredItems = useMemo(() => {
+    if (isAllCategory(activeCategory)) {
+      return items;
+    }
+    return items.filter((item) => isCategoryMatch(item.category, activeCategory));
+  }, [items, activeCategory]);
+
+  const displayedItems = isStandalone ? filteredItems : items.slice(0, 8);
 
   return (
     <section id="gallery" className="section-pad relative bg-background overflow-hidden">
-      <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
           eyebrow="Visual Chronicles"
-          title="A Pinterest-Style Tapestry of Memories"
-          subtitle="Glimpse into the intricate floral installations, grand ballroom stages, playful haldi setups, and candid romantic moments we’ve had the privilege to curate."
+          title="A Tapestry of Sacred Vows & Spatial Splendor"
+          subtitle="Explore our visual archives of bespoke mandap architecture, opulent reception ballroom stages, sun-kissed haldi carnivals, and intimate destination celebrations."
         />
 
-        {/* Pinterest-like Masonry Grid */}
+        {/* Dynamic Category Filter Pills */}
+        {isStandalone && items.length > 0 && (
+          <div className="reveal mt-10 flex flex-wrap items-center justify-center gap-2 sm:gap-2.5">
+            {categories.map((cat) => {
+              const isAllPill = isAllCategory(cat);
+
+              const count = isAllPill
+                ? items.length
+                : items.filter(
+                    (it) =>
+                      isCategoryMatch(it.category, cat.name) ||
+                      isCategoryMatch(it.category, cat.slug)
+                  ).length;
+
+              const isSelected = isAllPill
+                ? isAllCategory(activeCategory)
+                : isCategoryMatch(activeCategory, cat.name) ||
+                  isCategoryMatch(activeCategory, cat.slug);
+
+              return (
+                <button
+                  key={cat.id || cat.slug || cat.name}
+                  type="button"
+                  onClick={() => setActiveCategory(isAllPill ? "all" : cat.name)}
+                  className={`px-4 py-2 rounded-full text-xs font-semibold tracking-wide transition-all duration-300 flex items-center gap-2 cursor-pointer shadow-xs ${
+                    isSelected
+                      ? "gradient-royal text-primary-foreground shadow-[0_4px_18px_rgba(109,76,155,0.4)] scale-105 ring-1 ring-white/30"
+                      : "bg-card border border-border text-foreground/80 hover:text-secondary hover:border-secondary/60 hover:bg-card/90"
+                  }`}
+                >
+                  <span>{cat.name}</span>
+                  <span
+                    className={`text-[0.68rem] px-1.5 py-0.5 rounded-full font-mono font-bold ${
+                      isSelected
+                        ? "bg-secondary text-ink"
+                        : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Photo Gallery Masonry Grid */}
         {displayedItems.length === 0 ? (
-          <div className="reveal mt-14 glass-card rounded-3xl p-10 text-center text-muted-foreground border border-border">
-            <Eye className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
-            <h3 className="font-display text-lg text-ink font-semibold">No Gallery Photos Yet</h3>
-            <p className="text-xs text-muted-foreground mt-1">Uploaded event and decor photographs will appear here.</p>
+          <div className="mt-12 glass-card rounded-3xl p-12 text-center text-muted-foreground border border-border/80 max-w-xl mx-auto shadow-soft transition-all duration-300 animate-in fade-in">
+            <div className="h-14 w-14 rounded-full bg-secondary/15 ring-2 ring-secondary/40 flex items-center justify-center mx-auto mb-4 text-secondary">
+              <Eye className="h-7 w-7" />
+            </div>
+            <h3 className="font-display text-xl text-ink font-semibold">
+              {items.length === 0
+                ? "No Gallery Photos Uploaded"
+                : activeCategory && activeCategory !== "all"
+                ? `No Photos in "${activeCategory}" Yet`
+                : "No Photos in This Category"}
+            </h3>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-2 leading-relaxed">
+              {items.length === 0
+                ? "The visual archive is currently empty. Photographs added via the Admin Panel will appear here automatically."
+                : activeCategory && activeCategory !== "all"
+                ? `No photographs have been tagged under "${activeCategory}" in MongoDB yet. Select another category or click below to view all archives.`
+                : "No photographs match the selected filter category. Choose another category or click below to view all archives."}
+            </p>
+            {items.length > 0 && activeCategory !== "all" && (
+              <button
+                type="button"
+                onClick={() => setActiveCategory("all")}
+                className="mt-5 btn-luxe gradient-gold text-ink text-xs py-2 px-5 font-bold shadow-xs cursor-pointer"
+              >
+                View All Archives ({items.length})
+              </button>
+            )}
           </div>
         ) : (
-          <div className="reveal mt-14 columns-1 sm:columns-2 lg:columns-4 gap-5 space-y-5">
+          <div className="mt-12 columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-5 space-y-5 transition-all duration-300">
             {displayedItems.map((item, idx) => (
               <div
                 key={item.id || idx}
                 onClick={() => setLightboxIndex(idx)}
-                className="group relative cursor-pointer break-inside-avoid overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft transition-all duration-500 hover:-translate-y-1.5 hover:shadow-luxe"
+                className="group relative cursor-pointer break-inside-avoid overflow-hidden rounded-3xl border border-border/70 bg-card shadow-soft transition-all duration-500 hover:-translate-y-1.5 hover:shadow-luxe"
               >
-                <img
-                  src={item.image}
-                  alt={item.caption || "Confianza Wedding Decor"}
-                  className="w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  loading="lazy"
-                />
+                <div className="relative overflow-hidden bg-muted/40">
+                  <img
+                    src={item.image}
+                    alt={item.caption || "Confianza Luxury Wedding Decor"}
+                    className="w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    loading="lazy"
+                  />
 
-                {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/30 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex flex-col justify-end p-5">
-                  <span className="text-[0.65rem] uppercase tracking-widest text-secondary font-medium">
-                    Confianza Archive
-                  </span>
-                  <h4 className="mt-1 font-display text-base text-background">
-                    {item.caption}
-                  </h4>
-                  <div className="mt-3 flex items-center gap-1.5 text-xs text-champagne/80">
-                    <Eye className="h-3.5 w-3.5" />
-                    <span>Click to expand</span>
+                  {/* Top Category Tag Badge */}
+                  {item.category && (
+                    <div className="absolute top-3 left-3 z-10">
+                      <span className="px-2.5 py-1 rounded-full bg-ink/75 backdrop-blur-md text-[0.62rem] uppercase tracking-wider font-semibold text-champagne border border-white/15 shadow-sm">
+                        {item.category}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Bottom Hover Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-ink/95 via-ink/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex flex-col justify-end p-5">
+                    {item.location && (
+                      <div className="flex items-center gap-1.5 text-[0.68rem] text-secondary font-medium tracking-wide">
+                        <MapPin className="h-3 w-3 text-secondary" />
+                        <span>{item.location}</span>
+                      </div>
+                    )}
+                    <h4 className="mt-1 font-display text-sm sm:text-base text-background font-normal leading-snug">
+                      {item.caption}
+                    </h4>
+                    <div className="mt-3 flex items-center gap-1.5 text-xs text-champagne font-medium">
+                      <Eye className="h-3.5 w-3.5" />
+                      <span>Click to expand view</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -64,21 +195,21 @@ export default function GallerySection({ isStandalone = false }) {
           </div>
         )}
 
-        {/* View Full Gallery CTA */}
+        {/* View Full Gallery CTA for Homepage */}
         {!isStandalone && displayedItems.length > 0 && (
           <div className="reveal mt-12 text-center">
             <Link
               href="/gallery"
-              className="btn-luxe gradient-royal text-primary-foreground text-xs shadow-luxe"
+              className="btn-luxe gradient-royal text-primary-foreground text-xs shadow-luxe inline-flex items-center gap-2"
             >
-              <span>Explore Complete Photo Archive</span>
+              <span>Explore Complete Visual Archive ({items.length} Photos)</span>
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         )}
       </div>
 
-      {/* Lightbox popup */}
+      {/* Interactive Lightbox Viewer */}
       {lightboxIndex !== null && (
         <Lightbox
           items={displayedItems}
@@ -95,4 +226,3 @@ export default function GallerySection({ isStandalone = false }) {
     </section>
   );
 }
-

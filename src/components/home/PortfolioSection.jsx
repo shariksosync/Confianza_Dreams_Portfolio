@@ -71,7 +71,7 @@ export default function PortfolioSection({ isStandalone = false }) {
 
         {allItems.length === 0 ? (
           /* True Zero-Data State (Strict Database Reflection) */
-          <div className="reveal mt-12 glass-card rounded-3xl p-12 text-center text-muted-foreground border border-dashed border-border/80">
+          <div className="mt-12 glass-card rounded-3xl p-12 text-center text-muted-foreground border border-dashed border-border/80 transition-all duration-300">
             <Sparkles className="h-10 w-10 mx-auto text-secondary/60 mb-3" />
             <h3 className="font-display text-xl text-ink font-semibold">No Portfolio Works Added Yet</h3>
             <p className="text-xs text-muted-foreground mt-1 max-w-md mx-auto">
@@ -136,7 +136,7 @@ export default function PortfolioSection({ isStandalone = false }) {
             </div>
 
             {/* Portfolio Masonry / Responsive Grid */}
-            <div className="reveal mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 transition-all duration-300">
               {displayedItems.map((item, idx) => (
                 <div
                   key={item.id || idx}

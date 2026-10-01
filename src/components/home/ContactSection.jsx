@@ -103,7 +103,7 @@ export default function ContactSection({ isStandalone = false }) {
         <SectionHeading
           eyebrow="Begin Your Story"
           title="Reserve a Private Consultation"
-          subtitle="Tell us about your wedding dreams, guest expectations, and vision. Weâ€™ll meet over coffee in Pune or over a virtual call anywhere in the world."
+          subtitle="Tell us about your wedding dreams, guest expectations, and vision. We'll meet over coffee in Pune or over a virtual call anywhere in the world."
         />
 
         <div className="reveal mt-14 grid gap-10 lg:grid-cols-12">
@@ -185,7 +185,7 @@ export default function ContactSection({ isStandalone = false }) {
                       Studio Address
                     </span>
                     <span className="text-xs text-foreground/90 leading-relaxed block">
-                      {contact.address.line1}, {contact.address.line2}, {contact.address.city}, {contact.address.state} â€” {contact.address.pincode}
+                      {contact.address.line1}, {contact.address.line2}, {contact.address.city}, {contact.address.state} • {contact.address.pincode}
                     </span>
                   </div>
                 </div>

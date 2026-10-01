@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
@@ -220,7 +220,7 @@ export default function BudgetCalculatorSection() {
                 Projected Budget Range
               </span>
               <div className="mt-2 font-display text-2xl sm:text-3xl text-gold-gradient font-bold">
-                {formatINR(breakdown.minRange)} â€“ {formatINR(breakdown.maxRange)}
+                {formatINR(breakdown.minRange)} - {formatINR(breakdown.maxRange)}
               </div>
               <p className="mt-1 text-[0.68rem] text-background/60">
                 *Approximate estimate based on {guests} guests across {days} day{days > 1 ? "s" : ""}.

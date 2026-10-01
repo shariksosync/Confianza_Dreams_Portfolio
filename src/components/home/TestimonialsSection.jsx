@@ -24,13 +24,13 @@ export default function TestimonialsSection() {
         />
 
         {reviews.length === 0 ? (
-          <div className="reveal mt-14 glass-card rounded-3xl p-10 text-center text-muted-foreground border border-border">
+          <div className="mt-14 glass-card rounded-3xl p-10 text-center text-muted-foreground border border-border transition-all duration-300">
             <Quote className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
             <h3 className="font-display text-lg text-ink font-semibold">No Testimonials Yet</h3>
             <p className="text-xs text-muted-foreground mt-1">Client reviews will appear here once added in the admin panel.</p>
           </div>
         ) : (
-          <div className="reveal mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4 transition-all duration-300">
             {reviews.map((rev, idx) => (
               <div
                 key={rev.id || idx}

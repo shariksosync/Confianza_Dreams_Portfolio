@@ -174,7 +174,7 @@ export default function AdminPage() {
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="admin"
+                placeholder="Enter username (e.g. admin)"
                 className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-background placeholder:text-background/40 focus:border-secondary focus:outline-none"
               />
             </div>
@@ -188,7 +188,7 @@ export default function AdminPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                placeholder="Enter password..."
                 className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-background placeholder:text-background/40 focus:border-secondary focus:outline-none"
               />
             </div>
@@ -204,8 +204,9 @@ export default function AdminPage() {
             </div>
 
             <div className="pt-3 text-center">
-              <Link href="/" className="text-xs text-background/60 hover:text-secondary transition">
-                â† Return to Public Website
+              <Link href="/" className="text-xs text-background/60 hover:text-secondary transition inline-flex items-center gap-1.5">
+                <ChevronLeft className="h-3.5 w-3.5" />
+                <span>Return to Public Website</span>
               </Link>
             </div>
           </form>
@@ -225,7 +226,7 @@ export default function AdminPage() {
     { id: "about", label: "About", icon: Sparkles },
     { id: "services", label: "Services & Packages", icon: Briefcase },
     { id: "portfolio", label: "Portfolio Works", icon: ImageIcon },
-    { id: "gallery", label: "Pinterest Gallery", icon: ImageIcon },
+    { id: "gallery", label: "Gallery", icon: ImageIcon },
     {
       id: "testimonials",
       label: pendingTestimonialsCount > 0 ? `Testimonials (${pendingTestimonialsCount} New)` : "Testimonials & Reviews",
@@ -531,7 +532,7 @@ function OverviewModule({ site, setActiveTab, showSaved }) {
             onClick={() => setActiveTab("inbox")}
             className="text-xs text-primary font-semibold hover:underline"
           >
-            View All ({site.messages?.length || 0}) â†’
+            View All ({site.messages?.length || 0}) &rarr;
           </button>
         </div>
 
@@ -549,7 +550,7 @@ function OverviewModule({ site, setActiveTab, showSaved }) {
                 <div>
                   <span className="font-semibold text-ink text-sm block">{msg.name}</span>
                   <span className="text-muted-foreground block mt-0.5">
-                    {msg.phone} â€¢ {msg.email} â€¢ Budget: {msg.budget}
+                    {msg.phone} &bull; {msg.email} &bull; Budget: {msg.budget}
                   </span>
                   <p className="text-foreground/80 mt-1 italic">"{msg.message}"</p>
                 </div>
@@ -5467,24 +5468,273 @@ function PortfolioEditorModule({ site, showSaved }) {
 }
 
 // -------------------------------------------------------------
-// MODULE 8: Gallery Editor
+// MODULE 8: Gallery Management Suite (Visual Chronicles & Social Archive)
 // -------------------------------------------------------------
 function GalleryEditorModule({ site, showSaved }) {
+  const [subTab, setSubTab] = useState("photos");
   const [gallery, setGallery] = useState(site.gallery || []);
   const [editingPhoto, setEditingPhoto] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
 
-  const saveGallery = (newList) => {
-    setGallery(newList);
-    site.update("gallery", newList);
-    showSaved();
+  // Keep local states in reactive sync with site context
+  useEffect(() => {
+    if (Array.isArray(site.gallery)) {
+      setGallery(site.gallery);
+    }
+  }, [site.gallery]);
+
+  useEffect(() => {
+    if (Array.isArray(site.galleryCategories) && site.galleryCategories.length > 0) {
+      setCategories(site.galleryCategories);
+    }
+  }, [site.galleryCategories]);
+
+  useEffect(() => {
+    if (site.galleryHeader && Object.keys(site.galleryHeader).length > 0) {
+      setHeroHeader(site.galleryHeader);
+    }
+  }, [site.galleryHeader]);
+
+  useEffect(() => {
+    if (Array.isArray(site.galleryHighlights) && site.galleryHighlights.length > 0) {
+      setHighlights(site.galleryHighlights);
+    }
+  }, [site.galleryHighlights]);
+
+  useEffect(() => {
+    if (Array.isArray(site.instagram)) {
+      setInstagramPosts(site.instagram);
+    }
+  }, [site.instagram]);
+
+  useEffect(() => {
+    if (site.instagramHeader && Object.keys(site.instagramHeader).length > 0) {
+      setInstaHeader(site.instagramHeader);
+    }
+  }, [site.instagramHeader]);
+
+  useEffect(() => {
+    if (site.galleryCta && Object.keys(site.galleryCta).length > 0) {
+      setGalleryCta(site.galleryCta);
+    }
+  }, [site.galleryCta]);
+
+  // Dynamic Categories State
+  const defaultCategories = [
+    { id: "all", name: "All Archives", slug: "all", order: 1 },
+    { id: "mandap", name: "Mandap Architecture", slug: "mandap", order: 2 },
+    { id: "reception", name: "Opulent Receptions", slug: "reception", order: 3 },
+    { id: "haldi-sangeet", name: "Haldi & Sangeet", slug: "haldi-sangeet", order: 4 },
+    { id: "bridal-entries", name: "Bridal Entries & Portraits", slug: "bridal-entries", order: 5 },
+    { id: "destination", name: "Destination Venues", slug: "destination", order: 6 },
+    { id: "spatial-decor", name: "Spatial Decor & Floral Art", slug: "spatial-decor", order: 7 },
+  ];
+
+  const [categories, setCategories] = useState(
+    Array.isArray(site.galleryCategories) && site.galleryCategories.length > 0
+      ? site.galleryCategories
+      : defaultCategories
+  );
+  const [editingCategory, setEditingCategory] = useState(null);
+
+  // Hero Banner State
+  const defaultHeroHeader = {
+    badge: "Curated Visual Archive",
+    eyebrow: "VISUAL INSPIRATIONS",
+    title: "The Wedding Gallery",
+    subtitle:
+      "Immerse yourself in close-up details of floral centerpieces, bridal entries, fairy-lit courtyards, and grand lavender stages.",
+    image: "https://res.cloudinary.com/tridevsosync/image/upload/v1790881511/confianza_heroes/gallery_hero_banner.jpg",
+    stats: [
+      "500+ Celebrations Across India",
+      "15+ Landmark Destination Cities",
+      "100% 3D CAD-to-Reality Fidelity",
+      "Zero-Glitch Stage Execution",
+    ],
   };
+  const [heroHeader, setHeroHeader] = useState(site.galleryHeader || defaultHeroHeader);
+
+  // Spatial Craft Highlights State (From PDF Materials)
+  const defaultHighlights = [
+    {
+      id: "mandap-sanctum",
+      title: "Mandap Architecture & Vedic Sanctums",
+      subtitle: "Auspicious Engineering & Floral Art",
+      description:
+        "From custom temple pillars to floating lotus pools, our mandaps blend sacred Vedic geometry with opulent seasonal florals.",
+      icon: "Sparkles",
+      badge: "Vedic Precision",
+    },
+    {
+      id: "stage-production",
+      title: "Stage, Lighting & SFX Production",
+      subtitle: "3D CAD-to-Reality Fidelity",
+      description:
+        "Intelligent moving beam arrays, high-resolution curved LED walls, cold pyrotechnics, and hydraulic stages managed with millisecond cues.",
+      icon: "Layers",
+      badge: "Show Runner Direct",
+    },
+    {
+      id: "haldi-carnival",
+      title: "Themed Haldi & Mehendi Carnivals",
+      subtitle: "Joyous Yellow Blooms & Folk Artistry",
+      description:
+        "Phoolon ki Holi setups, handcrafted marigold canopies, brass urlis, artisanal mehendi cabanas, and energetic dhol tasha troupes.",
+      icon: "Award",
+      badge: "Cultural Extravaganza",
+    },
+    {
+      id: "luxe-tablescapes",
+      title: "Luxe Tablescapes & Hospitality Styling",
+      subtitle: "Intimate Ambiance & Event Branding",
+      description:
+        "Crystal chandeliers, candlelit floral centerpieces, customized luggage tags, itinerary jackets, and dedicated guest concierge suites.",
+      icon: "Users",
+      badge: "Concierge Elegance",
+    },
+  ];
+  const [highlights, setHighlights] = useState(
+    Array.isArray(site.galleryHighlights) && site.galleryHighlights.length > 0
+      ? site.galleryHighlights
+      : defaultHighlights
+  );
+  const [editingHighlight, setEditingHighlight] = useState(null);
+
+  // Follow Our Journey Instagram State
+  const defaultInstaHeader = {
+    eyebrow: "Follow Our Journey",
+    title: "@confianza_events on Instagram",
+    subtitle:
+      "Behind-the-scenes reels, live setups in Udaipur, Pune, and Goa, and daily wedding decor inspiration.",
+    handle: "@confianza_events",
+    followerCount: "10K+ Followers",
+    url: "https://www.instagram.com/confianza_events",
+  };
+  const [instaHeader, setInstaHeader] = useState(site.instagramHeader || defaultInstaHeader);
+  const [instagramPosts, setInstagramPosts] = useState(site.instagram || []);
+  const [editingInstaPost, setEditingInstaPost] = useState(null);
+
+  // Consultation CTA State
+  const defaultGalleryCta = {
+    eyebrow: "WHERE WEDDINGS BECOME STORIES",
+    headline: "Envision Your Wedding in Our Visual Chronicle",
+    subtitle:
+      "Connect directly with founders Ashish Wankhede and Rutik Pund in Warje, Pune to design your bespoke 3D CAD wedding decor.",
+    buttonText: "Book Your Free Consultation",
+    buttonLink: "/contact",
+    notice: "Free 1-on-1 Consultation • Direct Founder Interaction",
+    perks: [
+      "60–90 Min Vision & Budget Mapping",
+      "Direct Founder Interaction (Ashish & Rutik)",
+      "3D Spatial CAD Concept Previews",
+      "Clear Line-Item Vendor Estimates",
+    ],
+  };
+  const [galleryCta, setGalleryCta] = useState(site.galleryCta || defaultGalleryCta);
+
+  // Persist Gallery Photos
+  const saveGalleryPhotos = async (newList) => {
+    setGallery(newList);
+    try {
+      await site.update("gallery", newList);
+      showSaved("Gallery photos updated successfully in MongoDB!");
+    } catch (err) {
+      console.error("Failed to save gallery photos:", err);
+    }
+  };
+
+  // Persist Categories
+  const saveCategories = async (newList) => {
+    setCategories(newList);
+    try {
+      await site.update("galleryCategories", newList);
+      showSaved("Gallery categories updated successfully in MongoDB!");
+    } catch (err) {
+      console.error("Failed to save categories:", err);
+    }
+  };
+
+  // Persist Hero Header
+  const saveHeroHeader = async () => {
+    try {
+      await site.update("galleryHeader", heroHeader);
+      showSaved("Gallery Hero Header saved successfully in MongoDB!");
+    } catch (err) {
+      console.error("Failed to save hero header:", err);
+    }
+  };
+
+  // Persist Highlights
+  const saveHighlights = async (newList) => {
+    setHighlights(newList);
+    try {
+      await site.update("galleryHighlights", newList);
+      showSaved("Spatial craft highlights saved successfully in MongoDB!");
+    } catch (err) {
+      console.error("Failed to save highlights:", err);
+    }
+  };
+
+  // Persist Instagram Feed & Header
+  const saveInstagram = async (newPosts) => {
+    setInstagramPosts(newPosts);
+    try {
+      await site.update("instagram", newPosts);
+      showSaved("Instagram posts updated successfully in MongoDB!");
+    } catch (err) {
+      console.error("Failed to save instagram posts:", err);
+    }
+  };
+
+  const saveInstagramHeader = async () => {
+    try {
+      await site.update("instagramHeader", instaHeader);
+      showSaved("Instagram header settings saved successfully in MongoDB!");
+    } catch (err) {
+      console.error("Failed to save instagram header:", err);
+    }
+  };
+
+  // Persist CTA
+  const saveGalleryCta = async () => {
+    try {
+      await site.update("galleryCta", galleryCta);
+      showSaved("Gallery consultation CTA banner saved successfully in MongoDB!");
+    } catch (err) {
+      console.error("Failed to save gallery CTA:", err);
+    }
+  };
+
+  // Filter photos for visual archive tab
+  const filteredPhotos = gallery.filter((item) => {
+    const matchCat =
+      categoryFilter === "all" ||
+      (item.category || "").toLowerCase() === categoryFilter.toLowerCase();
+    const matchSearch =
+      !searchQuery ||
+      (item.caption || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (item.location || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (item.category || "").toLowerCase().includes(searchQuery.toLowerCase());
+    return matchCat && matchSearch;
+  });
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      {/* Module Header Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-4 p-5 rounded-3xl bg-card border border-border shadow-xs">
         <div>
-          <h3 className="font-display text-xl text-ink font-semibold">Pinterest Gallery Photos ({gallery.length})</h3>
-          <p className="text-xs text-muted-foreground mt-0.5">Manage public photo grid</p>
+          <div className="flex items-center gap-2">
+            <h3 className="font-display text-xl text-ink font-semibold">
+              Gallery Management Suite
+            </h3>
+            <span className="px-2.5 py-0.5 rounded-full bg-secondary/20 text-secondary text-[0.68rem] font-bold">
+              {gallery.length} Photos
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Manage Visual Chronicles, Filter Categories, Hero Banner, Social Feed & Highlights
+          </p>
         </div>
         <div className="flex items-center gap-2.5">
           <ModuleRefreshButton site={site} showSaved={showSaved} label="Refresh Gallery" />
@@ -5493,11 +5743,14 @@ function GalleryEditorModule({ site, showSaved }) {
             onClick={() =>
               setEditingPhoto({
                 isNew: true,
-                caption: "Grand Wedding Decor",
+                caption: "",
+                category: categories[1]?.name || "Mandap Architecture",
+                location: "Pune",
                 image: "",
+                order: gallery.length + 1,
               })
             }
-            className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-4 flex items-center gap-1.5 cursor-pointer"
+            className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-4 flex items-center gap-1.5 cursor-pointer shadow-sm"
           >
             <Plus className="h-4 w-4" />
             <span>Add Photo</span>
@@ -5505,75 +5758,800 @@ function GalleryEditorModule({ site, showSaved }) {
         </div>
       </div>
 
-      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-        {gallery.map((g) => (
-          <div key={g.id} className="relative group rounded-2xl overflow-hidden border border-border shadow-xs">
-            <img src={g.image} alt={g.caption} className="h-44 w-full object-cover" />
-            <div className="absolute inset-0 bg-ink/75 opacity-0 group-hover:opacity-100 transition p-3 flex flex-col justify-between text-background text-xs">
-              <span>{g.caption}</span>
-              <div className="flex justify-end gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => setEditingPhoto({ ...g })}
-                  className="p-1 rounded-lg bg-card/80 text-foreground"
-                >
-                  <Edit2 className="h-3.5 w-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => saveGallery(gallery.filter((x) => x.id !== g.id))}
-                  className="p-1 rounded-lg bg-destructive text-white"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
+      {/* Subtabs Navigation */}
+      <div className="flex flex-wrap items-center gap-2 border-b border-border/80 pb-3">
+        {[
+          { id: "photos", label: `Visual Chronicles (${gallery.length})`, icon: ImageIcon },
+          { id: "categories", label: `Categories (${categories.length})`, icon: Layers },
+          { id: "header", label: "Hero Header Banner", icon: Sliders },
+          { id: "highlights", label: `Spatial Highlights (${highlights.length})`, icon: Sparkles },
+          { id: "instagram", label: `Follow Journey (${instagramPosts.length})`, icon: MessageSquareQuote },
+          { id: "cta", label: "Consultation CTA", icon: PhoneCall },
+        ].map((tab) => {
+          const IconComp = tab.icon;
+          const isActive = subTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setSubTab(tab.id)}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold tracking-wide transition-all flex items-center gap-2 cursor-pointer ${
+                isActive
+                  ? "gradient-royal text-primary-foreground shadow-sm"
+                  : "bg-card border border-border text-foreground/80 hover:text-secondary hover:border-secondary/50"
+              }`}
+            >
+              <IconComp className="h-3.5 w-3.5" />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
 
+      {/* SUBTAB 1: Visual Chronicles Photo Archive */}
+      {subTab === "photos" && (
+        <div className="space-y-5">
+          {/* Controls: Search & Category Filter */}
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-card p-4 rounded-2xl border border-border">
+            <div className="relative flex-1 min-w-[220px]">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by caption, category, or location..."
+                className="w-full pl-10 pr-4 py-2 rounded-xl border border-border bg-background text-xs focus:outline-none focus:border-secondary"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="text-xs text-muted-foreground font-medium">Filter:</label>
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="rounded-xl border border-border bg-background px-3 py-2 text-xs focus:outline-none focus:border-secondary"
+              >
+                <option value="all">All Categories ({gallery.length})</option>
+                {categories
+                  .filter((c) => c.id !== "all")
+                  .map((c) => (
+                    <option key={c.id || c.slug} value={c.name}>
+                      {c.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Photos Grid */}
+          {filteredPhotos.length === 0 ? (
+            <div className="glass-card rounded-3xl p-12 text-center text-muted-foreground border border-border">
+              <ImageIcon className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
+              <h4 className="font-display text-base text-ink font-semibold">
+                No Gallery Photos Found
+              </h4>
+              <p className="text-xs text-muted-foreground mt-1">
+                {gallery.length === 0
+                  ? "Click 'Add Photo' above to upload your first wedding visual."
+                  : "No photos match your current search or category filter."}
+              </p>
+            </div>
+          ) : (
+            <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+              {filteredPhotos.map((g) => (
+                <div
+                  key={g.id}
+                  className="relative group rounded-2xl overflow-hidden border border-border bg-card shadow-xs transition-all duration-300 hover:shadow-soft"
+                >
+                  <div className="aspect-[4/3] w-full overflow-hidden bg-muted/40">
+                    <img
+                      src={g.image}
+                      alt={g.caption}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                  {g.category && (
+                    <div className="absolute top-2 left-2">
+                      <span className="px-2 py-0.5 rounded-full bg-ink/80 backdrop-blur-md text-[0.62rem] uppercase tracking-wider font-semibold text-champagne border border-white/10">
+                        {g.category}
+                      </span>
+                    </div>
+                  )}
+                  <div className="p-3 bg-card border-t border-border/60">
+                    <h5 className="font-display text-xs text-ink font-medium truncate">
+                      {g.caption || "Untitled Photo"}
+                    </h5>
+                    {g.location && (
+                      <div className="flex items-center gap-1 text-[0.65rem] text-muted-foreground mt-0.5">
+                        <MapPin className="h-3 w-3 text-secondary" />
+                        <span>{g.location}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between gap-1.5 mt-2.5 pt-2 border-t border-border/40">
+                      <span className="text-[0.62rem] font-mono text-muted-foreground">
+                        Order #{g.order || 1}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setEditingPhoto({ ...g })}
+                          className="p-1 rounded-lg bg-accent text-foreground hover:text-secondary transition"
+                          title="Edit Photo"
+                        >
+                          <Edit2 className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (confirm("Delete this photo from gallery?")) {
+                              saveGalleryPhotos(gallery.filter((x) => x.id !== g.id));
+                            }
+                          }}
+                          className="p-1 rounded-lg bg-destructive/15 text-destructive hover:bg-destructive hover:text-white transition"
+                          title="Delete Photo"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* SUBTAB 2: Filter Categories Manager */}
+      {subTab === "categories" && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between gap-4 p-4 bg-card rounded-2xl border border-border">
+            <div>
+              <h4 className="font-display text-base text-ink font-semibold">
+                Dynamic Gallery Filter Categories
+              </h4>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Manage category filter pills shown at the top of the Gallery page.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                setEditingCategory({
+                  isNew: true,
+                  id: `cat-${Date.now()}`,
+                  name: "",
+                  slug: "",
+                  order: categories.length + 1,
+                })
+              }
+              className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-4 flex items-center gap-1.5 cursor-pointer shadow-xs"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Add Category</span>
+            </button>
+          </div>
+
+          <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            {categories.map((cat, idx) => {
+              const count =
+                cat.id === "all" || cat.slug === "all"
+                  ? gallery.length
+                  : gallery.filter((it) => {
+                      const c = (it.category || "")
+                        .toLowerCase()
+                        .replace(/&/g, "and")
+                        .replace(/[^a-z0-9]/g, "")
+                        .trim();
+                      const n = (cat.name || "")
+                        .toLowerCase()
+                        .replace(/&/g, "and")
+                        .replace(/[^a-z0-9]/g, "")
+                        .trim();
+                      const s = (cat.slug || "")
+                        .toLowerCase()
+                        .replace(/&/g, "and")
+                        .replace(/[^a-z0-9]/g, "")
+                        .trim();
+                      return Boolean(c && ((n && c === n) || (s && c === s)));
+                    }).length;
+
+              return (
+                <div
+                  key={cat.id || idx}
+                  className="p-4 rounded-2xl border border-border bg-card shadow-xs flex items-center justify-between gap-3"
+                >
+                  <div className="truncate">
+                    <div className="flex items-center gap-2">
+                      <span className="font-display text-sm text-ink font-semibold truncate">
+                        {cat.name}
+                      </span>
+                      <span className="text-[0.68rem] px-2 py-0.5 rounded-full bg-secondary/15 text-secondary font-mono font-bold">
+                        {count} items
+                      </span>
+                    </div>
+                    <span className="text-[0.68rem] font-medium text-muted-foreground block mt-0.5">
+                      Display Order #{cat.order || idx + 1}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setEditingCategory({ ...cat })}
+                      className="p-1.5 rounded-lg bg-accent text-foreground hover:text-secondary transition"
+                      title="Edit Category"
+                    >
+                      <Edit2 className="h-3.5 w-3.5" />
+                    </button>
+                    {cat.id !== "all" && cat.slug !== "all" && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (confirm(`Delete category "${cat.name}"?`)) {
+                            saveCategories(categories.filter((c) => c.id !== cat.id));
+                          }
+                        }}
+                        className="p-1.5 rounded-lg bg-destructive/15 text-destructive hover:bg-destructive hover:text-white transition"
+                        title="Delete Category"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* SUBTAB 3: Hero Header Banner Customizer */}
+      {subTab === "header" && (
+        <div className="space-y-6">
+          <div className="p-5 rounded-2xl bg-card border border-border space-y-4">
+            <h4 className="font-display text-base text-ink font-semibold">
+              Gallery Hero Header Banner
+            </h4>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="text-xs font-medium block mb-1">Badge</label>
+                <input
+                  type="text"
+                  value={heroHeader.badge || ""}
+                  onChange={(e) => setHeroHeader({ ...heroHeader, badge: e.target.value })}
+                  placeholder="e.g. Curated Visual Archive"
+                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs focus:outline-none focus:border-secondary"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium block mb-1">Eyebrow</label>
+                <input
+                  type="text"
+                  value={heroHeader.eyebrow || ""}
+                  onChange={(e) => setHeroHeader({ ...heroHeader, eyebrow: e.target.value })}
+                  placeholder="e.g. VISUAL INSPIRATIONS"
+                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs focus:outline-none focus:border-secondary"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-medium block mb-1">Headline Title</label>
+              <input
+                type="text"
+                value={heroHeader.title || ""}
+                onChange={(e) => setHeroHeader({ ...heroHeader, title: e.target.value })}
+                placeholder="e.g. The Wedding Gallery"
+                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs focus:outline-none focus:border-secondary"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-medium block mb-1">Subtitle</label>
+              <textarea
+                rows={2}
+                value={heroHeader.subtitle || ""}
+                onChange={(e) => setHeroHeader({ ...heroHeader, subtitle: e.target.value })}
+                placeholder="Immerse yourself in close-up details..."
+                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs focus:outline-none focus:border-secondary"
+              />
+            </div>
+
+            <ImageUploadField
+              label="Hero Banner Image (Cloudinary <= 2MB)"
+              value={heroHeader.image || ""}
+              onChange={(url) => setHeroHeader({ ...heroHeader, image: url })}
+            />
+
+            {/* Stats Chips */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-xs font-medium">Floating Trust Metrics Chips</label>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setHeroHeader({
+                      ...heroHeader,
+                      stats: [...(heroHeader.stats || []), "New Metric Badge"],
+                    })
+                  }
+                  className="text-xs text-secondary font-semibold hover:underline cursor-pointer"
+                >
+                  + Add Metric Chip
+                </button>
+              </div>
+              <div className="space-y-2">
+                {(heroHeader.stats || []).map((st, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={st}
+                      onChange={(e) => {
+                        const newStats = [...heroHeader.stats];
+                        newStats[idx] = e.target.value;
+                        setHeroHeader({ ...heroHeader, stats: newStats });
+                      }}
+                      className="flex-1 rounded-xl border border-border bg-background px-3 py-1.5 text-xs"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newStats = heroHeader.stats.filter((_, i) => i !== idx);
+                        setHeroHeader({ ...heroHeader, stats: newStats });
+                      }}
+                      className="p-1.5 rounded-lg bg-destructive/15 text-destructive hover:bg-destructive hover:text-white transition"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={saveHeroHeader}
+                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2.5 px-6 font-semibold shadow-sm cursor-pointer"
+              >
+                Save Hero Banner
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SUBTAB 4: Spatial Craft Highlights (From PDF Materials) */}
+      {subTab === "highlights" && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between gap-4 p-4 bg-card rounded-2xl border border-border">
+            <div>
+              <h4 className="font-display text-base text-ink font-semibold">
+                Signature Spatial Craft & Highlights
+              </h4>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Aesthetic feature cards showcasing Confianza's specialty engineering and production from the official PDF materials.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                setEditingHighlight({
+                  isNew: true,
+                  id: `craft-${Date.now()}`,
+                  title: "",
+                  subtitle: "",
+                  description: "",
+                  badge: "Confianza Signature",
+                  icon: "Sparkles",
+                })
+              }
+              className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-4 flex items-center gap-1.5 cursor-pointer shadow-xs"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Add Highlight Card</span>
+            </button>
+          </div>
+
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            {highlights.map((card, idx) => (
+              <div
+                key={card.id || idx}
+                className="p-5 rounded-2xl border border-border bg-card shadow-xs flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <span className="text-[0.62rem] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full bg-accent text-secondary border border-secondary/20">
+                      {card.badge || "Signature"}
+                    </span>
+                    <span className="text-[0.62rem] font-mono text-muted-foreground">
+                      Icon: {card.icon || "Sparkles"}
+                    </span>
+                  </div>
+                  <h5 className="font-display text-sm text-ink font-semibold mt-2">
+                    {card.title}
+                  </h5>
+                  {card.subtitle && (
+                    <p className="text-xs text-secondary font-medium mt-0.5">{card.subtitle}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground mt-2 leading-relaxed line-clamp-3">
+                    {card.description}
+                  </p>
+                </div>
+                <div className="flex items-center justify-end gap-1.5 mt-4 pt-3 border-t border-border/60">
+                  <button
+                    type="button"
+                    onClick={() => setEditingHighlight({ ...card })}
+                    className="p-1.5 rounded-lg bg-accent text-foreground hover:text-secondary transition"
+                    title="Edit Highlight"
+                  >
+                    <Edit2 className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (confirm(`Delete highlight card "${card.title}"?`)) {
+                        saveHighlights(highlights.filter((h) => h.id !== card.id));
+                      }
+                    }}
+                    className="p-1.5 rounded-lg bg-destructive/15 text-destructive hover:bg-destructive hover:text-white transition"
+                    title="Delete Highlight"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* SUBTAB 5: Follow Our Journey Instagram Manager */}
+      {subTab === "instagram" && (
+        <div className="space-y-6">
+          {/* Header Settings */}
+          <div className="p-5 rounded-2xl bg-card border border-border space-y-4">
+            <h4 className="font-display text-base text-ink font-semibold">
+              Instagram Social Wall Header Settings
+            </h4>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div>
+                <label className="text-xs font-medium block mb-1">Instagram Handle</label>
+                <input
+                  type="text"
+                  value={instaHeader.handle || ""}
+                  onChange={(e) => setInstaHeader({ ...instaHeader, handle: e.target.value })}
+                  placeholder="@confianza_events"
+                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium block mb-1">Follower Count Badge</label>
+                <input
+                  type="text"
+                  value={instaHeader.followerCount || ""}
+                  onChange={(e) => setInstaHeader({ ...instaHeader, followerCount: e.target.value })}
+                  placeholder="10K+ Followers"
+                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium block mb-1">Instagram Profile URL</label>
+                <input
+                  type="text"
+                  value={instaHeader.url || ""}
+                  onChange={(e) => setInstaHeader({ ...instaHeader, url: e.target.value })}
+                  placeholder="https://www.instagram.com/confianza_events"
+                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="text-xs font-medium block mb-1">Section Subtitle</label>
+              <input
+                type="text"
+                value={instaHeader.subtitle || ""}
+                onChange={(e) => setInstaHeader({ ...instaHeader, subtitle: e.target.value })}
+                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={saveInstagramHeader}
+              className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5 font-semibold"
+            >
+              Save Instagram Settings
+            </button>
+          </div>
+
+          {/* Instagram Posts Grid */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between gap-4 p-4 bg-card rounded-2xl border border-border">
+              <div>
+                <h4 className="font-display text-base text-ink font-semibold">
+                  Instagram Posts & Reels Showcase ({instagramPosts.length})
+                </h4>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Posts rendered in the "Follow Our Journey" grid on homepage and gallery.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  setEditingInstaPost({
+                    isNew: true,
+                    likes: 1200,
+                    caption: "",
+                    image: "",
+                    url: instaHeader.url || "https://www.instagram.com/confianza_events",
+                  })
+                }
+                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-4 flex items-center gap-1.5 cursor-pointer"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Add Post Card</span>
+              </button>
+            </div>
+
+            {instagramPosts.length === 0 ? (
+              <div className="glass-card rounded-3xl p-10 text-center text-muted-foreground border border-border">
+                <MessageSquareQuote className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
+                <h4 className="font-display text-base text-ink font-semibold">
+                  No Instagram Posts Uploaded
+                </h4>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Click 'Add Post Card' above to upload Instagram feed items.
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+                {instagramPosts.map((post) => (
+                  <div
+                    key={post.id}
+                    className="relative group rounded-2xl overflow-hidden border border-border bg-card shadow-xs"
+                  >
+                    <div className="aspect-square w-full overflow-hidden bg-muted/40">
+                      <img
+                        src={post.image}
+                        alt="Instagram Post"
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                    <div className="p-2.5 bg-card text-xs">
+                      <div className="flex items-center justify-between gap-1 text-[0.68rem] text-secondary font-medium">
+                        <span>❤️ {post.likes || 0}</span>
+                      </div>
+                      <p className="text-[0.62rem] text-muted-foreground line-clamp-1 mt-1">
+                        {post.caption || "Instagram Reel"}
+                      </p>
+                      <div className="flex items-center justify-end gap-1 mt-2 pt-1.5 border-t border-border/50">
+                        <button
+                          type="button"
+                          onClick={() => setEditingInstaPost({ ...post })}
+                          className="p-1 rounded-lg bg-accent text-foreground hover:text-secondary"
+                        >
+                          <Edit2 className="h-3 w-3" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (confirm("Delete this Instagram post?")) {
+                              saveInstagram(instagramPosts.filter((p) => p.id !== post.id));
+                            }
+                          }}
+                          className="p-1 rounded-lg bg-destructive/15 text-destructive hover:bg-destructive hover:text-white"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* SUBTAB 6: Consultation CTA Banner Customizer */}
+      {subTab === "cta" && (
+        <div className="p-5 rounded-2xl bg-card border border-border space-y-4">
+          <h4 className="font-display text-base text-ink font-semibold">
+            Gallery Bottom Consultation CTA Banner
+          </h4>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="text-xs font-medium block mb-1">Eyebrow</label>
+              <input
+                type="text"
+                value={galleryCta.eyebrow || ""}
+                onChange={(e) => setGalleryCta({ ...galleryCta, eyebrow: e.target.value })}
+                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium block mb-1">Button Text</label>
+              <input
+                type="text"
+                value={galleryCta.buttonText || ""}
+                onChange={(e) => setGalleryCta({ ...galleryCta, buttonText: e.target.value })}
+                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-medium block mb-1">Headline</label>
+            <input
+              type="text"
+              value={galleryCta.headline || ""}
+              onChange={(e) => setGalleryCta({ ...galleryCta, headline: e.target.value })}
+              className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-medium block mb-1">Subtitle</label>
+            <textarea
+              rows={2}
+              value={galleryCta.subtitle || ""}
+              onChange={(e) => setGalleryCta({ ...galleryCta, subtitle: e.target.value })}
+              className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs"
+            />
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs font-medium">Founder Perks List</label>
+              <button
+                type="button"
+                onClick={() =>
+                  setGalleryCta({
+                    ...galleryCta,
+                    perks: [...(galleryCta.perks || []), "New Consultation Perk"],
+                  })
+                }
+                className="text-xs text-secondary font-semibold hover:underline cursor-pointer"
+              >
+                + Add Perk
+              </button>
+            </div>
+            <div className="space-y-2">
+              {(galleryCta.perks || []).map((perk, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={perk}
+                    onChange={(e) => {
+                      const newPerks = [...galleryCta.perks];
+                      newPerks[idx] = e.target.value;
+                      setGalleryCta({ ...galleryCta, perks: newPerks });
+                    }}
+                    className="flex-1 rounded-xl border border-border bg-background px-3 py-1.5 text-xs"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newPerks = galleryCta.perks.filter((_, i) => i !== idx);
+                      setGalleryCta({ ...galleryCta, perks: newPerks });
+                    }}
+                    className="p-1.5 rounded-lg bg-destructive/15 text-destructive hover:bg-destructive hover:text-white transition"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="pt-2">
+            <button
+              type="button"
+              onClick={saveGalleryCta}
+              className="btn-luxe gradient-royal text-primary-foreground text-xs py-2.5 px-6 font-semibold cursor-pointer"
+            >
+              Save Consultation CTA
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 1: Add/Edit Photo Modal */}
       {editingPhoto && (
         <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/80 p-4">
           <form
             onSubmit={(e) => {
               e.preventDefault();
               if (editingPhoto.isNew) {
-                saveGallery([...gallery, { ...editingPhoto, id: Date.now() }]);
+                saveGalleryPhotos([
+                  ...gallery,
+                  {
+                    ...editingPhoto,
+                    id: `gallery-${Date.now()}`,
+                    order: Number(editingPhoto.order) || gallery.length + 1,
+                  },
+                ]);
               } else {
-                saveGallery(gallery.map((x) => (x.id === editingPhoto.id ? editingPhoto : x)));
+                saveGalleryPhotos(
+                  gallery.map((x) => (x.id === editingPhoto.id ? editingPhoto : x))
+                );
               }
               setEditingPhoto(null);
             }}
-            className="glass-card max-w-md w-full rounded-3xl p-6 sm:p-8 space-y-4"
+            className="glass-card max-w-lg w-full rounded-3xl p-6 sm:p-8 space-y-4 max-h-[90vh] overflow-y-auto"
           >
             <div className="flex justify-between items-center border-b pb-3">
-              <h4 className="font-display text-lg text-ink">
-                {editingPhoto.isNew ? "Add Gallery Photo" : "Edit Photo"}
+              <h4 className="font-display text-lg text-ink font-semibold">
+                {editingPhoto.isNew ? "Add Gallery Photo" : "Edit Photo Details"}
               </h4>
               <button
                 type="button"
                 onClick={() => setEditingPhoto(null)}
-                className="text-muted-foreground"
+                className="text-muted-foreground hover:text-foreground"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
+
             <div>
-              <label className="text-xs font-medium block mb-1">Photo Caption</label>
+              <label className="text-xs font-medium block mb-1">Photo Caption / Title</label>
               <input
                 type="text"
                 required
-                value={editingPhoto.caption}
+                value={editingPhoto.caption || ""}
                 onChange={(e) => setEditingPhoto({ ...editingPhoto, caption: e.target.value })}
+                placeholder="e.g. Sacred Vedic Mandap with Lotus Arch"
                 className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
               />
             </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className="text-xs font-medium block mb-1">Category</label>
+                <select
+                  value={editingPhoto.category || categories[1]?.name || "Mandap Architecture"}
+                  onChange={(e) => setEditingPhoto({ ...editingPhoto, category: e.target.value })}
+                  className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs"
+                >
+                  {categories
+                    .filter((c) => c.id !== "all")
+                    .map((c) => (
+                      <option key={c.id || c.slug} value={c.name}>
+                        {c.name}
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs font-medium block mb-1">Location</label>
+                <input
+                  type="text"
+                  value={editingPhoto.location || ""}
+                  onChange={(e) => setEditingPhoto({ ...editingPhoto, location: e.target.value })}
+                  placeholder="e.g. Udaipur, Rajasthan or Pune"
+                  className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs"
+                />
+              </div>
+            </div>
+
             <ImageUploadField
-              label="Gallery Image"
+              label="Gallery Image (Cloudinary <= 2MB)"
               value={editingPhoto.image || ""}
               onChange={(url) => setEditingPhoto({ ...editingPhoto, image: url })}
             />
-            <div className="flex justify-end gap-2 pt-2">
+
+            <div>
+              <label className="text-xs font-medium block mb-1">Display Order #</label>
+              <input
+                type="number"
+                value={editingPhoto.order || 1}
+                onChange={(e) => setEditingPhoto({ ...editingPhoto, order: Number(e.target.value) })}
+                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-3 border-t border-border/60">
               <button
                 type="button"
                 onClick={() => setEditingPhoto(null)}
@@ -5583,9 +6561,307 @@ function GalleryEditorModule({ site, showSaved }) {
               </button>
               <button
                 type="submit"
-                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5"
+                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-6 font-semibold"
               >
                 Save Photo
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* MODAL 2: Add/Edit Category Modal */}
+      {editingCategory && (
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/80 p-4">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const cleanName = (editingCategory.name || "").trim();
+              if (!cleanName) return;
+              const cleanSlug = cleanName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+              const cleanCat = {
+                ...editingCategory,
+                id: editingCategory.id || `cat-${Date.now()}`,
+                name: cleanName,
+                slug: cleanSlug,
+              };
+
+              if (editingCategory.isNew) {
+                saveCategories([...categories, cleanCat]);
+              } else {
+                saveCategories(
+                  categories.map((c) => (c.id === editingCategory.id ? cleanCat : c))
+                );
+              }
+              setEditingCategory(null);
+            }}
+            className="glass-card max-w-md w-full rounded-3xl p-6 sm:p-8 space-y-4"
+          >
+            <div className="flex justify-between items-center border-b pb-3">
+              <h4 className="font-display text-lg text-ink font-semibold">
+                {editingCategory.isNew ? "Add New Category" : "Edit Category"}
+              </h4>
+              <button
+                type="button"
+                onClick={() => setEditingCategory(null)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div>
+              <label className="text-xs font-medium block mb-1">Category Name</label>
+              <input
+                type="text"
+                required
+                value={editingCategory.name || ""}
+                onChange={(e) =>
+                  setEditingCategory({
+                    ...editingCategory,
+                    name: e.target.value,
+                  })
+                }
+                placeholder="e.g. Mandap Architecture"
+                className="w-full rounded-xl border border-border bg-card px-3.5 py-2.5 text-sm focus:outline-none focus:border-secondary"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setEditingCategory(null)}
+                className="px-4 py-2 rounded-full border text-xs"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5 font-semibold cursor-pointer"
+              >
+                Save Category
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* MODAL 3: Add/Edit Highlight Card Modal */}
+      {editingHighlight && (
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/80 p-4">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (editingHighlight.isNew) {
+                saveHighlights([
+                  ...highlights,
+                  { ...editingHighlight, id: `highlight-${Date.now()}` },
+                ]);
+              } else {
+                saveHighlights(
+                  highlights.map((h) => (h.id === editingHighlight.id ? editingHighlight : h))
+                );
+              }
+              setEditingHighlight(null);
+            }}
+            className="glass-card max-w-md w-full rounded-3xl p-6 sm:p-8 space-y-4"
+          >
+            <div className="flex justify-between items-center border-b pb-3">
+              <h4 className="font-display text-lg text-ink font-semibold">
+                {editingHighlight.isNew ? "Add Spatial Highlight" : "Edit Highlight"}
+              </h4>
+              <button
+                type="button"
+                onClick={() => setEditingHighlight(null)}
+                className="text-muted-foreground"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div>
+              <label className="text-xs font-medium block mb-1">Card Title</label>
+              <input
+                type="text"
+                required
+                value={editingHighlight.title || ""}
+                onChange={(e) => setEditingHighlight({ ...editingHighlight, title: e.target.value })}
+                placeholder="e.g. Mandap Architecture & Vedic Sanctums"
+                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-medium block mb-1">Subtitle</label>
+              <input
+                type="text"
+                value={editingHighlight.subtitle || ""}
+                onChange={(e) => setEditingHighlight({ ...editingHighlight, subtitle: e.target.value })}
+                placeholder="e.g. Auspicious Engineering & Floral Art"
+                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-medium block mb-1">Description</label>
+              <textarea
+                rows={3}
+                required
+                value={editingHighlight.description || ""}
+                onChange={(e) => setEditingHighlight({ ...editingHighlight, description: e.target.value })}
+                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs"
+              />
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className="text-xs font-medium block mb-1">Badge</label>
+                <input
+                  type="text"
+                  value={editingHighlight.badge || ""}
+                  onChange={(e) => setEditingHighlight({ ...editingHighlight, badge: e.target.value })}
+                  placeholder="e.g. Vedic Precision"
+                  className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium block mb-1">Icon</label>
+                <select
+                  value={editingHighlight.icon || "Sparkles"}
+                  onChange={(e) => setEditingHighlight({ ...editingHighlight, icon: e.target.value })}
+                  className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs"
+                >
+                  <option value="Sparkles">Sparkles</option>
+                  <option value="Layers">Layers</option>
+                  <option value="Award">Award</option>
+                  <option value="Users">Users</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setEditingHighlight(null)}
+                className="px-4 py-2 rounded-full border text-xs"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5 font-semibold"
+              >
+                Save Highlight
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* MODAL 4: Add/Edit Instagram Post Modal */}
+      {editingInstaPost && (
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/80 p-4">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!editingInstaPost.image || !editingInstaPost.image.trim()) {
+                alert("Please upload or enter an image for the Instagram post card.");
+                return;
+              }
+              const cleanPost = {
+                id: editingInstaPost.id || `insta-${Date.now()}`,
+                image: editingInstaPost.image.trim(),
+                likes: Number(editingInstaPost.likes) || 0,
+                caption: (editingInstaPost.caption || "").trim(),
+                url:
+                  (editingInstaPost.url || "").trim() ||
+                  instaHeader.url ||
+                  "https://www.instagram.com/confianza_events",
+              };
+
+              let updatedList;
+              if (editingInstaPost.isNew) {
+                updatedList = [...instagramPosts, cleanPost];
+              } else {
+                updatedList = instagramPosts.map((p) =>
+                  p.id === editingInstaPost.id ? cleanPost : p
+                );
+              }
+              saveInstagram(updatedList);
+              setEditingInstaPost(null);
+            }}
+            className="glass-card max-w-md w-full rounded-3xl p-6 sm:p-8 space-y-4"
+          >
+            <div className="flex justify-between items-center border-b pb-3">
+              <h4 className="font-display text-lg text-ink font-semibold">
+                {editingInstaPost.isNew ? "Add Instagram Post" : "Edit Post Card"}
+              </h4>
+              <button
+                type="button"
+                onClick={() => setEditingInstaPost(null)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <ImageUploadField
+              label="Post Photo (Cloudinary <= 2MB)"
+              value={editingInstaPost.image || ""}
+              onChange={(url) => setEditingInstaPost({ ...editingInstaPost, image: url })}
+            />
+
+            <div>
+              <label className="text-xs font-medium block mb-1">Likes Count</label>
+              <input
+                type="number"
+                value={editingInstaPost.likes || 0}
+                onChange={(e) =>
+                  setEditingInstaPost({ ...editingInstaPost, likes: Number(e.target.value) })
+                }
+                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs focus:outline-none focus:border-secondary"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-medium block mb-1">Caption / Hashtags</label>
+              <input
+                type="text"
+                value={editingInstaPost.caption || ""}
+                onChange={(e) =>
+                  setEditingInstaPost({ ...editingInstaPost, caption: e.target.value })
+                }
+                placeholder="e.g. Mandap reveal at Lake Pichola #ConfianzaWeddings"
+                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs focus:outline-none focus:border-secondary"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-medium block mb-1">Post / Reel Link (Optional)</label>
+              <input
+                type="text"
+                value={editingInstaPost.url || ""}
+                onChange={(e) =>
+                  setEditingInstaPost({ ...editingInstaPost, url: e.target.value })
+                }
+                placeholder="https://www.instagram.com/p/..."
+                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs focus:outline-none focus:border-secondary"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-border/60">
+              <button
+                type="button"
+                onClick={() => setEditingInstaPost(null)}
+                className="px-4 py-2 rounded-full border text-xs"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5 font-semibold cursor-pointer"
+              >
+                Save Post
               </button>
             </div>
           </form>
@@ -7132,12 +8408,12 @@ function TeamEditorModule({ site, showSaved }) {
                 <span className="text-xs text-primary font-semibold block">{m.role}</span>
                 {m.email && (
                   <span className="text-[0.68rem] text-muted-foreground block mt-0.5">
-                    âœ‰ {m.email}
+                    ✉ {m.email}
                   </span>
                 )}
                 {m.experience && (
                   <span className="text-[0.68rem] text-secondary font-medium block mt-0.5">
-                    â˜… {m.experience}
+                    ★ {m.experience}
                   </span>
                 )}
               </div>

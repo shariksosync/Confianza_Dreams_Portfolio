@@ -1,59 +1,88 @@
 "use client";
 
-import { Instagram, Heart, ExternalLink } from "lucide-react";
+import { Instagram, Heart, ExternalLink, Sparkles } from "lucide-react";
 import { useSite } from "../../context/SiteContext";
 import SectionHeading from "../ui/SectionHeading";
 
 export default function InstagramSection() {
-  const { instagram, contact } = useSite();
+  const { instagram, instagramHeader, contact } = useSite();
 
-  const posts = instagram || [];
-  if (posts.length === 0) return null;
-
-  const instaUrl = contact.instagram || "https://www.instagram.com/confianza_events";
+  const posts = Array.isArray(instagram) ? instagram : [];
+  const header = instagramHeader || {};
+  const instaUrl =
+    header.url || contact?.instagram || "https://www.instagram.com/confianza_events";
+  const handle = header.handle || "@confianza_events";
+  const followerCount = header.followerCount || "10K+ Followers";
 
   return (
-    <section className="section-pad relative bg-accent/20 overflow-hidden">
-      <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+    <section className="section-pad relative bg-accent/20 overflow-hidden border-t border-border/40">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
-          eyebrow="Follow Our Journey"
-          title="@confianza_events on Instagram"
-          subtitle="Behind-the-scenes reels, live setups in Udaipur, Pune, and Goa, and daily wedding decor inspiration."
+          eyebrow={header.eyebrow || "Follow Our Journey"}
+          title={header.title || `${handle} on Instagram`}
+          subtitle={
+            header.subtitle ||
+            "Behind-the-scenes reels, live setups in Udaipur, Pune, and Goa, and daily wedding decor inspiration."
+          }
         />
 
-        {/* Instagram Grid */}
-        <div className="reveal mt-12 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-6">
-          {posts.map((post) => (
-            <a
-              key={post.id}
-              href={instaUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="group relative aspect-square overflow-hidden rounded-2xl border border-border bg-card shadow-soft block"
-            >
-              <img
-                src={post.image}
-                alt="Confianza Instagram Post"
-                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-ink/75 opacity-0 backdrop-blur-xs transition-opacity duration-300 group-hover:opacity-100 flex flex-col items-center justify-center gap-2 text-background p-3 text-center">
-                <Instagram className="h-6 w-6 text-secondary" />
-                <div className="flex items-center gap-1.5 text-xs text-champagne font-medium">
-                  <Heart className="h-3.5 w-3.5 fill-rose-gold text-rose-gold" />
-                  <span>{post.likes}</span>
-                </div>
-                <span className="text-[0.62rem] uppercase tracking-wider text-background/80 mt-1 flex items-center gap-1">
-                  <span>View Post</span>
-                  <ExternalLink className="h-2.5 w-2.5" />
-                </span>
-              </div>
-            </a>
-          ))}
-        </div>
+        {/* Empty state when 0 posts exist in database */}
+        {posts.length === 0 ? (
+          <div className="mt-12 glass-card rounded-3xl p-10 text-center text-muted-foreground border border-border/80 max-w-md mx-auto shadow-soft transition-all duration-300">
+            <div className="h-12 w-12 rounded-full bg-secondary/15 ring-2 ring-secondary/40 flex items-center justify-center mx-auto mb-3 text-secondary">
+              <Instagram className="h-6 w-6" />
+            </div>
+            <h4 className="font-display text-base text-ink font-semibold">
+              No Instagram Posts Configured
+            </h4>
+            <p className="text-xs text-muted-foreground mt-1">
+              Instagram posts and reels added in the Admin Panel will be showcased here.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-12 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-6 transition-all duration-300">
+            {posts.map((post) => {
+              const targetUrl = post.url || instaUrl;
+              return (
+                <a
+                  key={post.id}
+                  href={targetUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group relative aspect-square overflow-hidden rounded-2xl border border-border/80 bg-card shadow-soft block transition-all duration-500 hover:-translate-y-1 hover:shadow-luxe"
+                >
+                  <img
+                    src={post.image}
+                    alt={post.caption || "Confianza Instagram Post"}
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-ink/80 opacity-0 backdrop-blur-xs transition-opacity duration-300 group-hover:opacity-100 flex flex-col items-center justify-center gap-2 text-background p-3 text-center">
+                    <Instagram className="h-6 w-6 text-secondary animate-bounce" />
+                    {typeof post.likes === "number" && post.likes > 0 && (
+                      <div className="flex items-center gap-1.5 text-xs text-champagne font-medium">
+                        <Heart className="h-3.5 w-3.5 fill-rose-gold text-rose-gold" />
+                        <span>{post.likes.toLocaleString()}</span>
+                      </div>
+                    )}
+                    {post.caption && (
+                      <p className="text-[0.62rem] text-background/90 line-clamp-2 px-1">
+                        {post.caption}
+                      </p>
+                    )}
+                    <span className="text-[0.62rem] uppercase tracking-wider text-secondary font-semibold mt-1 flex items-center gap-1">
+                      <span>View on Instagram</span>
+                      <ExternalLink className="h-2.5 w-2.5" />
+                    </span>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        )}
 
-        {/* Follow CTA */}
-        <div className="reveal mt-10 text-center">
+        {/* Follow CTA Bar */}
+        <div className="reveal mt-10 text-center flex flex-col sm:flex-row items-center justify-center gap-3">
           <a
             href={instaUrl}
             target="_blank"
@@ -61,11 +90,13 @@ export default function InstagramSection() {
             className="btn-luxe gradient-royal text-primary-foreground text-xs shadow-luxe inline-flex items-center gap-2"
           >
             <Instagram className="h-4 w-4 text-secondary" />
-            <span>Follow on Instagram (@confianza_events)</span>
+            <span>Follow {handle}</span>
+            <span className="px-2 py-0.5 rounded-full bg-white/20 text-[0.65rem] font-mono">
+              {followerCount}
+            </span>
           </a>
         </div>
       </div>
     </section>
   );
 }
-
