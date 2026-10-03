@@ -29,12 +29,13 @@ export async function POST(req: Request) {
       }).exec();
     }
 
-    // Fallback seed if admin didn't exist
+    // Fallback seed if admin doesn't exist yet in the database
     if (!admin) {
+      const defaultPassword = process.env.ADMIN_PASSWORD || "admin123";
       const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash("admin123", salt);
+      const hashedPassword = await bcrypt.hash(defaultPassword, salt);
       admin = await Admin.create({
-        email: "confianzaevents@gmail.com",
+        email: (process.env.ADMIN_EMAIL || "confianzaevents@gmail.com").toLowerCase(),
         password: hashedPassword,
         name: "Ashish Wankhede",
         role: "superadmin",
@@ -43,15 +44,10 @@ export async function POST(req: Request) {
 
     const isValid = await bcrypt.compare(password, admin.password);
     if (!isValid) {
-      // Fallback check for direct "admin" / "admin123"
-      if ((cleanUsername === "admin" || cleanUsername === "confianzaevents@gmail.com") && password === "admin123") {
-        // match allowed
-      } else {
-        return NextResponse.json(
-          { success: false, error: "Invalid credentials. Please check username/password." },
-          { status: 401 }
-        );
-      }
+      return NextResponse.json(
+        { success: false, error: "Invalid credentials. Please check username/password." },
+        { status: 401 }
+      );
     }
 
     const payload = {

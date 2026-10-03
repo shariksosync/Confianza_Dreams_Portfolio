@@ -2,17 +2,17 @@ import nodemailer from "nodemailer";
 
 const EMAIL_HOST = process.env.EMAIL_HOST || "smtp.gmail.com";
 const EMAIL_PORT = parseInt(process.env.EMAIL_PORT || "587", 10);
-const EMAIL_HOST_USER = process.env.EMAIL_HOST_USER || "sharikahmed731@gmail.com";
-const EMAIL_HOST_PASSWORD = process.env.EMAIL_HOST_PASSWORD || "qijn piou dnrg tovn";
+const EMAIL_HOST_USER = process.env.EMAIL_HOST_USER || "";
+const EMAIL_HOST_PASSWORD = (process.env.EMAIL_HOST_PASSWORD || "").replace(/\s+/g, "");
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "confianzaevents@gmail.com";
 
 const transporter = nodemailer.createTransport({
   host: EMAIL_HOST,
   port: EMAIL_PORT,
-  secure: process.env.SMTP_SECURE === "true", // false for port 587 with STARTTLS
+  secure: process.env.SMTP_SECURE === "true" || EMAIL_PORT === 465,
   auth: {
     user: EMAIL_HOST_USER,
-    pass: EMAIL_HOST_PASSWORD.replace(/\s+/g, ""), // clean spaces in app password
+    pass: EMAIL_HOST_PASSWORD,
   },
 });
 

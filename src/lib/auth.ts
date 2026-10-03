@@ -2,7 +2,12 @@ import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 
 const ADMIN_SESSION_SECRET =
-  process.env.ADMIN_SESSION_SECRET || "confianza_super_secret_jwt_key_2026_luxury_secure_token_key";
+  process.env.ADMIN_SESSION_SECRET ||
+  (process.env.NODE_ENV === "production"
+    ? (() => {
+        throw new Error("Missing ADMIN_SESSION_SECRET in production environment variables");
+      })()
+    : "dev_fallback_secret_jwt_key_local_only");
 
 const TOKEN_COOKIE_NAME = "confianza_admin_token";
 
