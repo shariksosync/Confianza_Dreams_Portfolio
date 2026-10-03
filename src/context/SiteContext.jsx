@@ -21,7 +21,18 @@ const initialEmptyState = {
       secondary: "#C9A227",
       dark: "#2B2138",
     },
-    sections: [],
+    sections: [
+      { id: "hero", label: "Hero Banner", enabled: true },
+      { id: "partners", label: "Preferred Venues Marquee", enabled: true },
+      { id: "about", label: "About Confianza", enabled: true },
+      { id: "services", label: "Bespoke Services", enabled: true },
+      { id: "portfolio", label: "Signature Works / Portfolio", enabled: true },
+      { id: "beforeAfter", label: "Venue Transformations (Before / After)", enabled: true },
+      { id: "process", label: "The 4-Step Journey", enabled: true },
+      { id: "testimonials", label: "Love Stories & Testimonials", enabled: true },
+      { id: "instagram", label: "Instagram Live Showcase", enabled: true },
+      { id: "cta", label: "Private Consultation CTA", enabled: true },
+    ],
   },
   hero: {
     eyebrow: "",
@@ -459,6 +470,29 @@ export function SiteProvider({ children }) {
     }
   }, []);
 
+  /** Update inquiry (status, priority, notes) in MongoDB */
+  const updateMessage = useCallback(async (id, updates) => {
+    setMessages((prev) =>
+      prev.map((m) => {
+        if (m.id === id || m._id === id) {
+          return { ...m, ...updates };
+        }
+        return m;
+      })
+    );
+    try {
+      const res = await fetch("/api/inquiries", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, ...updates }),
+      });
+      const resJson = await res.json();
+      return resJson;
+    } catch (err) {
+      console.error(`Failed to update inquiry ${id}:`, err);
+    }
+  }, []);
+
   /** Remove inquiry from MongoDB */
   const removeMessage = useCallback(async (id) => {
     setMessages((prev) => prev.filter((m) => m.id !== id && m._id !== id));
@@ -482,11 +516,13 @@ export function SiteProvider({ children }) {
       update,
       messages,
       addMessage,
+      updateMessage,
+      updateInquiry: updateMessage,
       removeMessage,
       theme,
       setTheme,
     }),
-    [data, ready, loading, refreshing, refreshData, refreshInquiries, update, messages, addMessage, removeMessage, theme]
+    [data, ready, loading, refreshing, refreshData, refreshInquiries, update, messages, addMessage, updateMessage, removeMessage, theme]
   );
 
   return <SiteContext.Provider value={value}>{children}</SiteContext.Provider>;

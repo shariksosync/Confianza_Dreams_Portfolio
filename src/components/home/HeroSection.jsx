@@ -1,132 +1,138 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { ChevronDown, ArrowRight, Sparkles } from "lucide-react";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useSite } from "../../context/SiteContext";
+
+const DEFAULT_SLIDES = [
+  "/images/hero-1.jpg",
+  "/images/hero-2.jpg",
+  "/images/hero-3.jpg",
+];
 
 export default function HeroSection() {
   const { hero } = useSite();
   const [currentSlide, setCurrentSlide] = useState(0);
-  const images = hero.images?.length
-    ? hero.images
-    : ["/images/hero-1.jpg", "/images/hero-2.jpg", "/images/hero-3.jpg"];
+  const [isPaused, setIsPaused] = useState(false);
+  const touchStartX = useRef(null);
 
+  const images =
+    Array.isArray(hero?.images) && hero.images.length > 0
+      ? hero.images.filter(Boolean)
+      : DEFAULT_SLIDES;
+
+  const total = images.length;
+
+  const nextSlide = useCallback(() => {
+    if (total <= 1) return;
+    setCurrentSlide((prev) => (prev + 1) % total);
+  }, [total]);
+
+  const prevSlide = useCallback(() => {
+    if (total <= 1) return;
+    setCurrentSlide((prev) => (prev - 1 + total) % total);
+  }, [total]);
+
+  // Automatic timer with pause on hover
   useEffect(() => {
-    if (images.length <= 1) return;
+    if (total <= 1 || isPaused) return;
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % images.length);
-    }, 6000);
+      nextSlide();
+    }, 5000);
     return () => clearInterval(timer);
-  }, [images.length]);
+  }, [total, isPaused, nextSlide]);
+
+  // Touch swipe support for mobile viewports
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e) => {
+    if (touchStartX.current === null) return;
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) nextSlide();
+      else prevSlide();
+    }
+    touchStartX.current = null;
+  };
 
   return (
-    <section className="relative min-h-[92vh] sm:min-h-screen w-full flex items-center justify-center overflow-hidden bg-ink pt-20 pb-16">
-      {/* Background Image Carousel with Ken-Burns & Crossfade */}
-      <div className="absolute inset-0 z-0">
+    <section
+      aria-label="Homepage Luxury Banner Showcase"
+      className="relative w-full bg-[#1A1322] pt-[68px] sm:pt-[80px] lg:pt-[92px] select-none"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
+      {/* 100% Visible Banner Frame */}
+      <div className="relative w-full h-[45vh] sm:h-[60vh] md:h-[72vh] lg:h-[82vh] min-h-[320px] max-h-[860px] overflow-hidden">
         {images.map((img, idx) => (
           <div
             key={img + idx}
-            className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
-              idx === currentSlide ? "opacity-100 scale-105" : "opacity-0 scale-100"
+            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+              idx === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
             }`}
-            style={{
-              backgroundImage: `url(${img})`,
-              transition: "opacity 1.5s ease-in-out, transform 8s ease-out",
-            }}
-          />
+          >
+            <img
+              src={img}
+              alt={`Confianza Luxury Banner ${idx + 1}`}
+              className="h-full w-full object-cover object-center"
+              loading={idx === 0 ? "eager" : "lazy"}
+              onError={(e) => {
+                // Fallback to default if custom remote url fails
+                if (e.currentTarget.src !== DEFAULT_SLIDES[idx % DEFAULT_SLIDES.length]) {
+                  e.currentTarget.src = DEFAULT_SLIDES[idx % DEFAULT_SLIDES.length];
+                }
+              }}
+            />
+          </div>
         ))}
-        {/* Luxury Dark + Royal Lavender Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/75 to-ink/40" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(43,33,56,0.7)_100%)]" />
-      </div>
 
-      {/* Main Hero Content */}
-      <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8 lg:px-10 text-center flex flex-col items-center">
-        {/* Eyebrow */}
-        <div className="animate-fade-in inline-flex items-center gap-2 rounded-full border border-secondary/40 bg-secondary/10 px-4 py-1.5 backdrop-blur-md">
-          <Sparkles className="h-3.5 w-3.5 text-secondary animate-pulse" />
-          <span className="text-[0.68rem] sm:text-xs font-medium uppercase tracking-[0.3em] text-champagne">
-            {hero.eyebrow || "Luxury Wedding Planners • Pune"}
-          </span>
-        </div>
-
-        {/* Heading */}
-        <h1 className="animate-slide-up mt-6 max-w-4xl font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-normal leading-[1.12] text-background">
-          {hero.headline || "Where Weddings Become Stories"}
-        </h1>
-
-        {/* Gold divider */}
-        <div className="animate-zoom-in my-5 rule-gold mx-auto" />
-
-        {/* Subtitle */}
-        <p className="animate-fade-in max-w-2xl text-sm sm:text-base md:text-lg leading-relaxed text-background/80 font-light">
-          {hero.subtitle ||
-            "From the first consultation to the final celebration, Confianza crafts personalised, flawlessly executed weddings that your guests will talk about for years."}
-        </p>
-
-        {/* CTAs */}
-        <div className="animate-slide-up mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-4">
-          <Link
-            href={hero.primaryCta?.href || "/contact"}
-            className="btn-luxe gradient-royal text-primary-foreground shadow-luxe font-semibold"
+        {/* Previous Slide Button */}
+        {total > 1 && (
+          <button
+            type="button"
+            onClick={prevSlide}
+            aria-label="Previous Slide"
+            className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-20 h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-black/40 hover:bg-black/70 text-white hover:text-[#C2A438] border border-white/20 hover:border-[#C2A438]/80 backdrop-blur-md flex items-center justify-center transition-all duration-300 shadow-lg cursor-pointer hover:scale-105"
           >
-            <span>{hero.primaryCta?.label || "Book Consultation"}</span>
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-          <Link
-            href={hero.secondaryCta?.href || "/portfolio"}
-            className="btn-luxe glass-dark text-background border border-background/25 hover:border-secondary hover:text-secondary"
-          >
-            <span>{hero.secondaryCta?.label || "View Portfolio"}</span>
-          </Link>
-        </div>
+            <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
+          </button>
+        )}
 
-        {/* Slide navigation indicators */}
-        {images.length > 1 && (
-          <div className="mt-8 flex items-center justify-center gap-2.5">
+        {/* Next Slide Button */}
+        {total > 1 && (
+          <button
+            type="button"
+            onClick={nextSlide}
+            aria-label="Next Slide"
+            className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-20 h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-black/40 hover:bg-black/70 text-white hover:text-[#C2A438] border border-white/20 hover:border-[#C2A438]/80 backdrop-blur-md flex items-center justify-center transition-all duration-300 shadow-lg cursor-pointer hover:scale-105"
+          >
+            <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
+          </button>
+        )}
+
+        {/* Bottom Slide Indicators */}
+        {total > 1 && (
+          <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 sm:gap-2.5 px-3 py-1.5 rounded-full bg-black/35 backdrop-blur-md border border-white/10 shadow-md">
             {images.map((_, i) => (
               <button
                 key={i}
                 type="button"
                 aria-label={`Go to slide ${i + 1}`}
                 onClick={() => setCurrentSlide(i)}
-                className={`h-1.5 rounded-full transition-all duration-500 ${
-                  i === currentSlide ? "w-8 bg-secondary" : "w-2 bg-background/30 hover:bg-background/60"
+                className={`h-2 sm:h-2.5 rounded-full transition-all duration-500 cursor-pointer ${
+                  i === currentSlide
+                    ? "w-7 sm:w-9 bg-[#C2A438] shadow-[0_0_10px_rgba(194,164,56,0.6)]"
+                    : "w-2 sm:w-2.5 bg-white/40 hover:bg-white/80"
                 }`}
               />
             ))}
           </div>
         )}
-
-        {/* Floating Statistics Grid */}
-        <div className="mt-12 sm:mt-16 grid w-full max-w-5xl grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
-          {(hero.floatingStats || []).map((stat, i) => (
-            <div
-              key={stat.label || i}
-              className="glass-dark rounded-2xl p-4 sm:p-5 text-center backdrop-blur-lg border border-white/10 transition-all duration-300 hover:border-secondary/40 hover:-translate-y-1"
-            >
-              <div className="font-display text-2xl sm:text-3xl lg:text-4xl text-gold-gradient font-bold">
-                {stat.value}
-              </div>
-              <div className="mt-1 text-[0.68rem] sm:text-xs tracking-wider uppercase text-background/70 font-light">
-                {stat.label}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Scroll down prompt */}
-        <a
-          href="#about"
-          aria-label="Scroll down"
-          className="mt-10 inline-flex flex-col items-center text-xs tracking-widest text-background/50 hover:text-secondary transition-colors"
-        >
-          <span className="uppercase text-[0.62rem] mb-1 tracking-[0.25em]">Explore</span>
-          <ChevronDown className="h-4 w-4 animate-bounce" />
-        </a>
       </div>
     </section>
   );
 }
-

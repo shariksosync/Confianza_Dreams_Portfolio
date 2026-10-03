@@ -11,9 +11,19 @@ import {
   CheckCircle2,
   MessageCircle,
   Calendar,
+  AlertCircle,
 } from "lucide-react";
 import { useSite } from "../../context/SiteContext";
 import SectionHeading from "../ui/SectionHeading";
+import { validatePhoneNumber } from "../../lib/validation";
+
+const BUDGET_TIERS = [
+  "Below ₹5 Lakhs",
+  "₹5L - ₹15 Lakhs",
+  "₹15L - ₹30 Lakhs",
+  "₹30L - ₹60 Lakhs",
+  "₹60 Lakhs+ (Royal / Destination)",
+];
 
 export default function ContactSection({ isStandalone = false }) {
   const { contact, services, addMessage } = useSite();
@@ -23,9 +33,10 @@ export default function ContactSection({ isStandalone = false }) {
     email: "",
     eventDate: "",
     service: "",
-    budget: "₹5L - ₹15L",
+    budget: BUDGET_TIERS[0],
     message: "",
   });
+  const [phoneError, setPhoneError] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -63,21 +74,24 @@ export default function ContactSection({ isStandalone = false }) {
     }
   }, [services]);
 
-  const budgetTiers = [
-    "Below ₹5 Lakhs",
-    "₹5L - ₹15 Lakhs",
-    "₹15L - ₹30 Lakhs",
-    "₹30L - ₹60 Lakhs",
-    "₹60 Lakhs+ (Royal / Destination)",
-  ];
+  const budgetTiers = BUDGET_TIERS;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const phoneValidation = validatePhoneNumber(formData.phone);
+    if (!phoneValidation.isValid) {
+      setPhoneError(phoneValidation.error || "Please enter a valid contact phone number.");
+      return;
+    }
+    setPhoneError("");
     setLoading(true);
     try {
       await addMessage({
         ...formData,
         service: formData.service || availableServices[0],
+        budget: formData.budget || BUDGET_TIERS[0],
+        source: "Wedding Inquiry Form",
+        priority: "normal",
         createdAt: new Date().toISOString(),
       });
       setSubmitted(true);
@@ -87,9 +101,10 @@ export default function ContactSection({ isStandalone = false }) {
         email: "",
         eventDate: "",
         service: availableServices[0] || "",
-        budget: "₹5L - ₹15L",
+        budget: BUDGET_TIERS[0],
         message: "",
       });
+      setPhoneError("");
     } catch (err) {
       console.error("Consultation form error:", err);
     } finally {
@@ -214,15 +229,15 @@ export default function ContactSection({ isStandalone = false }) {
             <div className="glass-card rounded-3xl p-6 sm:p-10 border border-border shadow-luxe relative">
               {submitted ? (
                 <div className="py-12 text-center space-y-4 animate-zoom-in">
-                  <div className="gradient-royal mx-auto grid h-16 w-16 place-items-center rounded-full text-primary-foreground shadow-luxe">
-                    <CheckCircle2 className="h-8 w-8" />
+                  <div className="gradient-royal mx-auto grid h-16 w-16 place-items-center rounded-full text-primary-foreground shadow-luxe ring-4 ring-secondary/30">
+                    <CheckCircle2 className="h-8 w-8 text-secondary" />
                   </div>
                   <h3 className="font-display text-2xl sm:text-3xl text-ink">
                     Consultation Request Received!
                   </h3>
                   <div className="rule-gold mx-auto" />
                   <p className="max-w-md mx-auto text-sm text-muted-foreground leading-relaxed">
-                    Thank you! Ashish Wankhede and the Confianza planning team will review your dates and contact you within 24 hours.
+                    Thank you! We have dispatched a confirmation email to your inbox. Ashish Wankhede, Rutik Pund, and the Confianza planning team will review your celebration vision and contact you shortly.
                   </p>
                   <button
                     type="button"
@@ -265,11 +280,39 @@ export default function ContactSection({ isStandalone = false }) {
                       <input
                         type="tel"
                         required
+                        inputMode="tel"
                         placeholder="e.g. 9850983389"
                         value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        className="w-full rounded-xl border border-border bg-card/60 px-4 py-2.5 text-xs sm:text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setFormData({ ...formData, phone: val });
+                          if (phoneError) {
+                            const res = validatePhoneNumber(val);
+                            if (res.isValid) setPhoneError("");
+                          }
+                        }}
+                        onBlur={() => {
+                          if (formData.phone.trim()) {
+                            const res = validatePhoneNumber(formData.phone);
+                            if (!res.isValid) {
+                              setPhoneError(res.error || "Please enter a valid phone number.");
+                            } else {
+                              setPhoneError("");
+                            }
+                          }
+                        }}
+                        className={`w-full rounded-xl border bg-card/60 px-4 py-2.5 text-xs sm:text-sm text-foreground focus:outline-none focus:ring-1 ${
+                          phoneError
+                            ? "border-destructive focus:border-destructive focus:ring-destructive"
+                            : "border-border focus:border-primary focus:ring-primary"
+                        }`}
                       />
+                      {phoneError && (
+                        <p className="text-[0.7rem] text-destructive mt-1 flex items-center gap-1 font-medium">
+                          <AlertCircle className="h-3 w-3 shrink-0 inline" />
+                          <span>{phoneError}</span>
+                        </p>
+                      )}
                     </div>
                   </div>
 

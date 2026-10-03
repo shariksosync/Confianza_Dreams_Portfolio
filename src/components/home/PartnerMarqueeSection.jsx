@@ -40,7 +40,7 @@ export default function PartnerMarqueeSection() {
               <span className="font-display text-base sm:text-lg tracking-wider">
                 {name}
               </span>
-              <span className="text-secondary/40 text-xs">âœ¦</span>
+              <span className="text-secondary/50 text-xs">✦</span>
             </div>
           ))}
         </div>

@@ -41,7 +41,7 @@ export default function GalleryPage() {
   return (
     <SiteLayout revealKey="gallery-page">
       {/* 1. Dynamic Hero Header Banner */}
-      <section className="relative bg-ink pt-32 pb-20 sm:pt-40 sm:pb-28 text-background overflow-hidden">
+      <section className="relative bg-ink pt-36 pb-20 sm:pt-40 lg:pt-44 sm:pb-28 text-background overflow-hidden">
         {/* Background Image with Dark Overlay */}
         <div className="absolute inset-0 z-0 opacity-30">
           <img
@@ -93,7 +93,7 @@ export default function GalleryPage() {
       <GalleryHighlightsSection />
 
       {/* 4. Follow Our Journey Instagram Feed */}
-      <InstagramSection />
+      <InstagramSection showAll={true} />
 
       {/* 5. Bespoke Consultation CTA Banner */}
       <section className="section-pad relative bg-ink text-background overflow-hidden border-t border-white/10">

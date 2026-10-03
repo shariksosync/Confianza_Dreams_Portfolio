@@ -9,7 +9,7 @@ export default function AboutSection() {
   const { about } = useSite();
 
   return (
-    <section id="about" className="section-pad relative overflow-hidden bg-background">
+    <section id="about" className="section-pad relative overflow-hidden bg-background scroll-mt-28 lg:scroll-mt-32">
       {/* Decorative background glow */}
       <div className="pointer-events-none absolute -left-32 top-1/4 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
       <div className="pointer-events-none absolute -right-32 bottom-1/4 h-96 w-96 rounded-full bg-secondary/10 blur-3xl" />

@@ -127,39 +127,39 @@ export default function BlogSection({ isStandalone = false }) {
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-100 flex items-center justify-center bg-ink/85 p-4 backdrop-blur-md animate-fade-in"
+          className="fixed inset-0 z-100 flex items-center justify-center bg-[rgba(37,27,49,0.38)] p-4 backdrop-blur-md animate-fade-in"
           onClick={() => setSelectedArticle(null)}
         >
           <div
-            className="glass-card max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-3xl p-6 sm:p-10 border border-border shadow-luxe animate-zoom-in"
+            className="modal-dialog-luxury bg-[#FFFDFB] max-h-[88vh] w-full max-w-3xl overflow-y-auto no-scrollbar rounded-3xl p-6 sm:p-10 border border-[#E8E2EE] shadow-luxe animate-zoom-in"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-border pb-4">
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
-                <Sparkles className="h-3.5 w-3.5 text-secondary" />
+            <div className="flex items-center justify-between border-b border-[#E8E2EE] pb-4">
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#6A439E]">
+                <Sparkles className="h-3.5 w-3.5 text-[#C2A438]" />
                 {selectedArticle.category}
               </span>
               <button
                 type="button"
                 onClick={() => setSelectedArticle(null)}
                 aria-label="Close article"
-                className="rounded-full p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition"
+                className="rounded-full p-2 text-[#7E7688] hover:bg-[#F4F1F7] hover:text-[#2B2138] transition cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <div className="mt-6">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-                <Calendar className="h-4 w-4 text-secondary" />
+              <div className="flex items-center gap-2 text-xs text-[#7E7688] mb-2">
+                <Calendar className="h-4 w-4 text-[#C2A438]" />
                 <span>Published on {selectedArticle.date}</span>
               </div>
-              <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl text-ink leading-tight">
+              <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl text-[#2B2138] leading-tight font-bold">
                 {selectedArticle.title}
               </h2>
             </div>
 
-            <div className="my-6 overflow-hidden rounded-2xl h-64 sm:h-80 w-full">
+            <div className="my-6 overflow-hidden rounded-2xl h-64 sm:h-80 w-full border border-[#E8E2EE]/60 shadow-sm">
               <img
                 src={selectedArticle.image}
                 alt={selectedArticle.title}
@@ -167,22 +167,22 @@ export default function BlogSection({ isStandalone = false }) {
               />
             </div>
 
-            <div className="space-y-4 text-sm sm:text-base leading-relaxed text-foreground/90 font-light">
-              <p className="font-medium text-base sm:text-lg text-ink">
+            <div className="space-y-4 text-sm sm:text-base leading-relaxed text-[#4C4555] font-light">
+              <p className="font-medium text-base sm:text-lg text-[#2B2138]">
                 {selectedArticle.excerpt}
               </p>
               <div className="rule-gold my-4" />
-              <p>{selectedArticle.content}</p>
+              <p className="whitespace-pre-line leading-relaxed">{selectedArticle.content}</p>
             </div>
 
-            <div className="mt-8 pt-6 border-t border-border flex flex-wrap items-center justify-between gap-4">
-              <span className="text-xs text-muted-foreground">
+            <div className="mt-8 pt-6 border-t border-[#E8E2EE] flex flex-wrap items-center justify-between gap-4">
+              <span className="text-xs text-[#7E7688]">
                 Confianza Event's and Entertainment Editorial
               </span>
               <Link
                 href="/contact"
                 onClick={() => setSelectedArticle(null)}
-                className="btn-luxe gradient-royal text-primary-foreground text-xs"
+                className="btn-modal-primary"
               >
                 Book a Planning Session
               </Link>

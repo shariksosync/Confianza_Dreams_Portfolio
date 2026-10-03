@@ -46,11 +46,11 @@ export default function TeamDetailModal({ member, isOpen, onClose }) {
       role="dialog"
       aria-modal="true"
       aria-labelledby="team-member-name"
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-ink/85 p-4 sm:p-6 backdrop-blur-xl animate-fade-in"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-[rgba(37,27,49,0.38)] p-4 sm:p-6 backdrop-blur-md animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="glass-dark relative max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-3xl p-6 sm:p-8 border border-white/20 shadow-luxe animate-zoom-in text-background"
+        className="modal-dialog-luxury bg-[#FFFDFB] relative max-h-[88vh] w-full max-w-2xl overflow-y-auto no-scrollbar rounded-3xl p-6 sm:p-8 border border-[#E8E2EE] shadow-luxe text-[#4C4555]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
@@ -58,7 +58,7 @@ export default function TeamDetailModal({ member, isOpen, onClose }) {
           type="button"
           aria-label="Close details"
           onClick={onClose}
-          className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full border border-white/20 bg-white/10 text-white transition hover:bg-white/20 hover:text-secondary z-10"
+          className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full border border-[#E8E2EE] bg-[#F4F1F7] text-[#2B2138] transition hover:bg-[#EAE4F0] hover:text-[#6A439E] z-10 cursor-pointer"
         >
           <X className="h-4 w-4" />
         </button>
@@ -66,14 +66,14 @@ export default function TeamDetailModal({ member, isOpen, onClose }) {
         <div className="grid gap-6 sm:grid-cols-12 sm:items-center">
           {/* Member Photo */}
           <div className="sm:col-span-5 relative">
-            <div className="relative h-64 sm:h-80 w-full overflow-hidden rounded-2xl ring-2 ring-secondary/70 shadow-luxe bg-ink">
+            <div className="relative h-64 sm:h-80 w-full overflow-hidden rounded-2xl ring-2 ring-[#C2A438]/50 shadow-md bg-[#FAF8FC]">
               <img
                 src={member.image || "/images/couple.jpg"}
                 alt={member.name}
                 className="h-full w-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-transparent to-transparent" />
-              <span className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full gradient-gold px-3 py-1 text-[0.68rem] font-bold uppercase tracking-wider text-ink shadow-md">
+              <div className="absolute inset-0 bg-gradient-to-t from-[#2B2138]/70 via-transparent to-transparent" />
+              <span className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#C2A438] to-[#E4CA72] px-3 py-1 text-[0.68rem] font-bold uppercase tracking-wider text-[#2B2138] shadow-md">
                 <Sparkles className="h-3 w-3" />
                 {member.role}
               </span>
@@ -83,31 +83,31 @@ export default function TeamDetailModal({ member, isOpen, onClose }) {
           {/* Member Details */}
           <div className="sm:col-span-7 space-y-4">
             <div>
-              <span className="inline-flex items-center gap-1.5 text-[0.68rem] uppercase tracking-[0.25em] text-secondary font-bold">
+              <span className="inline-flex items-center gap-1.5 text-[0.68rem] uppercase tracking-[0.25em] text-[#C2A438] font-bold">
                 <ShieldCheck className="h-3.5 w-3.5" />
                 <span>Confianza Leadership &amp; Creative Team</span>
               </span>
-              <h2 id="team-member-name" className="font-display text-2xl sm:text-3xl text-white font-bold mt-1">
+              <h2 id="team-member-name" className="font-display text-2xl sm:text-3xl text-[#2B2138] font-bold mt-1">
                 {member.name}
               </h2>
-              <p className="text-xs text-champagne/80 uppercase tracking-wider font-medium mt-0.5">
+              <p className="text-xs text-[#7E7688] uppercase tracking-wider font-semibold mt-0.5">
                 {member.role} {member.experience ? `• ${member.experience}` : ""}
               </p>
             </div>
 
-            {/* Email Contact (NO Phone number) */}
-            <div className="rounded-2xl bg-white/5 p-3.5 border border-white/10 flex items-center justify-between gap-3">
+            {/* Email Contact */}
+            <div className="rounded-2xl bg-[#FCFBFE] p-3.5 border border-[#E8E2EE] flex items-center justify-between gap-3 shadow-sm">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary/20 text-secondary">
+                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#6A439E]/10 text-[#6A439E]">
                   <Mail className="h-4 w-4" />
                 </div>
                 <div className="min-w-0">
-                  <span className="text-[0.62rem] uppercase tracking-wider text-champagne/70 block font-medium">
+                  <span className="text-[0.62rem] uppercase tracking-wider text-[#7E7688] block font-semibold">
                     Official Email
                   </span>
                   <a
                     href={`mailto:${email}`}
-                    className="text-xs sm:text-sm text-white font-medium hover:text-secondary transition truncate block"
+                    className="text-xs sm:text-sm text-[#2B2138] font-medium hover:text-[#6A439E] transition truncate block"
                   >
                     {email}
                   </a>
@@ -117,23 +117,23 @@ export default function TeamDetailModal({ member, isOpen, onClose }) {
               <button
                 type="button"
                 onClick={handleCopyEmail}
-                className="shrink-0 p-2 rounded-xl border border-white/20 hover:border-secondary hover:text-secondary text-white/80 transition"
+                className="shrink-0 p-2 rounded-xl border border-[#E8E2EE] hover:border-[#6A439E] hover:text-[#6A439E] text-[#7E7688] transition cursor-pointer"
                 title="Copy email address"
               >
-                {copied ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+                {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
               </button>
             </div>
 
             {/* Specialties Badges */}
             <div>
-              <span className="text-[0.65rem] uppercase tracking-wider text-champagne/70 block mb-2 font-medium">
+              <span className="text-[0.65rem] uppercase tracking-wider text-[#7E7688] block mb-2 font-semibold">
                 Key Specialties &amp; Domain:
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {specialties.map((spec, sIdx) => (
                   <span
                     key={sIdx}
-                    className="rounded-full bg-primary/25 border border-primary/40 text-secondary text-[0.68rem] px-3 py-1 font-medium tracking-wide"
+                    className="rounded-full bg-[#FAF8FC] border border-[#6A439E]/25 text-[#6A439E] text-[0.68rem] px-3 py-1 font-semibold tracking-wide"
                   >
                     ✦ {spec}
                   </span>
@@ -143,10 +143,10 @@ export default function TeamDetailModal({ member, isOpen, onClose }) {
 
             {/* Full Bio */}
             <div>
-              <span className="text-[0.65rem] uppercase tracking-wider text-champagne/70 block mb-1 font-medium">
+              <span className="text-[0.65rem] uppercase tracking-wider text-[#7E7688] block mb-1 font-semibold">
                 About {member.name}:
               </span>
-              <p className="text-xs sm:text-sm text-white/85 leading-relaxed font-light">
+              <p className="text-xs sm:text-sm text-[#4C4555] leading-relaxed font-light">
                 {member.bio || "Dedicated luxury wedding coordinator bringing artistic mastery and calm execution to every couple's milestone celebration."}
               </p>
             </div>
@@ -156,7 +156,7 @@ export default function TeamDetailModal({ member, isOpen, onClose }) {
               <button
                 type="button"
                 onClick={onClose}
-                className="btn-luxe gradient-gold text-ink text-xs font-bold px-5 py-2"
+                className="btn-modal-primary text-xs"
               >
                 Close Details
               </button>

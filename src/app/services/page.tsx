@@ -18,19 +18,45 @@ import PackagesSection from "@/components/home/PackagesSection";
 import ProcessSection from "@/components/home/ProcessSection";
 import { useSite } from "@/context/SiteContext";
 
+const normalizeCategory = (str: string) =>
+  (str || "")
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]/g, "")
+    .trim();
+
+const isAllCategory = (cat: any) => {
+  if (!cat) return false;
+  const str = typeof cat === "string" ? cat : cat?.name || cat?.label || cat?.id || "";
+  const norm = normalizeCategory(str);
+  return norm === "all" || norm === "alldisciplines" || norm === "allservices";
+};
+
+const isCategoryMatch = (itemCategory: string, targetCategory: any) => {
+  if (!targetCategory || isAllCategory(targetCategory)) return true;
+  if (!itemCategory) return false;
+  const normItem = normalizeCategory(itemCategory);
+  const normTarget = normalizeCategory(
+    typeof targetCategory === "string"
+      ? targetCategory
+      : targetCategory?.name || targetCategory?.label || targetCategory?.id || ""
+  );
+  return Boolean(normItem && normTarget && normItem === normTarget);
+};
+
 export default function ServicesPage() {
   const { services, serviceCategories, ceremonies, stationery, servicesCta, contact, loading, ready } = useSite() as any;
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   const serviceList = services || [];
   const categoriesList =
-    serviceCategories && serviceCategories.length > 0
+    Array.isArray(serviceCategories) && serviceCategories.length > 0
       ? serviceCategories
       : [
-          { id: "planning", label: "Signature Planning & Direction" },
-          { id: "decor", label: "Mandap & Spatial Decor" },
-          { id: "hospitality", label: "Royal Hospitality & Shadows" },
-          { id: "rituals", label: "Rituals, Artists & F&B" },
+          { id: "planning", name: "Signature Planning & Direction", label: "Signature Planning & Direction" },
+          { id: "decor", name: "Mandap & Spatial Decor", label: "Mandap & Spatial Decor" },
+          { id: "hospitality", name: "Royal Hospitality & Shadows", label: "Royal Hospitality & Shadows" },
+          { id: "rituals", name: "Rituals, Artists & F&B", label: "Rituals, Artists & F&B" },
         ];
 
   const ceremonyList = ceremonies || [];
@@ -52,14 +78,14 @@ export default function ServicesPage() {
   };
 
   const filteredServices = serviceList.filter((service: any) => {
-    if (selectedCategory === "all") return true;
-    return service.category === selectedCategory || service.badge?.toLowerCase().includes(selectedCategory);
+    if (isAllCategory(selectedCategory)) return true;
+    return isCategoryMatch(service.category, selectedCategory);
   });
 
   return (
     <SiteLayout revealKey="services-page">
       {/* 1. Hero Banner */}
-      <section className="relative bg-ink pt-32 pb-20 sm:pt-40 sm:pb-24 text-background overflow-hidden">
+      <section className="relative bg-ink pt-36 pb-20 sm:pt-40 lg:pt-44 sm:pb-24 text-background overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-25">
           <img
             src="/images/hero-1.jpg"
@@ -98,38 +124,39 @@ export default function ServicesPage() {
               type="button"
               onClick={() => setSelectedCategory("all")}
               className={`rounded-full px-4 sm:px-5 py-2 text-xs font-semibold uppercase tracking-[0.14em] transition-all duration-300 flex items-center gap-2 cursor-pointer ${
-                selectedCategory === "all"
-                  ? "gradient-royal text-primary-foreground shadow-luxe"
+                isAllCategory(selectedCategory)
+                  ? "gradient-royal text-primary-foreground shadow-luxe scale-105"
                   : "glass-card text-foreground/80 hover:border-primary/40 hover:text-primary"
               }`}
             >
               <span>All Disciplines</span>
-              <span className={`text-[0.65rem] px-1.5 py-0.2 rounded-full ${selectedCategory === "all" ? "bg-white/20 text-white" : "bg-primary/10 text-primary"}`}>
+              <span className={`text-[0.65rem] px-1.5 py-0.5 rounded-full font-mono font-bold ${isAllCategory(selectedCategory) ? "bg-secondary text-ink" : "bg-muted text-muted-foreground"}`}>
                 {serviceList.length}
               </span>
             </button>
 
             {categoriesList.map((cat: any) => {
-              const count = serviceList.filter(
-                (s: any) => s.category === cat.id || s.badge?.toLowerCase().includes(cat.id)
-              ).length;
+              const catName = cat.name || cat.label || cat.id;
+              const count = serviceList.filter((s: any) => isCategoryMatch(s.category, catName)).length;
+              const isSelected = isAllCategory(selectedCategory)
+                ? false
+                : isCategoryMatch(selectedCategory, catName);
+
               return (
                 <button
-                  key={cat.id}
+                  key={cat.id || catName}
                   type="button"
-                  onClick={() => setSelectedCategory(cat.id)}
+                  onClick={() => setSelectedCategory(catName)}
                   className={`rounded-full px-4 sm:px-5 py-2 text-xs font-semibold uppercase tracking-[0.14em] transition-all duration-300 flex items-center gap-2 cursor-pointer ${
-                    selectedCategory === cat.id
-                      ? "gradient-royal text-primary-foreground shadow-luxe"
+                    isSelected
+                      ? "gradient-royal text-primary-foreground shadow-luxe scale-105"
                       : "glass-card text-foreground/80 hover:border-primary/40 hover:text-primary"
                   }`}
                 >
-                  <span>{cat.label}</span>
-                  {count > 0 && (
-                    <span className={`text-[0.65rem] px-1.5 py-0.2 rounded-full ${selectedCategory === cat.id ? "bg-white/20 text-white" : "bg-primary/10 text-primary"}`}>
-                      {count}
-                    </span>
-                  )}
+                  <span>{catName}</span>
+                  <span className={`text-[0.65rem] px-1.5 py-0.5 rounded-full font-mono font-bold ${isSelected ? "bg-secondary text-ink" : "bg-muted text-muted-foreground"}`}>
+                    {count}
+                  </span>
                 </button>
               );
             })}
@@ -150,15 +177,28 @@ export default function ServicesPage() {
               ))}
             </div>
           ) : filteredServices.length === 0 ? (
-            <div className="reveal is-visible mt-14 glass-card rounded-3xl p-12 text-center text-muted-foreground border border-border max-w-2xl mx-auto">
+            <div className="mt-14 glass-card rounded-3xl p-12 text-center text-muted-foreground border border-border max-w-2xl mx-auto transition-all duration-300 animate-in fade-in">
               <Sparkles className="h-12 w-12 mx-auto text-secondary/50 mb-3" />
-              <h3 className="font-display text-xl text-ink font-semibold">0 Services Listed</h3>
+              <h3 className="font-display text-xl text-ink font-semibold">
+                {serviceList.length === 0 ? "0 Services Listed" : `No Services in "${selectedCategory}"`}
+              </h3>
               <p className="text-xs text-muted-foreground mt-1.5">
-                No services found under this category. Add or edit services in the Admin Panel under the Services &amp; Packages module.
+                {serviceList.length === 0
+                  ? "No services have been added in the Admin Panel yet."
+                  : "No services are currently assigned to this discipline. Select another category or click below to view all disciplines."}
               </p>
+              {serviceList.length > 0 && !isAllCategory(selectedCategory) && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategory("all")}
+                  className="mt-5 btn-luxe gradient-gold text-ink text-xs py-2 px-5 font-bold shadow-xs cursor-pointer"
+                >
+                  View All Disciplines ({serviceList.length})
+                </button>
+              )}
             </div>
           ) : (
-            <div className="reveal is-visible mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-3 transition-all duration-300">
               {filteredServices.map((service: any, idx: number) => (
                 <div
                   key={service.id || service._id || idx}

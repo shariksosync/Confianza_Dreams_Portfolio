@@ -8,6 +8,9 @@ export interface IInquiry extends Document {
   service?: string;
   budget?: string;
   message?: string;
+  source?: string;
+  priority?: "normal" | "high";
+  notes?: string;
   status: "unread" | "contacted" | "archived";
   createdAt: Date;
   updatedAt: Date;
@@ -22,6 +25,9 @@ const InquirySchema = new Schema<IInquiry>(
     service: { type: String, default: "Full Wedding Planning" },
     budget: { type: String, default: "Flexible" },
     message: { type: String, default: "" },
+    source: { type: String, default: "Wedding Inquiry Form" },
+    priority: { type: String, enum: ["normal", "high"], default: "normal" },
+    notes: { type: String, default: "" },
     status: { type: String, enum: ["unread", "contacted", "archived"], default: "unread" },
   },
   { timestamps: true }

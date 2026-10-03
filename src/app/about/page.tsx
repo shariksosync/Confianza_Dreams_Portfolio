@@ -19,7 +19,7 @@ export default function AboutPage() {
   return (
     <SiteLayout revealKey="about-page">
       {/* 1. Hero Header Banner */}
-      <section className="relative bg-ink pt-32 pb-20 sm:pt-40 sm:pb-24 text-background overflow-hidden">
+      <section className="relative bg-ink pt-36 pb-20 sm:pt-40 lg:pt-44 sm:pb-24 text-background overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-25">
           <img
             src={about?.headerBanner?.image || "/images/hero-1.jpg"}

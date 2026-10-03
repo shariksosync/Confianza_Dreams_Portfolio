@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X, Sparkles, Send, CheckCircle2, Phone, Calendar, Mail, User } from "lucide-react";
+import { X, Sparkles, Send, CheckCircle2, Phone, Calendar, Mail, User, AlertCircle } from "lucide-react";
 import { useSite } from "../context/SiteContext";
+import { validatePhoneNumber } from "../lib/validation";
 
 const SERVICES_LIST = [
   "Full Wedding Planning",
@@ -14,7 +15,8 @@ const SERVICES_LIST = [
   "Corporate & Entertainment Events",
 ];
 
-export default function EnquiryModal({ isOpen, onClose }) {
+export default function EnquiryModal({ isOpen, open, onClose }) {
+  const isModalOpen = isOpen ?? open;
   const { addMessage } = useSite();
   const [formData, setFormData] = useState({
     name: "",
@@ -22,26 +24,27 @@ export default function EnquiryModal({ isOpen, onClose }) {
     email: "",
     eventDate: "",
     service: "Full Wedding Planning",
-    budget: "₹5L - ₹15L",
+    budget: "To Be Tailored",
     message: "",
   });
+  const [phoneError, setPhoneError] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   // Close on Escape key
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === "Escape" && isOpen) {
+      if (e.key === "Escape" && isModalOpen) {
         onClose();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isModalOpen, onClose]);
 
   // Lock body scroll when modal is open
   useEffect(() => {
-    if (isOpen) {
+    if (isModalOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -49,19 +52,29 @@ export default function EnquiryModal({ isOpen, onClose }) {
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isOpen]);
+  }, [isModalOpen]);
 
-  if (!isOpen) return null;
+  if (!isModalOpen) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const phoneValidation = validatePhoneNumber(formData.phone);
+    if (!phoneValidation.isValid) {
+      setPhoneError(phoneValidation.error || "Please enter a valid phone number.");
+      return;
+    }
+    setPhoneError("");
     setLoading(true);
     try {
       await addMessage({
         ...formData,
+        budget: "To Be Tailored",
+        source: "Enquiry Now",
+        priority: "normal",
         createdAt: new Date().toISOString(),
       });
       setSubmitted(true);
+      setPhoneError("");
     } catch (err) {
       console.error("Enquiry submission error:", err);
     } finally {
@@ -71,13 +84,14 @@ export default function EnquiryModal({ isOpen, onClose }) {
 
   const handleResetAndClose = () => {
     setSubmitted(false);
+    setPhoneError("");
     setFormData({
       name: "",
       phone: "",
       email: "",
       eventDate: "",
       service: "Full Wedding Planning",
-      budget: "₹5L - ₹15L",
+      budget: "To Be Tailored",
       message: "",
     });
     onClose();
@@ -88,11 +102,11 @@ export default function EnquiryModal({ isOpen, onClose }) {
       role="dialog"
       aria-modal="true"
       aria-labelledby="enquiry-modal-title"
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-ink/80 p-4 backdrop-blur-md animate-fade-in"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-[rgba(37,27,49,0.38)] p-4 backdrop-blur-md animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="glass-card relative max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-3xl p-6 sm:p-8 border border-border/80 shadow-luxe animate-zoom-in text-foreground"
+        className="modal-dialog-luxury bg-[#FFFDFB] relative max-h-[88vh] w-full max-w-lg overflow-y-auto no-scrollbar rounded-3xl p-6 sm:p-8 border border-[#E8E2EE] shadow-luxe text-[#4C4555]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
@@ -100,30 +114,30 @@ export default function EnquiryModal({ isOpen, onClose }) {
           type="button"
           aria-label="Close enquiry popup"
           onClick={onClose}
-          className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full border border-border text-muted-foreground transition hover:bg-muted hover:text-foreground"
+          className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full border border-[#E8E2EE] bg-[#F4F1F7] text-[#2B2138] transition hover:bg-[#EAE4F0] hover:text-[#6A439E] cursor-pointer z-10"
         >
           <X className="h-4 w-4" />
         </button>
 
         {submitted ? (
           <div className="py-8 text-center animate-fade-in">
-            <div className="gradient-royal mx-auto grid h-16 w-16 place-items-center rounded-full text-primary-foreground shadow-luxe ring-4 ring-secondary/40">
-              <CheckCircle2 className="h-8 w-8 text-secondary" />
+            <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-gradient-to-br from-[#6A439E] to-[#854EB8] text-white shadow-luxe ring-4 ring-[#C2A438]/40">
+              <CheckCircle2 className="h-8 w-8 text-[#E4CA72]" />
             </div>
-            <span className="mt-4 block text-[0.68rem] uppercase tracking-[0.25em] text-secondary font-semibold">
+            <span className="mt-4 block text-[0.68rem] uppercase tracking-[0.25em] text-[#C2A438] font-bold">
               Inquiry Received
             </span>
-            <h3 className="mt-2 font-display text-2xl sm:text-3xl text-ink">
+            <h3 className="mt-2 font-display text-2xl sm:text-3xl text-[#2B2138] font-bold">
               Thank You for Reaching Out!
             </h3>
-            <p className="mt-2 text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-sm mx-auto">
-              We have received your celebration details. Ashish and our senior planning director will connect with you shortly over phone or WhatsApp.
+            <p className="mt-2 text-xs sm:text-sm text-[#7E7688] leading-relaxed max-w-sm mx-auto">
+              We have received your celebration details. A confirmation email has been dispatched to <strong className="text-[#2B2138]">{formData.email}</strong>. Founders Ashish &amp; Rutik will connect with you shortly over phone/WhatsApp.
             </p>
             <div className="mt-6 flex justify-center">
               <button
                 type="button"
                 onClick={handleResetAndClose}
-                className="btn-luxe gradient-gold text-ink text-xs font-semibold px-6 py-2.5"
+                className="btn-modal-primary text-xs font-semibold px-6 py-2.5"
               >
                 Close Window
               </button>
@@ -131,71 +145,99 @@ export default function EnquiryModal({ isOpen, onClose }) {
           </div>
         ) : (
           <div>
-            <div className="text-center pb-4 border-b border-border/60">
-              <span className="inline-flex items-center gap-1.5 text-[0.68rem] uppercase tracking-[0.25em] text-secondary font-bold">
-                <Sparkles className="h-3.5 w-3.5 text-secondary" />
+            <div className="text-center pb-4 border-b border-[#E8E2EE]">
+              <span className="inline-flex items-center gap-1.5 text-[0.68rem] uppercase tracking-[0.25em] text-[#C2A438] font-bold">
+                <Sparkles className="h-3.5 w-3.5 text-[#C2A438]" />
                 <span>Confianza Concierge</span>
               </span>
               <h2
                 id="enquiry-modal-title"
-                className="mt-1 font-display text-2xl sm:text-3xl text-ink"
+                className="mt-1 font-display text-2xl sm:text-3xl text-[#2B2138] font-bold"
               >
                 Quick Wedding Enquiry
               </h2>
-              <p className="mt-1 text-xs text-muted-foreground">
+              <p className="mt-1 text-xs text-[#7E7688]">
                 Share your dates and vision. We will prepare custom mood boards and pricing for your event.
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="mt-5 space-y-3.5 text-left">
               <div>
-                <label className="text-xs font-medium text-foreground block mb-1">
-                  Full Name <span className="text-primary">*</span>
+                <label className="text-xs font-semibold text-[#2B2138] block mb-1">
+                  Full Name <span className="text-[#6A439E]">*</span>
                 </label>
                 <div className="relative">
-                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#7E7688]" />
                   <input
                     type="text"
                     required
                     placeholder="e.g. Sneha Deshmukh"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full rounded-xl border border-border bg-card/80 pl-10 pr-4 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full rounded-xl border border-[#E8E2EE] bg-white pl-10 pr-4 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:border-[#6A439E] focus:outline-none focus:ring-2 focus:ring-[#6A439E]/15 transition"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-foreground block mb-1">
-                    Phone / WhatsApp <span className="text-primary">*</span>
+                  <label className="text-xs font-semibold text-[#2B2138] block mb-1">
+                    Phone / WhatsApp <span className="text-[#6A439E]">*</span>
                   </label>
                   <div className="relative">
-                    <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#7E7688]" />
                     <input
                       type="tel"
                       required
-                      placeholder="+91 98765 43210"
+                      inputMode="tel"
+                      placeholder="e.g. 9850983389"
                       value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full rounded-xl border border-border bg-card/80 pl-10 pr-4 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setFormData({ ...formData, phone: val });
+                        if (phoneError) {
+                          const res = validatePhoneNumber(val);
+                          if (res.isValid) setPhoneError("");
+                        }
+                      }}
+                      onBlur={() => {
+                        if (formData.phone.trim()) {
+                          const res = validatePhoneNumber(formData.phone);
+                          if (!res.isValid) {
+                            setPhoneError(res.error || "Please enter a valid phone number.");
+                          } else {
+                            setPhoneError("");
+                          }
+                        }
+                      }}
+                      className={`w-full rounded-xl border bg-white pl-10 pr-4 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:ring-2 transition ${
+                        phoneError
+                          ? "border-red-400 focus:border-red-500 focus:ring-red-200"
+                          : "border-[#E8E2EE] focus:border-[#6A439E] focus:ring-[#6A439E]/15"
+                      }`}
                     />
                   </div>
+                  {phoneError && (
+                    <p className="text-[0.68rem] text-red-600 mt-1 flex items-center gap-1 font-medium">
+                      <AlertCircle className="h-3 w-3 shrink-0 inline" />
+                      <span>{phoneError}</span>
+                    </p>
+                  )}
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-foreground block mb-1">
-                    Email Address <span className="text-primary">*</span>
+                  <label className="text-xs font-semibold text-[#2B2138] block mb-1">
+                    Email Address <span className="text-[#6A439E]">*</span>
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#7E7688]" />
                     <input
                       type="email"
                       required
                       placeholder="sneha@example.com"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full rounded-xl border border-border bg-card/80 pl-10 pr-4 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                      className="w-full rounded-xl border border-[#E8E2EE] bg-white pl-10 pr-4 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:border-[#6A439E] focus:outline-none focus:ring-2 focus:ring-[#6A439E]/15 transition"
                     />
                   </div>
                 </div>
@@ -203,28 +245,28 @@ export default function EnquiryModal({ isOpen, onClose }) {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-foreground block mb-1">
+                  <label className="text-xs font-semibold text-[#2B2138] block mb-1">
                     Tentative Event Date
                   </label>
                   <div className="relative">
-                    <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#7E7688]" />
                     <input
                       type="date"
                       value={formData.eventDate}
                       onChange={(e) => setFormData({ ...formData, eventDate: e.target.value })}
-                      className="w-full rounded-xl border border-border bg-card/80 pl-10 pr-4 py-2 text-xs text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                      className="w-full rounded-xl border border-[#E8E2EE] bg-white pl-10 pr-4 py-2 text-xs text-[#2B2138] focus:border-[#6A439E] focus:outline-none focus:ring-2 focus:ring-[#6A439E]/15 transition"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-foreground block mb-1">
+                  <label className="text-xs font-semibold text-[#2B2138] block mb-1">
                     Preferred Service
                   </label>
                   <select
                     value={formData.service}
                     onChange={(e) => setFormData({ ...formData, service: e.target.value })}
-                    className="w-full rounded-xl border border-border bg-card/80 px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3 py-2 text-xs text-[#2B2138] focus:border-[#6A439E] focus:outline-none focus:ring-2 focus:ring-[#6A439E]/15 transition cursor-pointer"
                   >
                     {SERVICES_LIST.map((srv) => (
                       <option key={srv} value={srv}>
@@ -236,7 +278,7 @@ export default function EnquiryModal({ isOpen, onClose }) {
               </div>
 
               <div>
-                <label className="text-xs font-medium text-foreground block mb-1">
+                <label className="text-xs font-semibold text-[#2B2138] block mb-1">
                   Message / Special Wishes
                 </label>
                 <textarea
@@ -244,7 +286,7 @@ export default function EnquiryModal({ isOpen, onClose }) {
                   placeholder="Tell us about your estimated guest count, preferred venue, or any specific theme ideas..."
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  className="w-full rounded-xl border border-border bg-card/80 px-4 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary resize-none"
+                  className="w-full rounded-xl border border-[#E8E2EE] bg-white px-4 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:border-[#6A439E] focus:outline-none focus:ring-2 focus:ring-[#6A439E]/15 transition resize-none"
                 />
               </div>
 
@@ -252,9 +294,9 @@ export default function EnquiryModal({ isOpen, onClose }) {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="btn-luxe gradient-royal w-full text-primary-foreground text-xs font-semibold py-2.5 shadow-luxe flex items-center justify-center gap-2"
+                  className="btn-modal-primary w-full py-3 shadow-md flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <Send className="h-3.5 w-3.5 text-secondary" />
+                  <Send className="h-3.5 w-3.5 text-[#E4CA72]" />
                   <span>{loading ? "Sending Inquiry..." : "Submit Wedding Inquiry"}</span>
                 </button>
               </div>

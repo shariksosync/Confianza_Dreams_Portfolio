@@ -30,15 +30,44 @@ import PartnerMarqueeSection from "@/components/home/PartnerMarqueeSection";
 import ImageUploadField from "@/components/ImageUploadField";
 import { useSite } from "@/context/SiteContext";
 
+const normalizeCategory = (str: string) =>
+  (str || "")
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]/g, "")
+    .trim();
+
+const isAllCategory = (cat: any) => {
+  if (!cat) return true;
+  const str = typeof cat === "string" ? cat : cat?.name || cat?.label || cat?.id || "";
+  const norm = normalizeCategory(str);
+  return norm === "all" || norm === "allstories" || norm === "alltestimonials" || norm === "";
+};
+
+const isCategoryMatch = (itemCategory: string, targetCategory: any) => {
+  if (isAllCategory(targetCategory)) return true;
+  const norm1 = normalizeCategory(itemCategory);
+  const norm2 = normalizeCategory(
+    typeof targetCategory === "string"
+      ? targetCategory
+      : targetCategory?.name || targetCategory?.label || targetCategory?.id || ""
+  );
+  return Boolean(norm1 && norm2 && norm1 === norm2);
+};
+
 export default function TestimonialsPage() {
   const {
     testimonials,
-    siteContent,
+    testimonialsCategories,
+    testimonialsHeader,
+    testimonialsExperience,
+    testimonialsFaq,
+    testimonialsCta,
     contact,
   } = useSite() as any;
 
   // Header content
-  const header = siteContent?.testimonialsHeader || {
+  const header = testimonialsHeader || {
     badge: "Couples & Families",
     eyebrow: "Words of Gratitude",
     title: "Testimonials & Love Stories",
@@ -54,81 +83,87 @@ export default function TestimonialsPage() {
     ],
   };
 
-  // Categories
-  const categories = siteContent?.testimonialsCategories || [
-    { id: "royal-destination", name: "Royal & Destination Weddings" },
-    { id: "mandap-rituals", name: "Mandap & Rituals" },
-    { id: "haldi-sangeet", name: "Haldi & Sangeet" },
-    { id: "receptions", name: "Opulent Receptions" },
-    { id: "video-reviews", name: "Video Reviews & Reels" },
-    { id: "corporate-events", name: "Corporate Celebrations" },
-  ];
+  // Categories (Dynamic from MongoDB)
+  const categories = Array.isArray(testimonialsCategories) && testimonialsCategories.length > 0
+    ? testimonialsCategories
+    : [
+        { id: "royal-destination", name: "Royal & Destination Weddings" },
+        { id: "mandap-rituals", name: "Mandap & Rituals" },
+        { id: "haldi-sangeet", name: "Haldi & Sangeet" },
+        { id: "receptions", name: "Opulent Receptions" },
+        { id: "video-reviews", name: "Video Reviews & Reels" },
+        { id: "corporate-events", name: "Corporate Celebrations" },
+      ];
 
   // Experience Pillars from PDF
-  const experiencePillars = siteContent?.testimonialsExperience || [
-    {
-      id: "shadow-mgmt",
-      title: "Shadow Management",
-      subtitle: "Dedicated Bride & Groom Liaison",
-      description:
-        "A personal shadow coordinator attends to every personal need, attire touch-up, refreshment, and family coordination behind the scenes.",
-      icon: "Users",
-      badge: "Signature Care",
-    },
-    {
-      id: "ritual-mgmt",
-      title: "Sacred Ritual Coordination",
-      subtitle: "Flawless Pandit & Samagri Prep",
-      description:
-        "Complete management of traditional Vedic rituals (Baraat, Milni, Saptapadi, Havan) ensuring exact customs and priest requirements are honored.",
-      icon: "Sparkles",
-      badge: "Cultural Precision",
-    },
-    {
-      id: "production-decor",
-      title: "3D CAD Decor & Production",
-      subtitle: "100% Design-to-Reality Fidelity",
-      description:
-        "From custom stage carpentry to imported floral conditioning and ambient warm lighting, every spatial element matches the 3D CAD design.",
-      icon: "Layers",
-      badge: "Spatial Artistry",
-    },
-    {
-      id: "show-runner",
-      title: "Show Runner Timeline Execution",
-      subtitle: "Zero-Glitch Stage Management",
-      description:
-        "The Show Runner acts as the single point-of-contact for artists, DJs, sound technicians, and entry pyrotechnics with millisecond timing.",
-      icon: "Award",
-      badge: "Live Direction",
-    },
-  ];
+  const experiencePillars = Array.isArray(testimonialsExperience) && testimonialsExperience.length > 0
+    ? testimonialsExperience
+    : [
+        {
+          id: "shadow-mgmt",
+          title: "Shadow Management",
+          subtitle: "Dedicated Bride & Groom Liaison",
+          description:
+            "A personal shadow coordinator attends to every personal need, attire touch-up, refreshment, and family coordination behind the scenes.",
+          icon: "Users",
+          badge: "Signature Care",
+        },
+        {
+          id: "ritual-mgmt",
+          title: "Sacred Ritual Coordination",
+          subtitle: "Flawless Pandit & Samagri Prep",
+          description:
+            "Complete management of traditional Vedic rituals (Baraat, Milni, Saptapadi, Havan) ensuring exact customs and priest requirements are honored.",
+          icon: "Sparkles",
+          badge: "Cultural Precision",
+        },
+        {
+          id: "production-decor",
+          title: "3D CAD Decor & Production",
+          subtitle: "100% Design-to-Reality Fidelity",
+          description:
+            "From custom stage carpentry to imported floral conditioning and ambient warm lighting, every spatial element matches the 3D CAD design.",
+          icon: "Layers",
+          badge: "Spatial Artistry",
+        },
+        {
+          id: "show-runner",
+          title: "Show Runner Timeline Execution",
+          subtitle: "Zero-Glitch Stage Management",
+          description:
+            "The Show Runner acts as the single point-of-contact for artists, DJs, sound technicians, and entry pyrotechnics with millisecond timing.",
+          icon: "Award",
+          badge: "Live Direction",
+        },
+      ];
 
   // FAQ
-  const faqs = siteContent?.testimonialsFaq || [
-    {
-      question: "How do I submit our wedding review and photographs?",
-      answer:
-        "Click the 'Share Your Love Story' button on this page. You can share your story, select your star rating, and upload your high-resolution wedding photos directly from your phone or computer.",
-    },
-    {
-      question: "Can we include our cinematic wedding teaser or Instagram Reel?",
-      answer:
-        "Yes! You can paste your YouTube, Vimeo, Google Drive, or Instagram Reel link in the video link field. Our team will feature the interactive video player on your review card.",
-    },
-    {
-      question: "Why does my review say 'Awaiting Admin Moderation'?",
-      answer:
-        "To protect client privacy and ensure genuine testimonials, all public submissions are reviewed and verified by Ashish Wankhede & the Confianza editorial team before going live.",
-    },
-    {
-      question: "How long does review verification take?",
-      answer: "Our team typically verifies and publishes new couple stories within 12 to 24 hours.",
-    },
-  ];
+  const faqs = Array.isArray(testimonialsFaq) && testimonialsFaq.length > 0
+    ? testimonialsFaq
+    : [
+        {
+          question: "How do I submit our wedding review and photographs?",
+          answer:
+            "Click the 'Share Your Love Story' button on this page. You can share your story, select your star rating, and upload your high-resolution wedding photos directly from your phone or computer.",
+        },
+        {
+          question: "Can we include our cinematic wedding teaser or Instagram Reel?",
+          answer:
+            "Yes! You can paste your YouTube, Vimeo, Google Drive, or Instagram Reel link in the video link field. Our team will feature the interactive video player on your review card.",
+        },
+        {
+          question: "Why does my review say 'Awaiting Admin Moderation'?",
+          answer:
+            "To protect client privacy and ensure genuine testimonials, all public submissions are reviewed and verified by Ashish Wankhede & the Confianza editorial team before going live.",
+        },
+        {
+          question: "How long does review verification take?",
+          answer: "Our team typically verifies and publishes new couple stories within 12 to 24 hours.",
+        },
+      ];
 
   // CTA
-  const cta = siteContent?.testimonialsCta || {
+  const cta = testimonialsCta || {
     badge: "Share Your Love Story",
     headline: "Were You A Confianza Couple or Guest?",
     subtitle:
@@ -181,9 +216,8 @@ export default function TestimonialsPage() {
       // Category filter
       if (selectedCategory === "Video Reviews & Reels") {
         if (!t.videoUrl) return false;
-      } else if (selectedCategory !== "All") {
-        const catName = t.category || "";
-        if (catName.toLowerCase() !== selectedCategory.toLowerCase()) {
+      } else if (!isAllCategory(selectedCategory)) {
+        if (!isCategoryMatch(t.category, selectedCategory)) {
           return false;
         }
       }
@@ -313,7 +347,7 @@ export default function TestimonialsPage() {
   return (
     <SiteLayout revealKey="testimonials-page">
       {/* 1. Dynamic Hero Banner */}
-      <section className="relative bg-ink pt-32 pb-20 sm:pt-40 sm:pb-24 text-background overflow-hidden">
+      <section className="relative bg-ink pt-36 pb-20 sm:pt-40 lg:pt-44 sm:pb-24 text-background overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-25">
           <img
             src={header.image || "https://res.cloudinary.com/tridevsosync/image/upload/v1790838224/confianza_portfolio/portfolio_hero_banner.jpg"}
@@ -438,7 +472,7 @@ export default function TestimonialsPage() {
                   type="button"
                   onClick={() => setSelectedCategory("All")}
                   className={`px-4 py-2 rounded-full text-xs font-semibold tracking-wide transition shrink-0 cursor-pointer ${
-                    selectedCategory === "All"
+                    isAllCategory(selectedCategory)
                       ? "gradient-royal text-primary-foreground shadow-md"
                       : "bg-card border border-border text-foreground hover:bg-muted"
                   }`}
@@ -448,14 +482,11 @@ export default function TestimonialsPage() {
 
                 {categories.map((cat: any) => {
                   const catName = typeof cat === "string" ? cat : cat.name;
-                  const count =
-                    catName === "Video Reviews & Reels"
-                      ? allApproved.filter((t: any) => t.videoUrl).length
-                      : allApproved.filter(
-                          (t: any) =>
-                            t.category &&
-                            t.category.toLowerCase() === catName.toLowerCase()
-                        ).length;
+                  const isVideo = catName === "Video Reviews & Reels";
+                  const count = isVideo
+                    ? allApproved.filter((t: any) => t.videoUrl).length
+                    : allApproved.filter((t: any) => isCategoryMatch(t.category, catName)).length;
+                  const isSelected = !isAllCategory(selectedCategory) && isCategoryMatch(selectedCategory, catName);
 
                   return (
                     <button
@@ -463,12 +494,12 @@ export default function TestimonialsPage() {
                       type="button"
                       onClick={() => setSelectedCategory(catName)}
                       className={`px-4 py-2 rounded-full text-xs font-medium tracking-wide transition shrink-0 cursor-pointer ${
-                        selectedCategory === catName
+                        isSelected
                           ? "gradient-royal text-primary-foreground shadow-md font-semibold"
                           : "bg-card border border-border text-foreground hover:bg-muted"
                       }`}
                     >
-                      {catName} {count > 0 && <span className="opacity-70 ml-1">({count})</span>}
+                      {catName} <span className="opacity-70 ml-1">({count})</span>
                     </button>
                   );
                 })}
@@ -501,7 +532,7 @@ export default function TestimonialsPage() {
 
           {/* Testimonials Grid */}
           {filteredReviews.length > 0 ? (
-            <div className="reveal mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {filteredReviews.map((rev: any, idx: number) => {
                 const hasVideo = Boolean(rev.videoUrl);
 
@@ -609,15 +640,30 @@ export default function TestimonialsPage() {
               <p className="text-xs text-muted-foreground max-w-md mx-auto">
                 {allApproved.length === 0
                   ? "Be the first couple or guest to share your magical celebration with Confianza!"
-                  : "Try clearing your search query or selecting another event category above."}
+                  : "No testimonials matched the selected category or search filters."}
               </p>
-              <button
-                type="button"
-                onClick={openSubmissionModal}
-                className="btn-luxe gradient-gold text-ink text-xs font-bold py-2.5 px-6 rounded-full cursor-pointer shadow-sm"
-              >
-                + Submit Your Love Story
-              </button>
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                {(!isAllCategory(selectedCategory) || selectedRating !== "All" || searchQuery.trim()) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedCategory("All");
+                      setSelectedRating("All");
+                      setSearchQuery("");
+                    }}
+                    className="px-5 py-2 rounded-full border border-border bg-card text-xs font-semibold text-foreground hover:bg-muted transition cursor-pointer"
+                  >
+                    Reset Filters
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={openSubmissionModal}
+                  className="btn-luxe gradient-gold text-ink text-xs font-bold py-2.5 px-6 rounded-full cursor-pointer shadow-sm"
+                >
+                  + Submit Your Love Story
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -940,20 +986,7 @@ export default function TestimonialsPage() {
                           </option>
                         );
                       })}
-                      <option value="Other">Other</option>
                     </select>
-                    {categorySelect === "Other" && (
-                      <div className="mt-2 animate-fade-in">
-                        <input
-                          type="text"
-                          required
-                          value={customCategory}
-                          onChange={(e) => setCustomCategory(e.target.value)}
-                          placeholder="e.g. Sangeet Gala, Engagement, Anniversary Banquet"
-                          className="w-full rounded-xl border border-secondary/60 bg-card px-3.5 py-2 text-xs focus:border-secondary focus:outline-none ring-1 ring-secondary/20"
-                        />
-                      </div>
-                    )}
                   </div>
 
                   <div>

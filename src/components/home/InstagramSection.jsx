@@ -4,7 +4,7 @@ import { Instagram, Heart, ExternalLink, Sparkles } from "lucide-react";
 import { useSite } from "../../context/SiteContext";
 import SectionHeading from "../ui/SectionHeading";
 
-export default function InstagramSection() {
+export default function InstagramSection({ showAll = false }) {
   const { instagram, instagramHeader, contact } = useSite();
 
   const posts = Array.isArray(instagram) ? instagram : [];
@@ -13,6 +13,16 @@ export default function InstagramSection() {
     header.url || contact?.instagram || "https://www.instagram.com/confianza_events";
   const handle = header.handle || "@confianza_events";
   const followerCount = header.followerCount || "10K+ Followers";
+
+  let displayedPosts;
+  if (showAll) {
+    // Gallery Page: showcase all available posts & reels
+    displayedPosts = posts;
+  } else {
+    // Homepage: show only items marked with "showOnHome" (capped at 6), fallback to first 6 if none selected
+    const homePosts = posts.filter((post) => Boolean(post.showOnHome));
+    displayedPosts = (homePosts.length > 0 ? homePosts : posts).slice(0, 6);
+  }
 
   return (
     <section className="section-pad relative bg-accent/20 overflow-hidden border-t border-border/40">
@@ -41,7 +51,7 @@ export default function InstagramSection() {
           </div>
         ) : (
           <div className="mt-12 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-6 transition-all duration-300">
-            {posts.map((post) => {
+            {displayedPosts.map((post) => {
               const targetUrl = post.url || instaUrl;
               return (
                 <a
@@ -81,19 +91,20 @@ export default function InstagramSection() {
           </div>
         )}
 
-        {/* Follow CTA Bar */}
+        {/* Explore All on Instagram CTA Bar */}
         <div className="reveal mt-10 text-center flex flex-col sm:flex-row items-center justify-center gap-3">
           <a
             href={instaUrl}
             target="_blank"
             rel="noreferrer"
-            className="btn-luxe gradient-royal text-primary-foreground text-xs shadow-luxe inline-flex items-center gap-2"
+            className="btn-luxe gradient-royal text-primary-foreground text-xs shadow-luxe py-3.5 px-8 inline-flex items-center gap-2.5 hover:scale-105 transition font-semibold tracking-wider uppercase"
           >
             <Instagram className="h-4 w-4 text-secondary" />
-            <span>Follow {handle}</span>
+            <span>Explore All on Instagram ({handle})</span>
             <span className="px-2 py-0.5 rounded-full bg-white/20 text-[0.65rem] font-mono">
               {followerCount}
             </span>
+            <ExternalLink className="h-3.5 w-3.5" />
           </a>
         </div>
       </div>

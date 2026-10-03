@@ -131,29 +131,29 @@ export default function ImageUploadField({
 
   // Luxury non-technical status labels
   const getStatusText = (pct) => {
-    if (pct >= 100) return "Photo Ready & Active!";
-    if (pct >= 85) return "Finalizing Photo...";
-    if (pct >= 35) return "Uploading Photo...";
+    if (pct >= 100) return "Photograph Ready & Active!";
+    if (pct >= 85) return "Finalizing & Optimizing...";
+    if (pct >= 35) return "Uploading Photograph...";
     return "Preparing Photograph...";
   };
 
   return (
     <div className="space-y-2 text-xs">
       <div className="flex items-center justify-between">
-        <label className="font-semibold text-foreground flex items-center gap-1.5">
+        <label className="font-semibold text-[#2B2138] flex items-center gap-1.5">
           <span>{label}</span>
-          <span className="text-[0.62rem] text-muted-foreground font-normal px-1.5 py-0.5 rounded-md bg-muted/70">
+          <span className="text-[0.62rem] text-[#7E7688] font-normal px-2 py-0.5 rounded-full bg-[#F4F1F7] border border-[#E8E2EE]">
             Max 2 MB
           </span>
         </label>
         {value && !uploading && (
-          <span className="text-[0.68rem] text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-medium animate-fade-in">
-            <CheckCircle2 className="h-3.5 w-3.5 text-secondary" /> Photo Active &amp; Ready
+          <span className="text-[0.68rem] text-emerald-700 flex items-center gap-1 font-semibold animate-fade-in bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> Photo Active &amp; Ready
           </span>
         )}
       </div>
 
-      {description && <p className="text-[0.68rem] text-muted-foreground">{description}</p>}
+      {description && <p className="text-[0.68rem] text-[#7E7688]">{description}</p>}
 
       {/* Upload Zone & Input */}
       <div
@@ -163,46 +163,47 @@ export default function ImageUploadField({
         onDrop={handleDrop}
         className={`relative rounded-2xl border transition-all ${
           dragActive
-            ? "border-secondary bg-secondary/10 shadow-md"
-            : "border-border/80 bg-card/50 hover:border-primary/40"
+            ? "border-[#C2A438] bg-[#FDFCF7] shadow-md ring-2 ring-[#C2A438]/30"
+            : "border-[#E8E2EE] bg-[#FCFBFE] hover:border-[#6A439E]/40"
         } ${uploading ? "min-h-[110px]" : ""} p-3.5 space-y-3 overflow-hidden`}
       >
-        {/* Full Container Luxury Loading HUD with 0 to 100 Progress */}
+        {/* Full Container Light Luxury Loading HUD with 0 to 100 Progress */}
         {uploading && (
-          <div className="absolute inset-0 z-20 bg-ink/95 backdrop-blur-md flex flex-col items-center justify-center p-3 text-center text-background animate-fade-in gap-2.5">
+          <div className="absolute inset-0 z-20 bg-[#FCFBFE]/98 backdrop-blur-md flex flex-col items-center justify-center p-3 text-center text-[#2B2138] animate-fade-in gap-2.5 border border-[#E8E2EE]">
+            <div className="absolute top-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-[#C2A438] via-[#E4CA72] to-[#6A439E]" />
+            
             <div className="flex items-center justify-center gap-3 w-full max-w-sm px-2">
               {progressPercent >= 100 ? (
-                <div className="h-9 w-9 rounded-full gradient-gold flex items-center justify-center shadow-luxe animate-scale-up shrink-0">
-                  <CheckCircle2 className="h-5 w-5 text-ink" />
+                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#C2A438] to-[#E4CA72] flex items-center justify-center shadow-md animate-scale-up shrink-0 text-[#2B2138]">
+                  <CheckCircle2 className="h-5 w-5 text-[#2B2138]" />
                 </div>
               ) : (
-                <div className="relative h-9 w-9 shrink-0 flex items-center justify-center">
-                  <div className="h-9 w-9 rounded-full border-2 border-secondary/30 border-t-secondary animate-spin" />
-                  <CloudUpload className="h-4 w-4 text-secondary absolute inset-0 m-auto" />
+                <div className="upload-icon-badge">
+                  <CloudUpload className="h-5 w-5 text-[#C2A438]" />
                 </div>
               )}
 
               <div className="text-left flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-bold text-background truncate">
+                  <span className="text-xs font-bold text-[#2B2138] truncate">
                     {getStatusText(progressPercent)}
                   </span>
-                  <span className="font-display text-base font-extrabold text-secondary shrink-0">
+                  <span className="upload-percentage-luxury shrink-0">
                     {progressPercent}%
                   </span>
                 </div>
-                <p className="text-[0.65rem] text-background/70 font-light truncate">
+                <p className="text-[0.68rem] text-[#7E7688] font-normal truncate">
                   {progressPercent >= 100
-                    ? "Verified & ready to display"
+                    ? "Verified & ready to display live"
                     : "Optimizing & uploading image..."}
                 </p>
               </div>
             </div>
 
-            {/* Shimmering Progress Bar */}
-            <div className="w-full max-w-sm h-2 rounded-full bg-white/15 overflow-hidden ring-1 ring-white/20 shadow-inner px-0.5">
+            {/* Light Luxury Shimmering Progress Bar */}
+            <div className="w-full max-w-sm progress-track-luxury">
               <div
-                className="h-full gradient-gold transition-all duration-300 rounded-full shadow-sm"
+                className="progress-fill-luxury"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -212,7 +213,7 @@ export default function ImageUploadField({
         <div className="flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center">
           {/* Direct URL / Path input */}
           <div className="relative flex-1">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#7E7688]">
               <LinkIcon className="h-3.5 w-3.5" />
             </div>
             <input
@@ -220,7 +221,7 @@ export default function ImageUploadField({
               value={value}
               onChange={(e) => onChange(e.target.value)}
               placeholder="Paste Image URL or click Upload button..."
-              className="w-full rounded-xl border border-border bg-card pl-9 pr-3 py-2 text-xs text-foreground placeholder:text-muted-foreground/60 focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary/40 transition"
+              className="w-full rounded-xl border border-[#E8E2EE] bg-white pl-9 pr-3 py-2 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:border-[#6A439E] focus:outline-none focus:ring-2 focus:ring-[#6A439E]/15 transition"
             />
           </div>
 
@@ -242,16 +243,16 @@ export default function ImageUploadField({
             type="button"
             disabled={uploading}
             onClick={() => fileInputRef.current?.click()}
-            className="btn-luxe gradient-royal text-primary-foreground px-4 py-2 text-xs font-semibold shrink-0 flex items-center justify-center gap-2 rounded-xl shadow-sm hover:opacity-95 transition cursor-pointer"
+            className="btn-modal-primary px-4 py-2 text-xs font-semibold shrink-0 flex items-center justify-center gap-2 cursor-pointer"
           >
             {uploading ? (
               <>
-                <Loader2 className="h-3.5 w-3.5 animate-spin text-secondary" />
+                <Loader2 className="h-3.5 w-3.5 animate-spin text-[#C2A438]" />
                 <span>Processing...</span>
               </>
             ) : (
               <>
-                <Upload className="h-3.5 w-3.5 text-secondary" />
+                <Upload className="h-3.5 w-3.5 text-[#E4CA72]" />
                 <span>Upload Photo</span>
               </>
             )}
@@ -260,9 +261,9 @@ export default function ImageUploadField({
 
         {/* Drag and Drop Prompt or Image Preview */}
         {value ? (
-          <div className="flex items-center justify-between rounded-xl bg-card border border-border/70 p-2.5 shadow-sm">
+          <div className="flex items-center justify-between rounded-xl bg-white border border-[#E8E2EE] p-2.5 shadow-sm">
             <div className="flex items-center gap-3 overflow-hidden">
-              <div className="relative h-14 w-14 shrink-0 rounded-xl overflow-hidden bg-ink/5 border border-secondary/40 shadow-inner">
+              <div className="relative h-14 w-14 shrink-0 rounded-xl overflow-hidden bg-[#FAF8FC] border border-[#C2A438]/40 shadow-inner">
                 <img
                   src={value}
                   alt="Preview"
@@ -273,13 +274,13 @@ export default function ImageUploadField({
                 />
               </div>
               <div className="truncate">
-                <span className="text-[0.7rem] font-semibold text-ink flex items-center gap-1.5 truncate">
+                <span className="text-[0.7rem] font-semibold text-[#2B2138] flex items-center gap-1.5 truncate">
                   <span>Active Image</span>
-                  <span className="text-[0.62rem] px-2 py-0.2 rounded-full bg-secondary/15 text-secondary font-bold">
+                  <span className="text-[0.62rem] px-2 py-0.2 rounded-full bg-[#C2A438]/15 text-[#8C7118] font-bold border border-[#C2A438]/25">
                     Live Ready
                   </span>
                 </span>
-                <span className="text-[0.62rem] text-muted-foreground font-mono block truncate max-w-xs sm:max-w-sm mt-0.5">
+                <span className="text-[0.62rem] text-[#7E7688] font-mono block truncate max-w-xs sm:max-w-sm mt-0.5">
                   {value}
                 </span>
               </div>
@@ -289,14 +290,14 @@ export default function ImageUploadField({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="px-2.5 py-1 rounded-lg border border-border text-[0.68rem] text-primary hover:bg-primary/10 transition cursor-pointer"
+                className="px-2.5 py-1 rounded-lg border border-[#E8E2EE] text-[0.68rem] text-[#6A439E] font-semibold hover:bg-[#6A439E]/10 transition cursor-pointer"
               >
                 Change
               </button>
               <button
                 type="button"
                 onClick={() => onChange("")}
-                className="p-1 rounded-lg text-destructive hover:bg-destructive/10 transition cursor-pointer"
+                className="p-1 rounded-lg text-red-500 hover:bg-red-50 transition cursor-pointer"
                 title="Remove photo"
               >
                 <X className="h-3.5 w-3.5" />
@@ -306,17 +307,17 @@ export default function ImageUploadField({
         ) : (
           <div
             onClick={() => fileInputRef.current?.click()}
-            className="cursor-pointer py-3.5 px-4 border border-dashed border-border rounded-xl text-center hover:bg-card/80 transition group"
+            className="cursor-pointer py-3.5 px-4 border border-dashed border-[#D6CDE2] rounded-xl text-center bg-[#FAF8FC]/60 hover:bg-[#F5F1FA] transition group"
           >
-            <p className="text-[0.72rem] text-muted-foreground group-hover:text-foreground transition">
-              <span className="font-semibold text-primary">Click to browse</span> or drag and drop JPG / PNG / WebP (up to 2 MB)
+            <p className="text-[0.72rem] text-[#7E7688] group-hover:text-[#2B2138] transition">
+              <span className="font-semibold text-[#6A439E]">Click to browse</span> or drag and drop JPG / PNG / WebP (up to 2 MB)
             </p>
           </div>
         )}
       </div>
 
       {error && (
-        <div className="p-2.5 rounded-xl bg-destructive/10 border border-destructive/30 text-destructive text-[0.7rem] animate-fade-in">
+        <div className="p-2.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-[0.7rem] animate-fade-in font-medium">
           {error}
         </div>
       )}

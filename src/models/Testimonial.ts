@@ -14,6 +14,7 @@ export interface ITestimonial extends Document {
   text: string;
   status: "pending" | "approved" | "rejected";
   featured: boolean;
+  showOnPortfolio?: boolean;
   order: number;
   email?: string;
   adminNotes?: string;
@@ -34,6 +35,7 @@ const TestimonialSchema = new Schema<ITestimonial>(
     text: { type: String, required: true },
     status: { type: String, enum: ["pending", "approved", "rejected"], default: "approved" },
     featured: { type: Boolean, default: true },
+    showOnPortfolio: { type: Boolean, default: false },
     order: { type: Number, default: 0 },
     email: { type: String, default: "" },
     adminNotes: { type: String, default: "" },

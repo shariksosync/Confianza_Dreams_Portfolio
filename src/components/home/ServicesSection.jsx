@@ -1,34 +1,67 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { ArrowRight, Sparkles, HeartHandshake } from "lucide-react";
 import { useSite } from "../../context/SiteContext";
 import SectionHeading from "../ui/SectionHeading";
 
+const normalizeCategory = (str) =>
+  (str || "")
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]/g, "")
+    .trim();
+
+const isAllCategory = (cat) => {
+  if (!cat) return false;
+  const str = typeof cat === "string" ? cat : cat?.name || cat?.label || cat?.id || "";
+  const norm = normalizeCategory(str);
+  return norm === "all" || norm === "alldisciplines" || norm === "allservices";
+};
+
+const isCategoryMatch = (itemCategory, targetCategory) => {
+  if (!targetCategory || isAllCategory(targetCategory)) return true;
+  if (!itemCategory) return false;
+  const normItem = normalizeCategory(itemCategory);
+  const normTarget = normalizeCategory(
+    typeof targetCategory === "string"
+      ? targetCategory
+      : targetCategory?.name || targetCategory?.label || targetCategory?.id || ""
+  );
+  return Boolean(normItem && normTarget && normItem === normTarget);
+};
+
 export default function ServicesSection() {
-  const { services } = useSite();
-  const [filter, setFilter] = useState("all");
+  const { services, serviceCategories } = useSite();
+  const [activeCategory, setActiveCategory] = useState("all");
 
-  const categories = [
-    { id: "all", label: "All Services" },
-    { id: "core", label: "Signature Planning" },
-    { id: "rituals", label: "Rituals & Functions" },
-    { id: "special", label: "Corporate & Entertainment" },
-  ];
+  const serviceList = useMemo(() => {
+    return Array.isArray(services) ? services : [];
+  }, [services]);
 
-  const serviceList = services || [];
+  const categories = useMemo(() => {
+    const list =
+      Array.isArray(serviceCategories) && serviceCategories.length > 0
+        ? serviceCategories
+        : [
+            { id: "all", name: "All Services", label: "All Services" },
+            { id: "planning", name: "Signature Planning & Direction", label: "Signature Planning & Direction" },
+            { id: "decor", name: "Mandap & Spatial Decor", label: "Mandap & Spatial Decor" },
+            { id: "hospitality", name: "Royal Hospitality & Shadows", label: "Royal Hospitality & Shadows" },
+            { id: "rituals", name: "Rituals, Artists & F&B", label: "Rituals, Artists & F&B" },
+          ];
+    return list;
+  }, [serviceCategories]);
 
-  const filteredServices = serviceList.filter((s) => {
-    if (filter === "all") return true;
-    if (filter === "core")
-      return ["wedding-planning", "wedding-decor", "destination-wedding", "wedding-execution"].includes(s.id);
-    if (filter === "rituals")
-      return ["haldi", "mehendi", "reception", "engagement", "anniversary"].includes(s.id);
-    if (filter === "special")
-      return ["corporate-events", "entertainment", "birthday"].includes(s.id);
-    return true;
-  });
+  const filteredServices = useMemo(() => {
+    if (isAllCategory(activeCategory)) return serviceList;
+    return serviceList.filter((s) => isCategoryMatch(s.category, activeCategory));
+  }, [serviceList, activeCategory]);
+
+  const displayedServices = useMemo(() => {
+    return filteredServices.slice(0, 8);
+  }, [filteredServices]);
 
   return (
     <section id="services" className="section-pad relative bg-accent/40">
@@ -41,85 +74,123 @@ export default function ServicesSection() {
 
         {/* Category Filter Pills */}
         <div className="reveal mt-10 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              type="button"
-              onClick={() => setFilter(cat.id)}
-              className={`rounded-full px-4 sm:px-6 py-2 text-xs font-medium uppercase tracking-[0.14em] transition-all duration-300 ${
-                filter === cat.id
-                  ? "gradient-royal text-primary-foreground shadow-luxe"
-                  : "glass-card text-foreground/80 hover:border-primary/40 hover:text-primary"
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
+          {categories.map((cat, idx) => {
+            const isAllPill = isAllCategory(cat);
+            const catName = cat.name || cat.label || cat.id;
+            const count = isAllPill
+              ? serviceList.length
+              : serviceList.filter((s) => isCategoryMatch(s.category, catName)).length;
+
+            const isSelected = isAllPill
+              ? isAllCategory(activeCategory)
+              : isCategoryMatch(activeCategory, catName);
+
+            return (
+              <button
+                key={cat.id || catName || idx}
+                type="button"
+                onClick={() => setActiveCategory(isAllPill ? "all" : catName)}
+                className={`rounded-full px-4 sm:px-5 py-2 text-xs font-semibold uppercase tracking-[0.14em] transition-all duration-300 flex items-center gap-2 cursor-pointer shadow-xs ${
+                  isSelected
+                    ? "gradient-royal text-primary-foreground shadow-luxe scale-105"
+                    : "glass-card text-foreground/80 hover:border-primary/40 hover:text-primary"
+                }`}
+              >
+                <span>{catName}</span>
+                <span
+                  className={`text-[0.65rem] px-1.5 py-0.5 rounded-full font-mono font-bold ${
+                    isSelected
+                      ? "bg-secondary text-ink"
+                      : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {count}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Services Grid */}
         {filteredServices.length === 0 ? (
-          <div className="mt-12 glass-card rounded-3xl p-10 text-center text-muted-foreground border border-border transition-all duration-300">
+          <div className="mt-12 glass-card rounded-3xl p-10 text-center text-muted-foreground border border-border transition-all duration-300 animate-in fade-in">
             <Sparkles className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
-            <h3 className="font-display text-lg text-ink font-semibold">No Services Found</h3>
-            <p className="text-xs text-muted-foreground mt-1">Services will appear here once added in the admin panel.</p>
+            <h3 className="font-display text-lg text-ink font-semibold">
+              {serviceList.length === 0
+                ? "No Services Listed"
+                : `No Services in "${activeCategory}"`}
+            </h3>
+            <p className="text-xs text-muted-foreground mt-1 max-w-md mx-auto">
+              {serviceList.length === 0
+                ? "Services will appear here once added in the admin panel."
+                : "No services are currently assigned to this category. Select another category or click below to view all services."}
+            </p>
+            {serviceList.length > 0 && activeCategory !== "all" && (
+              <button
+                type="button"
+                onClick={() => setActiveCategory("all")}
+                className="mt-5 btn-luxe gradient-gold text-ink text-xs py-2 px-5 font-bold shadow-xs cursor-pointer"
+              >
+                View All Services ({serviceList.length})
+              </button>
+            )}
           </div>
         ) : (
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 transition-all duration-300">
-          {filteredServices.map((service, idx) => (
-            <div
-              key={service.id || idx}
-              className="group glass-card overflow-hidden rounded-3xl transition-all duration-500 hover:-translate-y-2 hover:shadow-luxe flex flex-col justify-between"
-            >
-              <div className="relative h-56 overflow-hidden">
-                <img
-                  src={service.image || "/images/hero-1.jpg"}
-                  alt={service.title}
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/20 to-transparent" />
-                <span className="absolute bottom-3 left-4 inline-flex items-center gap-1.5 rounded-full bg-ink/60 px-3 py-1 text-[0.65rem] uppercase tracking-wider text-champagne backdrop-blur-md border border-white/10">
-                  <Sparkles className="h-2.5 w-2.5 text-secondary" />
-                  <span>Confianza Signature</span>
-                </span>
-              </div>
-
-              <div className="p-6 flex flex-col flex-1 justify-between">
-                <div>
-                  <h3 className="font-display text-xl text-ink transition-colors group-hover:text-primary">
-                    {service.title}
-                  </h3>
-                  <p className="mt-3 text-xs sm:text-sm leading-relaxed text-muted-foreground line-clamp-3">
-                    {service.description}
-                  </p>
-                </div>
-
-                <div className="mt-6 pt-4 border-t border-border/50 flex items-center justify-between">
-                  <Link
-                    href={`/contact?service=${encodeURIComponent(service.title)}`}
-                    className="inline-flex items-center gap-1.5 text-xs font-medium tracking-wider uppercase text-primary transition-all group-hover:text-secondary group-hover:translate-x-1"
-                  >
-                    <span>Inquire Now</span>
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </Link>
-                  <span className="text-[0.68rem] text-muted-foreground/60 font-mono">
-                    0{idx + 1}
+            {displayedServices.map((service, idx) => (
+              <div
+                key={service.id || idx}
+                className="group glass-card overflow-hidden rounded-3xl transition-all duration-500 hover:-translate-y-2 hover:shadow-luxe flex flex-col justify-between"
+              >
+                <div className="relative h-56 overflow-hidden">
+                  <img
+                    src={service.image || "/images/hero-1.jpg"}
+                    alt={service.title}
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/20 to-transparent" />
+                  <span className="absolute bottom-3 left-4 inline-flex items-center gap-1.5 rounded-full bg-ink/60 px-3 py-1 text-[0.65rem] uppercase tracking-wider text-champagne backdrop-blur-md border border-white/10">
+                    <Sparkles className="h-2.5 w-2.5 text-secondary" />
+                    <span>{service.badge || "Confianza Signature"}</span>
                   </span>
                 </div>
+
+                <div className="p-6 flex flex-col flex-1 justify-between">
+                  <div>
+                    <h3 className="font-display text-xl text-ink transition-colors group-hover:text-primary">
+                      {service.title}
+                    </h3>
+                    <p className="mt-3 text-xs sm:text-sm leading-relaxed text-muted-foreground line-clamp-3">
+                      {service.description}
+                    </p>
+                  </div>
+
+                  <div className="mt-6 pt-4 border-t border-border/50 flex items-center justify-between">
+                    <Link
+                      href={`/contact?service=${encodeURIComponent(service.title)}`}
+                      className="inline-flex items-center gap-1.5 text-xs font-medium tracking-wider uppercase text-primary transition-all group-hover:text-secondary group-hover:translate-x-1"
+                    >
+                      <span>Inquire Now</span>
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                    <span className="text-[0.68rem] text-muted-foreground/60 font-mono">
+                      0{idx + 1}
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
         )}
 
         {/* Bottom CTA to full services page */}
         <div className="reveal mt-14 text-center">
           <Link
             href="/services"
-            className="btn-luxe gradient-royal text-primary-foreground text-xs shadow-luxe"
+            className="btn-luxe gradient-royal text-primary-foreground text-xs shadow-luxe py-3.5 px-8 inline-flex items-center gap-2 hover:scale-105 transition uppercase tracking-wider font-semibold"
           >
-            <span>Explore All 12 Tailored Services &amp; Packages</span>
+            <span>Explore All Services &amp; Packages</span>
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>

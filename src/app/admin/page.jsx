@@ -45,6 +45,17 @@ import {
   Play,
   Phone,
   MessageCircle,
+  Mail,
+  Clock,
+  Calendar,
+  Filter,
+  ExternalLink,
+  Share2,
+  Send,
+  FileText,
+  CheckSquare,
+  Tag,
+  AlertCircle,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useSite } from "@/context/SiteContext";
@@ -216,13 +227,17 @@ export default function AdminPage() {
   }
 
   const pendingTestimonialsCount = (site.allTestimonials || site.testimonials || []).filter((t) => t.status === "pending").length;
+  const pendingInquiriesCount = (site.messages || []).filter((m) => m.status === "unread" || !m.status).length;
 
   // Navigation Items
   const NAV_ITEMS = [
     { id: "overview", label: "Dashboard Overview", icon: LayoutDashboard },
-    { id: "inbox", label: `Inquiries Inbox (${site.messages?.length || 0})`, icon: Inbox },
-    { id: "sections", label: "Homepage Sections", icon: Layers },
-    { id: "hero", label: "Hero Slider", icon: Sliders },
+    {
+      id: "contact-us",
+      label: pendingInquiriesCount > 0 ? `Contact Us (${pendingInquiriesCount} New)` : "Contact Us",
+      icon: PhoneCall,
+      badge: pendingInquiriesCount > 0 ? pendingInquiriesCount : null,
+    },
     { id: "about", label: "About", icon: Sparkles },
     { id: "services", label: "Services & Packages", icon: Briefcase },
     { id: "portfolio", label: "Portfolio Works", icon: ImageIcon },
@@ -232,10 +247,6 @@ export default function AdminPage() {
       label: pendingTestimonialsCount > 0 ? `Testimonials (${pendingTestimonialsCount} New)` : "Testimonials & Reviews",
       icon: MessageSquareQuote,
     },
-    { id: "team", label: "Team & Staff", icon: Users },
-    { id: "faq", label: "FAQ Manager", icon: HelpCircle },
-    { id: "blogs", label: "Blog & Guides", icon: BookOpen },
-    { id: "contact", label: "Contact & Hours", icon: PhoneCall },
     { id: "settings", label: "Brand & SEO Settings", icon: SettingsIcon },
   ];
 
@@ -416,8 +427,8 @@ export default function AdminPage() {
               <OverviewModule site={site} setActiveTab={setActiveTab} showSaved={showSaved} />
             )}
 
-            {activeTab === "inbox" && (
-              <InboxModule site={site} showSaved={showSaved} />
+            {(activeTab === "contact-us" || activeTab === "inbox" || activeTab === "contact") && (
+              <ContactUsModule site={site} showSaved={showSaved} />
             )}
 
             {activeTab === "sections" && (
@@ -460,10 +471,6 @@ export default function AdminPage() {
               <BlogsEditorModule site={site} showSaved={showSaved} />
             )}
 
-            {activeTab === "contact" && (
-              <ContactEditorModule site={site} showSaved={showSaved} />
-            )}
-
             {activeTab === "settings" && (
               <SettingsEditorModule site={site} showSaved={showSaved} />
             )}
@@ -479,14 +486,12 @@ export default function AdminPage() {
 // -------------------------------------------------------------
 function OverviewModule({ site, setActiveTab, showSaved }) {
   const cards = [
-    { label: "New Inquiries", value: site.messages?.length || 0, tab: "inbox", icon: Inbox },
+    { label: "Client Inquiries", value: site.messages?.length || 0, tab: "contact-us", icon: PhoneCall },
     { label: "Active Services", value: site.services?.length || 0, tab: "services", icon: Briefcase },
     { label: "Portfolio Projects", value: site.portfolio?.length || 0, tab: "portfolio", icon: ImageIcon },
     { label: "Gallery Photos", value: site.gallery?.length || 0, tab: "gallery", icon: ImageIcon },
     { label: "Client Testimonials", value: site.testimonials?.length || 0, tab: "testimonials", icon: MessageSquareQuote },
-    { label: "Journal Articles", value: site.blogs?.length || 0, tab: "blogs", icon: BookOpen },
-    { label: "FAQ Items", value: site.faq?.length || 0, tab: "faq", icon: HelpCircle },
-    { label: "Team Members", value: site.team?.length || 0, tab: "team", icon: Users },
+    { label: "Brand & SEO", value: "Active", tab: "settings", icon: SettingsIcon },
   ];
 
   return (
@@ -529,10 +534,10 @@ function OverviewModule({ site, setActiveTab, showSaved }) {
         <div className="flex items-center justify-between">
           <h3 className="font-display text-xl text-ink">Recent Client Inquiries</h3>
           <button
-            onClick={() => setActiveTab("inbox")}
-            className="text-xs text-primary font-semibold hover:underline"
+            onClick={() => setActiveTab("contact-us")}
+            className="text-xs text-primary font-semibold hover:underline cursor-pointer"
           >
-            View All ({site.messages?.length || 0}) &rarr;
+            View All Inquiries ({site.messages?.length || 0}) &rarr;
           </button>
         </div>
 
@@ -567,92 +572,995 @@ function OverviewModule({ site, setActiveTab, showSaved }) {
 }
 
 // -------------------------------------------------------------
-// MODULE 2: Inquiries Inbox
+// MODULE 2: Unified Contact Us & Client Inquiries Manager
 // -------------------------------------------------------------
-function InboxModule({ site, showSaved }) {
+function ContactUsModule({ site, showSaved }) {
+  const [activeSubTab, setActiveSubTab] = useState("leads"); // "leads" | "details" | "hours" | "socials"
+
+  // Lead Filters & Search State
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all"); // "all" | "unread" | "high" | "contacted" | "archived"
+  const [sourceFilter, setSourceFilter] = useState("all"); // "all" | "Enquiry Now" | "Wedding Inquiry Form"
+
+  // Selected Inquiry for Detail / Notes Modal
+  const [selectedInquiry, setSelectedInquiry] = useState(null);
+  const [editingNotes, setEditingNotes] = useState("");
+  const [savingNote, setSavingNote] = useState(false);
+
+  // Studio Contact Info Form State
+  const [contactState, setContactState] = useState({
+    business: site.contact?.business || "Confianza Event's and Entertainment",
+    owner: site.contact?.owner || "Ashish Wankhede",
+    partner: site.contact?.partner || "Rutik Pund",
+    phone: site.contact?.phone || "7057357240",
+    secondaryPhone: site.contact?.secondaryPhone || "9850983389",
+    whatsapp: site.contact?.whatsapp || "917057357240",
+    email: site.contact?.email || "confianzaevents2024@gmail.com",
+    instagram: site.contact?.instagram || "https://www.instagram.com/confianza_events",
+    facebook: site.contact?.facebook || "https://www.facebook.com/confianzaevents",
+    youtube: site.contact?.youtube || "https://www.youtube.com/@confianzaevents",
+    pinterest: site.contact?.pinterest || "https://www.pinterest.com/confianzaevents",
+    address: {
+      line1: site.contact?.address?.line1 || "Indrayani Complex",
+      line2: site.contact?.address?.line2 || "Near Mr DIY, Warje Jakat Naka, Warje",
+      city: site.contact?.address?.city || "Pune",
+      state: site.contact?.address?.state || "Maharashtra",
+      pincode: site.contact?.address?.pincode || "411052",
+    },
+    mapEmbed: site.contact?.mapEmbed || "",
+    hours:
+      site.contact?.hours && site.contact.hours.length > 0
+        ? site.contact.hours
+        : [
+            { day: "Monday – Friday", time: "10:00 AM – 8:00 PM" },
+            { day: "Saturday", time: "10:00 AM – 8:00 PM" },
+            { day: "Sunday", time: "By Private Appointment Only" },
+          ],
+  });
+
+  // Keep contactState synchronized when site.contact refreshes
+  useEffect(() => {
+    if (site.contact) {
+      setContactState((prev) => ({
+        ...prev,
+        ...site.contact,
+        address: {
+          ...prev.address,
+          ...(site.contact.address || {}),
+        },
+        hours:
+          site.contact.hours && site.contact.hours.length > 0
+            ? site.contact.hours
+            : prev.hours,
+      }));
+    }
+  }, [site.contact]);
+
   const messages = site.messages || [];
+
+  // Filtered leads
+  const filteredMessages = messages.filter((m) => {
+    // Search query
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const matchName = m.name?.toLowerCase().includes(q);
+      const matchEmail = m.email?.toLowerCase().includes(q);
+      const matchPhone = m.phone?.toLowerCase().includes(q);
+      const matchService = m.service?.toLowerCase().includes(q);
+      const matchMessage = m.message?.toLowerCase().includes(q);
+      const matchNotes = m.notes?.toLowerCase().includes(q);
+      if (!matchName && !matchEmail && !matchPhone && !matchService && !matchMessage && !matchNotes) {
+        return false;
+      }
+    }
+
+    // Status filter
+    if (statusFilter === "unread" && (m.status === "contacted" || m.status === "archived")) return false;
+    if (statusFilter === "high" && m.priority !== "high") return false;
+    if (statusFilter === "contacted" && m.status !== "contacted") return false;
+    if (statusFilter === "archived" && m.status !== "archived") return false;
+
+    // Source filter
+    if (sourceFilter !== "all") {
+      const normalizedMsgSource = (m.source === "Enquiry Now Modal" || m.source === "Enquiry Now") ? "Enquiry Now" : (m.source || "Wedding Inquiry Form");
+      if (normalizedMsgSource !== sourceFilter) return false;
+    }
+
+    return true;
+  });
+
+  // Statistics counters
+  const totalCount = messages.length;
+  const unreadCount = messages.filter((m) => m.status === "unread" || !m.status).length;
+  const highPriorityCount = messages.filter((m) => m.priority === "high").length;
+  const contactedCount = messages.filter((m) => m.status === "contacted").length;
+
+  // Toggle Priority Star
+  const handleTogglePriority = async (msg) => {
+    const nextPriority = msg.priority === "high" ? "normal" : "high";
+    if (typeof site.updateInquiry === "function") {
+      await site.updateInquiry(msg.id || msg._id, { priority: nextPriority });
+    }
+    showSaved(nextPriority === "high" ? "Marked as ⭐ High Priority VIP Lead!" : "Priority reset to normal");
+  };
+
+  // Change Status
+  const handleStatusChange = async (msg, nextStatus) => {
+    if (typeof site.updateInquiry === "function") {
+      await site.updateInquiry(msg.id || msg._id, { status: nextStatus });
+    }
+    showSaved(`Inquiry marked as ${nextStatus}`);
+  };
+
+  // Save Contact Info
+  const handleSaveContact = (e) => {
+    e.preventDefault();
+    site.update("contact", contactState);
+    showSaved("Contact & Studio details updated in MongoDB Atlas!");
+  };
+
+  // Save Office Hours
+  const handleSaveHours = (e) => {
+    e.preventDefault();
+    site.update("contact", contactState);
+    showSaved("Office & Consultation hours saved successfully!");
+  };
+
+  // Save Social Links
+  const handleSaveSocials = (e) => {
+    e.preventDefault();
+    site.update("contact", contactState);
+    showSaved("Social media channels saved successfully!");
+  };
+
+  // Save Admin Note on Lead
+  const handleSaveNote = async () => {
+    if (!selectedInquiry) return;
+    setSavingNote(true);
+    try {
+      if (typeof site.updateInquiry === "function") {
+        await site.updateInquiry(selectedInquiry.id || selectedInquiry._id, { notes: editingNotes });
+      }
+      setSelectedInquiry((prev) => ({ ...prev, notes: editingNotes }));
+      showSaved("Client consultation note saved!");
+    } catch (err) {
+      console.error("Save note error:", err);
+    } finally {
+      setSavingNote(false);
+    }
+  };
+
+  // Hours Row Management
+  const handleAddHourRow = () => {
+    setContactState((prev) => ({
+      ...prev,
+      hours: [...prev.hours, { day: "New Schedule", time: "10:00 AM – 7:00 PM" }],
+    }));
+  };
+
+  const handleUpdateHourRow = (index, field, val) => {
+    setContactState((prev) => {
+      const nextHours = [...prev.hours];
+      nextHours[index] = { ...nextHours[index], [field]: val };
+      return { ...prev, hours: nextHours };
+    });
+  };
+
+  const handleRemoveHourRow = (index) => {
+    setContactState((prev) => ({
+      ...prev,
+      hours: prev.hours.filter((_, i) => i !== index),
+    }));
+  };
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      {/* Module Title Header & Global Sync */}
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-border/60">
         <div>
-          <h3 className="font-display text-xl text-ink font-semibold">Received Booking &amp; Consultation Requests</h3>
-          <p className="text-xs text-muted-foreground mt-0.5">Total Inquiries: {messages.length}</p>
-        </div>
-        <ModuleRefreshButton site={site} showSaved={showSaved} label="Refresh Inbox" />
-      </div>
-
-      {messages.length === 0 ? (
-        <div className="glass-card rounded-3xl p-12 text-center text-muted-foreground">
-          <Inbox className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
-          <p className="font-display text-lg text-ink">Inbox is Empty</p>
-          <p className="text-xs mt-1">
-            When users submit the Consultation Form, their requests will appear here instantly.
+          <div className="flex items-center gap-2">
+            <h2 className="font-display text-2xl text-ink font-semibold">Contact Us &amp; Lead Management</h2>
+            {unreadCount > 0 && (
+              <span className="rounded-full bg-secondary text-ink px-2.5 py-0.5 text-xs font-bold animate-pulse">
+                {unreadCount} New
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Manage incoming wedding inquiries, automated emails, studio address, hours, and social media channels.
           </p>
         </div>
-      ) : (
-        <div className="space-y-4">
-          {messages.map((m) => (
+        <ModuleRefreshButton site={site} showSaved={showSaved} label="Sync Inquiries &amp; Contact" />
+      </div>
+
+      {/* Sub-Tab Navigation Bar */}
+      <div className="flex flex-wrap gap-2 border-b border-border pb-3">
+        <button
+          type="button"
+          onClick={() => setActiveSubTab("leads")}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-semibold transition cursor-pointer ${
+            activeSubTab === "leads"
+              ? "gradient-royal text-primary-foreground shadow-md"
+              : "bg-card text-muted-foreground hover:text-foreground border border-border"
+          }`}
+        >
+          <Inbox className="h-4 w-4" />
+          <span>Client Inquiries &amp; Leads</span>
+          <span
+            className={`ml-1.5 px-2 py-0.5 rounded-full text-[0.65rem] font-bold ${
+              activeSubTab === "leads"
+                ? "bg-secondary text-ink"
+                : "bg-muted text-foreground"
+            }`}
+          >
+            {totalCount}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveSubTab("details")}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-semibold transition cursor-pointer ${
+            activeSubTab === "details"
+              ? "gradient-royal text-primary-foreground shadow-md"
+              : "bg-card text-muted-foreground hover:text-foreground border border-border"
+          }`}
+        >
+          <MapPin className="h-4 w-4" />
+          <span>Studio Info &amp; Address</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveSubTab("hours")}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-semibold transition cursor-pointer ${
+            activeSubTab === "hours"
+              ? "gradient-royal text-primary-foreground shadow-md"
+              : "bg-card text-muted-foreground hover:text-foreground border border-border"
+          }`}
+        >
+          <Clock className="h-4 w-4" />
+          <span>Office &amp; Consultation Hours</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveSubTab("socials")}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-semibold transition cursor-pointer ${
+            activeSubTab === "socials"
+              ? "gradient-royal text-primary-foreground shadow-md"
+              : "bg-card text-muted-foreground hover:text-foreground border border-border"
+          }`}
+        >
+          <Share2 className="h-4 w-4" />
+          <span>Social Media Channels</span>
+        </button>
+      </div>
+
+      {/* SUB-TAB 1: CLIENT INQUIRIES & LEADS */}
+      {activeSubTab === "leads" && (
+        <div className="space-y-6 animate-fade-in">
+          {/* Quick Metrics Bar */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 text-xs">
             <div
-              key={m.id}
-              className="glass-card rounded-2xl p-5 border border-border flex flex-col sm:flex-row justify-between gap-4"
+              onClick={() => setStatusFilter("all")}
+              className={`glass-card rounded-2xl p-4 border transition cursor-pointer ${
+                statusFilter === "all" ? "border-primary shadow-sm bg-primary/5" : "border-border hover:border-border/80"
+              }`}
             >
-              <div className="space-y-2">
-                <div className="flex items-center gap-3">
-                  <h4 className="font-display text-base text-ink font-semibold">{m.name}</h4>
-                  <span className="rounded-full bg-primary/10 text-primary px-2.5 py-0.5 text-[0.65rem] font-bold uppercase">
-                    {m.service || "Wedding Planning"}
-                  </span>
-                </div>
+              <span className="text-muted-foreground block text-[0.7rem] uppercase tracking-wider font-medium">Total Inquiries</span>
+              <span className="font-display text-2xl font-bold text-ink mt-0.5 block">{totalCount}</span>
+            </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs text-muted-foreground">
-                  <div>
-                    <span className="block text-[0.65rem] uppercase text-muted-foreground/70">Phone</span>
-                    <a href={`tel:${m.phone}`} className="text-primary font-medium">{m.phone}</a>
-                  </div>
-                  <div>
-                    <span className="block text-[0.65rem] uppercase text-muted-foreground/70">Email</span>
-                    <a href={`mailto:${m.email}`} className="text-foreground">{m.email}</a>
-                  </div>
-                  <div>
-                    <span className="block text-[0.65rem] uppercase text-muted-foreground/70">Event Date</span>
-                    <span className="text-foreground">{m.eventDate || "TBD"}</span>
-                  </div>
-                  <div>
-                    <span className="block text-[0.65rem] uppercase text-muted-foreground/70">Budget</span>
-                    <span className="text-foreground font-semibold">{m.budget || "Standard"}</span>
-                  </div>
-                </div>
+            <div
+              onClick={() => setStatusFilter("unread")}
+              className={`glass-card rounded-2xl p-4 border transition cursor-pointer ${
+                statusFilter === "unread" ? "border-secondary shadow-sm bg-secondary/10" : "border-border hover:border-secondary/50"
+              }`}
+            >
+              <span className="text-secondary font-bold block text-[0.7rem] uppercase tracking-wider">Pending / Unread</span>
+              <span className="font-display text-2xl font-bold text-secondary mt-0.5 block">{unreadCount}</span>
+            </div>
 
-                {m.message && (
-                  <div className="mt-3 rounded-xl bg-card/80 p-3 text-xs text-foreground/90 border border-border/50">
-                    <span className="text-[0.65rem] uppercase text-muted-foreground block mb-1 font-semibold">
-                      Client Message:
-                    </span>
-                    {m.message}
-                  </div>
-                )}
+            <div
+              onClick={() => setStatusFilter("high")}
+              className={`glass-card rounded-2xl p-4 border transition cursor-pointer ${
+                statusFilter === "high" ? "border-amber-500 shadow-sm bg-amber-500/10" : "border-border hover:border-amber-400"
+              }`}
+            >
+              <span className="text-amber-600 dark:text-amber-400 font-bold block text-[0.7rem] uppercase tracking-wider">⭐ High Priority / VIP</span>
+              <span className="font-display text-2xl font-bold text-amber-600 dark:text-amber-400 mt-0.5 block">{highPriorityCount}</span>
+            </div>
+
+            <div
+              onClick={() => setStatusFilter("contacted")}
+              className={`glass-card rounded-2xl p-4 border transition cursor-pointer ${
+                statusFilter === "contacted" ? "border-emerald-500 shadow-sm bg-emerald-500/10" : "border-border hover:border-emerald-400"
+              }`}
+            >
+              <span className="text-emerald-600 dark:text-emerald-400 font-bold block text-[0.7rem] uppercase tracking-wider">Contacted Leads</span>
+              <span className="font-display text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 block">{contactedCount}</span>
+            </div>
+          </div>
+
+          {/* Search & Filters Controls */}
+          <div className="glass-card rounded-2xl p-4 border border-border flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+            {/* Search input */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search leads by name, email, phone, service, or message..."
+                className="w-full rounded-xl border border-border bg-card pl-9 pr-4 py-2 text-xs text-foreground focus:outline-none focus:border-primary"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-xs"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Filter by Status and Source */}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1 bg-card rounded-xl border border-border p-1 text-xs">
+                <Filter className="h-3.5 w-3.5 text-muted-foreground ml-1.5" />
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="bg-transparent text-xs text-foreground px-2 py-1 focus:outline-none cursor-pointer"
+                >
+                  <option value="all">All Statuses ({totalCount})</option>
+                  <option value="unread">Pending / Unread ({unreadCount})</option>
+                  <option value="high">High Priority / VIP ({highPriorityCount})</option>
+                  <option value="contacted">Contacted ({contactedCount})</option>
+                  <option value="archived">Archived</option>
+                </select>
               </div>
 
-              <div className="flex sm:flex-col justify-end items-end gap-2 shrink-0">
+              <div className="flex items-center gap-1 bg-card rounded-xl border border-border p-1 text-xs">
+                <Tag className="h-3.5 w-3.5 text-muted-foreground ml-1.5" />
+                <select
+                  value={sourceFilter}
+                  onChange={(e) => setSourceFilter(e.target.value)}
+                  className="bg-transparent text-xs text-foreground px-2 py-1 focus:outline-none cursor-pointer"
+                >
+                  <option value="all">All Form Sources</option>
+                  <option value="Enquiry Now">Enquiry Now</option>
+                  <option value="Wedding Inquiry Form">Wedding Inquiry Form</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Inquiries List */}
+          {filteredMessages.length === 0 ? (
+            <div className="glass-card rounded-3xl p-12 text-center text-muted-foreground border border-border">
+              <Inbox className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
+              <p className="font-display text-lg text-ink">No Inquiries Found</p>
+              <p className="text-xs mt-1">
+                {messages.length === 0
+                  ? "When users submit either the Enquiry Now pop-up or the Wedding Inquiry Form, their requests will appear here instantly."
+                  : "No inquiries matched your search and filter criteria."}
+              </p>
+              {(searchQuery || statusFilter !== "all" || sourceFilter !== "all") && (
                 <button
                   type="button"
                   onClick={() => {
-                    site.removeMessage(m.id);
-                    showSaved();
+                    setSearchQuery("");
+                    setStatusFilter("all");
+                    setSourceFilter("all");
                   }}
-                  className="rounded-lg p-2 text-destructive hover:bg-destructive/10 transition"
-                  title="Delete message"
+                  className="mt-4 px-4 py-2 rounded-xl bg-card border border-border text-xs font-semibold hover:border-primary transition cursor-pointer"
+                >
+                  Clear Filters
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredMessages.map((m) => {
+                const isHighPriority = m.priority === "high";
+                const isUnread = m.status === "unread" || !m.status;
+                const isContacted = m.status === "contacted";
+                const rawSource = m.source || "Wedding Inquiry Form";
+                const leadSource = (rawSource === "Enquiry Now Modal" || rawSource === "Enquiry Now") ? "Enquiry Now" : rawSource;
+
+                return (
+                  <div
+                    key={m.id || m._id}
+                    className={`glass-card rounded-2xl p-5 border transition flex flex-col lg:flex-row justify-between gap-5 ${
+                      isHighPriority
+                        ? "border-amber-500/60 bg-amber-500/5 shadow-md ring-1 ring-amber-500/30"
+                        : isUnread
+                        ? "border-secondary/60 bg-secondary/5"
+                        : "border-border"
+                    }`}
+                  >
+                    {/* Left: Lead Details */}
+                    <div className="space-y-3 flex-1">
+                      {/* Name, Badges & Priority Star */}
+                      <div className="flex flex-wrap items-center gap-2.5">
+                        <button
+                          type="button"
+                          onClick={() => handleTogglePriority(m)}
+                          title={isHighPriority ? "Remove High Priority" : "Set as High Priority VIP lead"}
+                          className={`p-1.5 rounded-lg border transition cursor-pointer ${
+                            isHighPriority
+                              ? "bg-amber-500 text-ink border-amber-500 shadow-sm"
+                              : "bg-card text-muted-foreground border-border hover:text-amber-500 hover:border-amber-400"
+                          }`}
+                        >
+                          <Star className={`h-4 w-4 ${isHighPriority ? "fill-current" : ""}`} />
+                        </button>
+
+                        <h4 className="font-display text-lg text-ink font-semibold">{m.name}</h4>
+
+                        {/* Source Badge */}
+                        <span
+                          className={`rounded-full px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider border ${
+                            leadSource === "Enquiry Now"
+                              ? "bg-primary/10 text-primary border-primary/30"
+                              : "bg-secondary/15 text-secondary border-secondary/40"
+                          }`}
+                        >
+                          {leadSource}
+                        </span>
+
+                        {/* Status Badge Dropdown */}
+                        <select
+                          value={m.status || "unread"}
+                          onChange={(e) => handleStatusChange(m, e.target.value)}
+                          className={`rounded-full px-2.5 py-0.5 text-[0.68rem] font-bold border focus:outline-none cursor-pointer ${
+                            isUnread
+                              ? "bg-secondary/20 text-secondary border-secondary/50"
+                              : isContacted
+                              ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/40"
+                              : "bg-muted text-muted-foreground border-border"
+                          }`}
+                        >
+                          <option value="unread">🟡 Pending / Unread</option>
+                          <option value="contacted">🟢 Contacted</option>
+                          <option value="archived">⚪ Archived</option>
+                        </select>
+
+                        {isHighPriority && (
+                          <span className="rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/40 px-2 py-0.5 text-[0.65rem] font-bold uppercase">
+                            VIP Lead
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Lead Metadata Grid */}
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs bg-card/60 p-3.5 rounded-xl border border-border/60">
+                        <div>
+                          <span className="block text-[0.65rem] uppercase text-muted-foreground font-semibold">Phone / WhatsApp</span>
+                          <a
+                            href={`tel:${m.phone}`}
+                            className="text-primary font-semibold hover:underline block truncate mt-0.5"
+                          >
+                            {m.phone}
+                          </a>
+                        </div>
+                        <div>
+                          <span className="block text-[0.65rem] uppercase text-muted-foreground font-semibold">Email</span>
+                          <a
+                            href={`mailto:${m.email}`}
+                            className="text-foreground hover:text-primary transition block truncate mt-0.5"
+                          >
+                            {m.email}
+                          </a>
+                        </div>
+                        <div>
+                          <span className="block text-[0.65rem] uppercase text-muted-foreground font-semibold">Event Date</span>
+                          <span className="text-foreground font-medium block truncate mt-0.5">
+                            {m.eventDate || "To Be Finalized"}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="block text-[0.65rem] uppercase text-muted-foreground font-semibold">Estimated Budget</span>
+                          <span className="text-foreground font-semibold block mt-0.5">
+                            {m.budget === "To Be Tailored" ? (
+                              <span className="text-secondary font-medium text-[0.7rem]">To Be Tailored ✨</span>
+                            ) : (
+                              m.budget || "To Be Tailored"
+                            )}
+                          </span>
+                        </div>
+                        <div className="col-span-2 sm:col-span-3 lg:col-span-1">
+                          <span className="block text-[0.65rem] uppercase text-muted-foreground font-semibold">Requested Service</span>
+                          <span className="text-primary font-semibold block mt-0.5 leading-snug">
+                            {m.service || "Full Wedding Planning"}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Customer Message */}
+                      {m.message && (
+                        <div className="rounded-xl bg-card/80 p-3 text-xs text-foreground/90 border border-border/50">
+                          <span className="text-[0.65rem] uppercase text-muted-foreground block mb-0.5 font-bold">
+                            Client Message / Notes:
+                          </span>
+                          <p className="italic text-foreground/90 leading-relaxed">"{m.message}"</p>
+                        </div>
+                      )}
+
+                      {/* Internal Admin Note (if any) */}
+                      {m.notes && (
+                        <div className="rounded-xl bg-primary/5 p-2.5 text-xs text-foreground/90 border border-primary/20 flex items-start gap-2">
+                          <FileText className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+                          <div>
+                            <span className="text-[0.65rem] uppercase text-primary block font-bold">Internal Follow-Up Note:</span>
+                            <span className="text-foreground/85">{m.notes}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Right: Quick Action Controls */}
+                    <div className="flex lg:flex-col justify-between items-end gap-2.5 shrink-0 border-t lg:border-t-0 lg:border-l border-border/60 pt-3 lg:pt-0 lg:pl-5">
+                      {/* Action Buttons */}
+                      <div className="flex flex-wrap lg:flex-col gap-2 w-full">
+                        {/* WhatsApp Quick Chat */}
+                        <a
+                          href={`https://wa.me/${m.phone.replace(/[^0-9]/g, "")}?text=Hello%20${encodeURIComponent(
+                            m.name
+                          )},%20thank%20you%20for%20reaching%20out%20to%20Confianza%20Events!%20We%20received%20your%20inquiry%20regarding%20${encodeURIComponent(
+                            m.service || "Wedding Planning"
+                          )}.`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-xs transition"
+                        >
+                          <MessageCircle className="h-3.5 w-3.5" />
+                          <span>WhatsApp</span>
+                        </a>
+
+                        {/* Call Button */}
+                        <a
+                          href={`tel:${m.phone}`}
+                          className="px-3 py-1.5 rounded-xl bg-card border border-border hover:border-primary text-foreground text-xs font-semibold flex items-center justify-center gap-1.5 transition"
+                        >
+                          <Phone className="h-3.5 w-3.5 text-primary" />
+                          <span>Call</span>
+                        </a>
+
+                        {/* Notes / View Details Button */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedInquiry(m);
+                            setEditingNotes(m.notes || "");
+                          }}
+                          className="px-3 py-1.5 rounded-xl bg-card border border-border hover:border-secondary text-foreground text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer"
+                        >
+                          <FileText className="h-3.5 w-3.5 text-secondary" />
+                          <span>{m.notes ? "Edit Note" : "Add Note"}</span>
+                        </button>
+
+                        {/* Delete Button */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (window.confirm(`Are you sure you want to delete the inquiry from ${m.name}?`)) {
+                              site.removeMessage(m.id || m._id);
+                              showSaved("Inquiry deleted successfully");
+                            }
+                          }}
+                          className="px-3 py-1.5 rounded-xl text-destructive hover:bg-destructive/10 text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer"
+                          title="Delete inquiry"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          <span>Delete</span>
+                        </button>
+                      </div>
+
+                      {/* Timestamp */}
+                      <span className="text-[0.68rem] text-muted-foreground block text-right mt-1">
+                        {new Date(m.createdAt || m.id).toLocaleDateString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Lead Notes & Details Modal */}
+          {selectedInquiry && (
+            <div className="fixed inset-0 z-100 flex items-center justify-center bg-[rgba(37,27,49,0.38)] backdrop-blur-md p-4 animate-fade-in">
+              <div className="modal-dialog-luxury bg-[#FFFDFB] max-w-lg w-full max-h-[88vh] overflow-y-auto no-scrollbar rounded-3xl p-6 sm:p-8 border border-[#E8E2EE] shadow-luxe text-[#4C4555] space-y-4 animate-zoom-in">
+                <div className="flex items-center justify-between pb-3.5 border-b border-[#E8E2EE]">
+                  <div>
+                    <h3 className="font-display text-xl text-[#2B2138] font-bold">
+                      Client Consultation Details
+                    </h3>
+                    <p className="text-xs text-[#7E7688] font-medium">{selectedInquiry.name} &bull; {selectedInquiry.source || "Wedding Inquiry Form"}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedInquiry(null)}
+                    className="p-1.5 rounded-full bg-[#F4F1F7] hover:bg-[#EAE4F0] text-[#2B2138] transition cursor-pointer"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <div className="space-y-3.5 text-xs">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 bg-[#FCFBFE] p-4 rounded-2xl border border-[#E8E2EE]">
+                    <div>
+                      <span className="text-[#7E7688] block text-[0.68rem] uppercase font-bold tracking-wider">Phone:</span>
+                      <a href={`tel:${selectedInquiry.phone}`} className="text-[#6A439E] font-bold">{selectedInquiry.phone}</a>
+                    </div>
+                    <div>
+                      <span className="text-[#7E7688] block text-[0.68rem] uppercase font-bold tracking-wider">Email:</span>
+                      <a href={`mailto:${selectedInquiry.email}`} className="text-[#2B2138] truncate block font-medium">{selectedInquiry.email}</a>
+                    </div>
+                    <div>
+                      <span className="text-[#7E7688] block text-[0.68rem] uppercase font-bold tracking-wider">Event Date:</span>
+                      <span className="font-semibold text-[#2B2138] block">{selectedInquiry.eventDate || "To Be Finalized"}</span>
+                    </div>
+                    <div>
+                      <span className="text-[#7E7688] block text-[0.68rem] uppercase font-bold tracking-wider">Estimated Budget:</span>
+                      <span className="font-semibold text-[#2B2138] block">
+                        {selectedInquiry.budget === "To Be Tailored"
+                          ? "To Be Tailored (Quick Enquiry)"
+                          : selectedInquiry.budget || "To Be Tailored"}
+                      </span>
+                    </div>
+                    <div className="col-span-2">
+                      <span className="text-[#7E7688] block text-[0.68rem] uppercase font-bold tracking-wider">Requested Service:</span>
+                      <span className="font-semibold text-[#6A439E] block leading-snug">{selectedInquiry.service || "Full Wedding Planning"}</span>
+                    </div>
+                  </div>
+
+                  {selectedInquiry.message && (
+                    <div className="bg-[#FCFBFE] p-3.5 rounded-2xl border border-[#E8E2EE]">
+                      <span className="text-[#7E7688] block font-semibold mb-1 text-[0.68rem] uppercase tracking-wider">Customer Requirements:</span>
+                      <p className="text-[#2B2138] italic">"{selectedInquiry.message}"</p>
+                    </div>
+                  )}
+
+                  {/* Internal Admin Notes */}
+                  <div>
+                    <label className="font-semibold text-[#2B2138] block mb-1">
+                      Internal Planning &amp; Follow-Up Notes
+                    </label>
+                    <textarea
+                      rows={4}
+                      value={editingNotes}
+                      onChange={(e) => setEditingNotes(e.target.value)}
+                      placeholder="Add notes about call discussions, venue choices, budget quotes, or mood board preferences..."
+                      className="w-full rounded-xl border border-[#E8E2EE] bg-white p-3.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedInquiry(null)}
+                    className="btn-modal-cancel"
+                  >
+                    Close
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSaveNote}
+                    disabled={savingNote}
+                    className="btn-modal-primary"
+                  >
+                    <Save className="h-3.5 w-3.5" />
+                    <span>{savingNote ? "Saving..." : "Save Planning Note"}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* SUB-TAB 2: STUDIO INFO & ADDRESS */}
+      {activeSubTab === "details" && (
+        <form onSubmit={handleSaveContact} className="glass-card rounded-3xl p-6 sm:p-8 border border-border space-y-6 animate-fade-in">
+          <div className="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-border/50">
+            <div>
+              <h3 className="font-display text-xl text-ink font-semibold">Studio Info &amp; Physical Address</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Official contact numbers, founder designations, and Pune studio location
+              </p>
+            </div>
+            <button type="submit" className="btn-luxe gradient-royal text-primary-foreground text-xs">
+              <Save className="h-4 w-4" />
+              <span>Save Studio Details</span>
+            </button>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+            <div>
+              <label className="font-medium text-foreground block mb-1">Business Name</label>
+              <input
+                type="text"
+                value={contactState.business}
+                onChange={(e) => setContactState({ ...contactState, business: e.target.value })}
+                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground"
+              />
+            </div>
+            <div>
+              <label className="font-medium text-foreground block mb-1">Founder / Managing Director</label>
+              <input
+                type="text"
+                value={contactState.owner}
+                onChange={(e) => setContactState({ ...contactState, owner: e.target.value })}
+                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground"
+              />
+            </div>
+            <div>
+              <label className="font-medium text-foreground block mb-1">Co-Founder / Director</label>
+              <input
+                type="text"
+                value={contactState.partner}
+                onChange={(e) => setContactState({ ...contactState, partner: e.target.value })}
+                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground"
+              />
+            </div>
+            <div>
+              <label className="font-medium text-foreground block mb-1">Primary Phone Number</label>
+              <input
+                type="text"
+                value={contactState.phone}
+                onChange={(e) => setContactState({ ...contactState, phone: e.target.value })}
+                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground"
+              />
+            </div>
+            <div>
+              <label className="font-medium text-foreground block mb-1">Secondary / Concierge Phone</label>
+              <input
+                type="text"
+                value={contactState.secondaryPhone}
+                onChange={(e) => setContactState({ ...contactState, secondaryPhone: e.target.value })}
+                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground"
+              />
+            </div>
+            <div>
+              <label className="font-medium text-foreground block mb-1">WhatsApp Number (e.g. 917057357240)</label>
+              <input
+                type="text"
+                value={contactState.whatsapp}
+                onChange={(e) => setContactState({ ...contactState, whatsapp: e.target.value })}
+                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="font-medium text-foreground block mb-1">Official Inquiries Email</label>
+              <input
+                type="email"
+                value={contactState.email}
+                onChange={(e) => setContactState({ ...contactState, email: e.target.value })}
+                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground"
+              />
+            </div>
+            <div>
+              <label className="font-medium text-foreground block mb-1">Google Maps Embed URL / Share Link</label>
+              <input
+                type="text"
+                value={contactState.mapEmbed}
+                onChange={(e) => setContactState({ ...contactState, mapEmbed: e.target.value })}
+                placeholder="https://maps.google.com/..."
+                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground"
+              />
+            </div>
+          </div>
+
+          {/* Physical Address Fields */}
+          <div className="space-y-3 pt-2 text-xs border-t border-border/50">
+            <h4 className="font-semibold text-ink text-sm">Physical Studio Address</h4>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <input
+                type="text"
+                placeholder="Address Line 1 (e.g. Indrayani Complex)"
+                value={contactState.address?.line1}
+                onChange={(e) =>
+                  setContactState({
+                    ...contactState,
+                    address: { ...contactState.address, line1: e.target.value },
+                  })
+                }
+                className="rounded-xl border border-border bg-card px-3 py-2 text-sm"
+              />
+              <input
+                type="text"
+                placeholder="Address Line 2 (e.g. Near Mr DIY, Warje)"
+                value={contactState.address?.line2}
+                onChange={(e) =>
+                  setContactState({
+                    ...contactState,
+                    address: { ...contactState.address, line2: e.target.value },
+                  })
+                }
+                className="rounded-xl border border-border bg-card px-3 py-2 text-sm"
+              />
+              <input
+                type="text"
+                placeholder="City (e.g. Pune)"
+                value={contactState.address?.city}
+                onChange={(e) =>
+                  setContactState({
+                    ...contactState,
+                    address: { ...contactState.address, city: e.target.value },
+                  })
+                }
+                className="rounded-xl border border-border bg-card px-3 py-2 text-sm"
+              />
+              <input
+                type="text"
+                placeholder="State (e.g. Maharashtra)"
+                value={contactState.address?.state}
+                onChange={(e) =>
+                  setContactState({
+                    ...contactState,
+                    address: { ...contactState.address, state: e.target.value },
+                  })
+                }
+                className="rounded-xl border border-border bg-card px-3 py-2 text-sm"
+              />
+              <input
+                type="text"
+                placeholder="Pincode (e.g. 411052)"
+                value={contactState.address?.pincode}
+                onChange={(e) =>
+                  setContactState({
+                    ...contactState,
+                    address: { ...contactState.address, pincode: e.target.value },
+                  })
+                }
+                className="rounded-xl border border-border bg-card px-3 py-2 text-sm"
+              />
+            </div>
+          </div>
+
+          <button type="submit" className="btn-luxe gradient-royal text-primary-foreground text-xs">
+            <Save className="h-4 w-4" />
+            <span>Save Contact Details</span>
+          </button>
+        </form>
+      )}
+
+      {/* SUB-TAB 3: OFFICE & CONSULTATION HOURS */}
+      {activeSubTab === "hours" && (
+        <form onSubmit={handleSaveHours} className="glass-card rounded-3xl p-6 sm:p-8 border border-border space-y-6 animate-fade-in">
+          <div className="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-border/50">
+            <div>
+              <h3 className="font-display text-xl text-ink font-semibold">Office &amp; Consultation Hours</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Customize studio working hours and client appointment schedule
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleAddHourRow}
+              className="px-3.5 py-1.5 rounded-xl border border-primary/40 bg-primary/10 text-primary text-xs font-semibold flex items-center gap-1.5 hover:bg-primary/20 transition cursor-pointer"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span>Add Schedule Row</span>
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {contactState.hours.map((h, idx) => (
+              <div key={idx} className="flex items-center gap-3 bg-card p-3 rounded-2xl border border-border text-xs">
+                <div className="flex-1">
+                  <label className="text-[0.65rem] text-muted-foreground block mb-0.5 uppercase font-semibold">Days</label>
+                  <input
+                    type="text"
+                    value={h.day}
+                    onChange={(e) => handleUpdateHourRow(idx, "day", e.target.value)}
+                    placeholder="e.g. Monday – Saturday"
+                    className="w-full rounded-xl border border-border bg-background px-3 py-1.5 text-xs text-foreground"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="text-[0.65rem] text-muted-foreground block mb-0.5 uppercase font-semibold">Timings</label>
+                  <input
+                    type="text"
+                    value={h.time}
+                    onChange={(e) => handleUpdateHourRow(idx, "time", e.target.value)}
+                    placeholder="e.g. 10:00 AM – 8:00 PM"
+                    className="w-full rounded-xl border border-border bg-background px-3 py-1.5 text-xs text-foreground"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveHourRow(idx)}
+                  className="p-2 rounded-xl text-destructive hover:bg-destructive/10 transition mt-4 cursor-pointer"
+                  title="Remove row"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
-                <span className="text-[0.65rem] text-muted-foreground">
-                  {new Date(m.createdAt || m.id).toLocaleDateString()}
-                </span>
               </div>
+            ))}
+          </div>
+
+          <div className="rounded-2xl bg-secondary/10 border border-secondary/30 p-4 text-xs text-ink space-y-1">
+            <span className="font-bold text-secondary flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>24/7 Wedding Day Concierge Note</span>
+            </span>
+            <p className="text-muted-foreground">
+              During booked wedding dates, our on-ground shadow managers and show runners operate 24/7 round-the-clock.
+            </p>
+          </div>
+
+          <button type="submit" className="btn-luxe gradient-royal text-primary-foreground text-xs">
+            <Save className="h-4 w-4" />
+            <span>Save Consultation Hours</span>
+          </button>
+        </form>
+      )}
+
+      {/* SUB-TAB 4: SOCIAL MEDIA CHANNELS */}
+      {activeSubTab === "socials" && (
+        <form onSubmit={handleSaveSocials} className="glass-card rounded-3xl p-6 sm:p-8 border border-border space-y-6 animate-fade-in">
+          <div className="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-border/50">
+            <div>
+              <h3 className="font-display text-xl text-ink font-semibold">Social Media Channels</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Manage external links to Instagram, Facebook, and YouTube
+              </p>
             </div>
-          ))}
-        </div>
+            <button type="submit" className="btn-luxe gradient-royal text-primary-foreground text-xs">
+              <Save className="h-4 w-4" />
+              <span>Save Social Links</span>
+            </button>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+            <div>
+              <label className="font-medium text-foreground block mb-1">Instagram Profile URL</label>
+              <input
+                type="text"
+                value={contactState.instagram || ""}
+                onChange={(e) => setContactState({ ...contactState, instagram: e.target.value })}
+                placeholder="https://www.instagram.com/confianza_events"
+                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground"
+              />
+            </div>
+            <div>
+              <label className="font-medium text-foreground block mb-1">Facebook Page URL</label>
+              <input
+                type="text"
+                value={contactState.facebook || ""}
+                onChange={(e) => setContactState({ ...contactState, facebook: e.target.value })}
+                placeholder="https://www.facebook.com/..."
+                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground"
+              />
+            </div>
+            <div>
+              <label className="font-medium text-foreground block mb-1">YouTube Channel URL</label>
+              <input
+                type="text"
+                value={contactState.youtube || ""}
+                onChange={(e) => setContactState({ ...contactState, youtube: e.target.value })}
+                placeholder="https://www.youtube.com/@..."
+                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground"
+              />
+            </div>
+          </div>
+
+          <button type="submit" className="btn-luxe gradient-royal text-primary-foreground text-xs">
+            <Save className="h-4 w-4" />
+            <span>Save Social Links</span>
+          </button>
+        </form>
       )}
     </div>
   );
@@ -757,109 +1665,173 @@ function SectionsManagerModule({ site, showSaved }) {
 // MODULE 4: Hero Editor
 // -------------------------------------------------------------
 function HeroEditorModule({ site, showSaved }) {
-  const [formData, setFormData] = useState(site.hero);
+  const [formData, setFormData] = useState(site.hero || {});
+  const [newImageUrl, setNewImageUrl] = useState("");
 
   const handleSave = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     site.update("hero", formData);
-    showSaved();
+    showSaved("Homepage luxury banner slider saved successfully!");
+  };
+
+  const images = Array.isArray(formData.images) && formData.images.length > 0
+    ? formData.images
+    : ["/images/hero-1.jpg", "/images/hero-2.jpg", "/images/hero-3.jpg"];
+
+  const addImage = (url) => {
+    if (!url) return;
+    const updated = [...(formData.images || ["/images/hero-1.jpg", "/images/hero-2.jpg", "/images/hero-3.jpg"]), url];
+    setFormData({ ...formData, images: updated });
+    setNewImageUrl("");
+  };
+
+  const removeImage = (idx) => {
+    const updated = images.filter((_, i) => i !== idx);
+    setFormData({ ...formData, images: updated });
   };
 
   return (
-    <form onSubmit={handleSave} className="glass-card rounded-3xl p-6 sm:p-8 border border-border space-y-6">
+    <div className="glass-card rounded-3xl p-6 sm:p-8 border border-border space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-border/50">
         <div>
-          <h3 className="font-display text-xl text-ink font-semibold">Hero Section Content</h3>
-          <p className="text-xs text-muted-foreground mt-0.5">Customize homepage hero slider headlines, badges, CTA buttons & images</p>
+          <h3 className="font-display text-xl text-ink font-semibold">Homepage Luxury Banner Slider</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Manage full-width 100% visible luxury banner slides (zero text overlay, pure visual elegance)
+          </p>
         </div>
-        <ModuleRefreshButton site={site} showSaved={showSaved} label="Refresh Hero" />
+        <div className="flex items-center gap-2">
+          <ModuleRefreshButton site={site} showSaved={showSaved} label="Refresh Banner" />
+          <button
+            type="button"
+            onClick={handleSave}
+            className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-4 flex items-center gap-1.5 cursor-pointer"
+          >
+            <Save className="h-4 w-4" />
+            <span>Save Banner Slider</span>
+          </button>
+        </div>
       </div>
 
-      <div className="space-y-4 text-xs">
-        <div>
-          <label className="font-medium text-foreground block mb-1">Eyebrow Badge</label>
-          <input
-            type="text"
-            value={formData.eyebrow}
-            onChange={(e) => setFormData({ ...formData, eyebrow: e.target.value })}
-            className="w-full rounded-xl border border-border bg-card px-4 py-2 text-sm text-foreground"
-          />
-        </div>
+      {/* Cloudinary Single Upload to Add New Slide */}
+      <div className="space-y-4">
+        <ImageUploadField
+          label="Upload New Slide to Banner (Cloudinary)"
+          value={newImageUrl}
+          onChange={(url) => {
+            if (url) {
+              addImage(url);
+            }
+          }}
+        />
 
+        {/* Existing Slide Cards */}
         <div>
-          <label className="font-medium text-foreground block mb-1">Main Headline</label>
-          <input
-            type="text"
-            value={formData.headline}
-            onChange={(e) => setFormData({ ...formData, headline: e.target.value })}
-            className="w-full rounded-xl border border-border bg-card px-4 py-2 text-sm text-foreground"
-          />
-        </div>
+          <label className="font-semibold text-foreground text-xs block mb-2">
+            Active Banner Slides ({images.length})
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {images.map((img, idx) => (
+              <div
+                key={img + idx}
+                className="relative group rounded-2xl overflow-hidden border border-border bg-card shadow-sm"
+              >
+                <div className="aspect-[16/9] w-full bg-muted overflow-hidden relative">
+                  <img
+                    src={img}
+                    alt={`Slide ${idx + 1}`}
+                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                    onError={(e) => {
+                      e.currentTarget.src = "/images/hero-1.jpg";
+                    }}
+                  />
+                  <div className="absolute top-2 left-2 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-[0.65rem] font-bold text-white uppercase tracking-wider">
+                    Slide {idx + 1}
+                  </div>
+                </div>
 
-        <div>
-          <label className="font-medium text-foreground block mb-1">Subtitle Description</label>
-          <textarea
-            rows={3}
-            value={formData.subtitle}
-            onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
-            className="w-full rounded-xl border border-border bg-card px-4 py-2 text-sm text-foreground"
-          />
-        </div>
-
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div>
-            <label className="font-medium text-foreground block mb-1">Primary Button Label</label>
-            <input
-              type="text"
-              value={formData.primaryCta?.label}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  primaryCta: { ...formData.primaryCta, label: e.target.value },
-                })
-              }
-              className="w-full rounded-xl border border-border bg-card px-4 py-2 text-sm text-foreground"
-            />
-          </div>
-          <div>
-            <label className="font-medium text-foreground block mb-1">Secondary Button Label</label>
-            <input
-              type="text"
-              value={formData.secondaryCta?.label}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  secondaryCta: { ...formData.secondaryCta, label: e.target.value },
-                })
-              }
-              className="w-full rounded-xl border border-border bg-card px-4 py-2 text-sm text-foreground"
-            />
+                <div className="p-3 flex items-center justify-between gap-2 border-t border-border/50 bg-background/50">
+                  <span className="text-[0.7rem] text-muted-foreground truncate font-mono">
+                    {img}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeImage(idx)}
+                    className="p-1.5 rounded-lg text-destructive hover:bg-destructive/10 transition-colors shrink-0 cursor-pointer"
+                    title="Delete Slide"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
+        {/* Bulk Image URLs Input (Optional) */}
         <div>
-          <label className="font-medium text-foreground block mb-1">
-            Hero Slider Image URLs (one per line)
+          <label className="font-medium text-foreground text-xs block mb-1">
+            Bulk Edit Image URLs (one per line)
           </label>
           <textarea
             rows={3}
-            value={(formData.images || []).join("\n")}
+            value={images.join("\n")}
             onChange={(e) =>
               setFormData({
                 ...formData,
-                images: e.target.value.split("\n").filter(Boolean),
+                images: e.target.value.split("\n").map((s) => s.trim()).filter(Boolean),
               })
             }
-            className="w-full rounded-xl border border-border bg-card px-4 py-2 text-sm text-foreground font-mono"
+            className="w-full rounded-xl border border-border bg-card px-4 py-2 text-xs text-foreground font-mono leading-relaxed"
+            placeholder="https://...&#10;https://..."
           />
         </div>
       </div>
 
-      <button type="submit" className="btn-luxe gradient-royal text-primary-foreground text-xs">
-        <Save className="h-4 w-4" />
-        <span>Save Hero Settings</span>
-      </button>
-    </form>
+      {/* Live Preview */}
+      <div className="pt-4 border-t border-border/50">
+        <div className="flex items-center gap-2 mb-2">
+          <Eye className="h-4 w-4 text-primary" />
+          <h4 className="text-xs font-bold uppercase tracking-wider text-ink">
+            Live Banner Visual Preview (100% Image Visibility)
+          </h4>
+        </div>
+        <div className="rounded-2xl overflow-hidden border border-border shadow-inner bg-black">
+          <div className="relative w-full aspect-[21/9] sm:aspect-[24/9] overflow-hidden">
+            {images.length > 0 && (
+              <img
+                src={images[0]}
+                alt="Banner Preview"
+                className="w-full h-full object-cover object-center"
+                onError={(e) => {
+                  e.currentTarget.src = "/images/hero-1.jpg";
+                }}
+              />
+            )}
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-md">
+              {images.map((_, i) => (
+                <span
+                  key={i}
+                  className={`h-1.5 rounded-full ${
+                    i === 0 ? "w-5 bg-[#C2A438]" : "w-1.5 bg-white/40"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="pt-2 flex justify-end">
+        <button
+          type="button"
+          onClick={handleSave}
+          className="btn-luxe gradient-royal text-primary-foreground text-xs py-2.5 px-6 flex items-center gap-2 cursor-pointer shadow-luxe"
+        >
+          <Save className="h-4 w-4" />
+          <span>Save Banner Changes</span>
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -1091,7 +2063,7 @@ function AboutEditorModule({ site, showSaved }) {
               </div>
               <h3 className="font-display text-2xl text-ink font-bold mt-1">Founder's Address &amp; Vision</h3>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Customize the luxury dark card displayed on the public <span className="text-primary font-semibold">/about</span> page. Changes reflect live below.
+                Customize the luxury dark card displayed on the public <span className="text-primary font-semibold">About page</span>. Changes reflect live below.
               </p>
             </div>
             <button
@@ -1515,7 +2487,7 @@ function AboutEditorModule({ site, showSaved }) {
 
           {/* Member Add/Edit Modal */}
           {editingMember && (
-            <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/80 p-4">
+            <div className="fixed inset-0 z-100 flex items-center justify-center bg-[rgba(37,27,49,0.38)] backdrop-blur-md p-4 animate-fade-in">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -1544,18 +2516,18 @@ function AboutEditorModule({ site, showSaved }) {
                   saveTeam(updated);
                   setEditingMember(null);
                 }}
-                className="glass-card max-w-lg w-full max-h-[90vh] overflow-y-auto rounded-3xl p-6 sm:p-8 space-y-4"
+                className="modal-dialog-luxury bg-[#FFFDFB] max-w-lg w-full max-h-[88vh] overflow-y-auto no-scrollbar rounded-3xl p-6 sm:p-8 space-y-4 border border-[#E8E2EE] shadow-luxe"
               >
-                <div className="flex justify-between items-center border-b pb-3">
-                  <h4 className="font-display text-lg text-ink font-bold">
+                <div className="flex justify-between items-center border-b border-[#E8E2EE] pb-3.5">
+                  <h4 className="font-display text-lg text-[#2B2138] font-bold">
                     {editingMember.isNew ? "Add Team Member" : "Edit Team Member"}
                   </h4>
                   <button
                     type="button"
                     onClick={() => setEditingMember(null)}
-                    className="text-muted-foreground hover:text-foreground"
+                    className="p-1.5 rounded-full bg-[#F4F1F7] hover:bg-[#EAE4F0] text-[#2B2138] transition cursor-pointer"
                   >
-                    <X className="h-5 w-5" />
+                    <X className="h-4 w-4" />
                   </button>
                 </div>
 
@@ -1567,25 +2539,25 @@ function AboutEditorModule({ site, showSaved }) {
 
                 <div className="grid sm:grid-cols-2 gap-3 text-xs">
                   <div>
-                    <label className="font-semibold text-foreground block mb-1">Full Name</label>
+                    <label className="font-semibold text-[#2B2138] block mb-1">Full Name</label>
                     <input
                       type="text"
                       required
                       value={editingMember.name || ""}
                       onChange={(e) => setEditingMember({ ...editingMember, name: e.target.value })}
-                      className="w-full rounded-xl border border-border bg-card px-3 py-2"
+                      className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                       placeholder="e.g. Radhika Deshmukh"
                     />
                   </div>
 
                   <div>
-                    <label className="font-semibold text-foreground block mb-1">Designation / Role</label>
+                    <label className="font-semibold text-[#2B2138] block mb-1">Designation / Role</label>
                     <input
                       type="text"
                       required
                       value={editingMember.role || ""}
                       onChange={(e) => setEditingMember({ ...editingMember, role: e.target.value })}
-                      className="w-full rounded-xl border border-border bg-card px-3 py-2"
+                      className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                       placeholder="e.g. Lead Floral Architect"
                     />
                   </div>
@@ -1593,31 +2565,31 @@ function AboutEditorModule({ site, showSaved }) {
 
                 <div className="grid sm:grid-cols-2 gap-3 text-xs">
                   <div>
-                    <label className="font-semibold text-foreground block mb-1">Official Email</label>
+                    <label className="font-semibold text-[#2B2138] block mb-1">Official Email</label>
                     <input
                       type="email"
                       required
                       value={editingMember.email || ""}
                       onChange={(e) => setEditingMember({ ...editingMember, email: e.target.value })}
-                      className="w-full rounded-xl border border-border bg-card px-3 py-2"
+                      className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                       placeholder="name@confianzaevents.com"
                     />
                   </div>
 
                   <div>
-                    <label className="font-semibold text-foreground block mb-1">Experience</label>
+                    <label className="font-semibold text-[#2B2138] block mb-1">Experience</label>
                     <input
                       type="text"
                       value={editingMember.experience || ""}
                       onChange={(e) => setEditingMember({ ...editingMember, experience: e.target.value })}
-                      className="w-full rounded-xl border border-border bg-card px-3 py-2"
+                      className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                       placeholder="e.g. 6+ Years"
                     />
                   </div>
                 </div>
 
                 <div className="text-xs">
-                  <label className="font-semibold text-foreground block mb-1">
+                  <label className="font-semibold text-[#2B2138] block mb-1">
                     Specialties &amp; Domain (comma-separated)
                   </label>
                   <input
@@ -1632,33 +2604,33 @@ function AboutEditorModule({ site, showSaved }) {
                     onChange={(e) =>
                       setEditingMember({ ...editingMember, specialtiesText: e.target.value })
                     }
-                    className="w-full rounded-xl border border-border bg-card px-3 py-2"
+                    className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                     placeholder="Luxury Decor, Spatial Design, Guest Concierge"
                   />
                 </div>
 
                 <div className="text-xs">
-                  <label className="font-semibold text-foreground block mb-1">Bio / Profile Description</label>
+                  <label className="font-semibold text-[#2B2138] block mb-1">Bio / Profile Description</label>
                   <textarea
                     rows={3}
                     value={editingMember.bio || ""}
                     onChange={(e) => setEditingMember({ ...editingMember, bio: e.target.value })}
-                    className="w-full rounded-xl border border-border bg-card px-3 py-2"
+                    className="w-full rounded-xl border border-[#E8E2EE] bg-white p-3 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                     placeholder="Describe their role and mastery in wedding coordination..."
                   />
                 </div>
 
-                <div className="flex justify-end gap-2 pt-2 border-t">
+                <div className="flex justify-end gap-3 pt-3 border-t border-[#E8E2EE]">
                   <button
                     type="button"
                     onClick={() => setEditingMember(null)}
-                    className="px-4 py-2 rounded-full border text-xs"
+                    className="btn-modal-cancel"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5"
+                    className="btn-modal-primary"
                   >
                     Save Member Profile
                   </button>
@@ -1682,7 +2654,7 @@ function AboutEditorModule({ site, showSaved }) {
             <div>
               <h3 className="font-display text-xl text-ink">Vision &amp; Mission Statements</h3>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Manage high-level guiding principles and bullet commitments shown on /about.
+                Manage high-level guiding principles and bullet commitments shown on the About page.
               </p>
             </div>
             <button
@@ -1907,7 +2879,7 @@ function AboutEditorModule({ site, showSaved }) {
 
           {/* Core Value Modal */}
           {editingValue && (
-            <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/80 p-4">
+            <div className="fixed inset-0 z-100 flex items-center justify-center bg-[rgba(37,27,49,0.38)] backdrop-blur-md p-4 animate-fade-in">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -1922,51 +2894,51 @@ function AboutEditorModule({ site, showSaved }) {
                   saveAbout(next);
                   setEditingValue(null);
                 }}
-                className="glass-card max-w-md w-full rounded-3xl p-6 sm:p-8 space-y-4"
+                className="modal-dialog-luxury bg-[#FFFDFB] max-w-md w-full max-h-[88vh] overflow-y-auto no-scrollbar rounded-3xl p-6 sm:p-8 space-y-4 border border-[#E8E2EE] shadow-luxe"
               >
-                <div className="flex justify-between items-center border-b pb-3">
-                  <h4 className="font-display text-lg text-ink font-bold">
+                <div className="flex justify-between items-center border-b border-[#E8E2EE] pb-3.5">
+                  <h4 className="font-display text-lg text-[#2B2138] font-bold">
                     {editingValue.isNew ? "Add Core Value" : "Edit Core Value"}
                   </h4>
                   <button
                     type="button"
                     onClick={() => setEditingValue(null)}
-                    className="text-muted-foreground"
+                    className="p-1.5 rounded-full bg-[#F4F1F7] hover:bg-[#EAE4F0] text-[#2B2138] transition cursor-pointer"
                   >
-                    <X className="h-5 w-5" />
+                    <X className="h-4 w-4" />
                   </button>
                 </div>
 
-                <div className="space-y-3 text-xs">
+                <div className="space-y-3.5 text-xs">
                   <div>
-                    <label className="font-semibold block mb-1">Title</label>
+                    <label className="font-semibold text-[#2B2138] block mb-1">Title</label>
                     <input
                       type="text"
                       required
                       value={editingValue.title || ""}
                       onChange={(e) => setEditingValue({ ...editingValue, title: e.target.value })}
-                      className="w-full rounded-xl border px-3 py-2 bg-card"
+                      className="w-full rounded-xl border border-[#E8E2EE] px-3.5 py-2.5 bg-white text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                       placeholder="e.g. Uncompromised Trust (Confianza)"
                     />
                   </div>
 
                   <div>
-                    <label className="font-semibold block mb-1">Subtitle Tag</label>
+                    <label className="font-semibold text-[#2B2138] block mb-1">Subtitle Tag</label>
                     <input
                       type="text"
                       value={editingValue.subtitle || ""}
                       onChange={(e) => setEditingValue({ ...editingValue, subtitle: e.target.value })}
-                      className="w-full rounded-xl border px-3 py-2 bg-card"
+                      className="w-full rounded-xl border border-[#E8E2EE] px-3.5 py-2.5 bg-white text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                       placeholder="e.g. Absolute Honesty in Costing"
                     />
                   </div>
 
                   <div>
-                    <label className="font-semibold block mb-1">Icon Name</label>
+                    <label className="font-semibold text-[#2B2138] block mb-1">Icon Name</label>
                     <select
                       value={editingValue.icon || "ShieldCheck"}
                       onChange={(e) => setEditingValue({ ...editingValue, icon: e.target.value })}
-                      className="w-full rounded-xl border px-3 py-2 bg-card text-xs"
+                      className="w-full rounded-xl border border-[#E8E2EE] px-3.5 py-2.5 bg-white text-[#2B2138] text-xs focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15 cursor-pointer"
                     >
                       <option value="ShieldCheck">ShieldCheck (Trust & Security)</option>
                       <option value="Palette">Palette (Art & Aesthetics)</option>
@@ -1978,29 +2950,29 @@ function AboutEditorModule({ site, showSaved }) {
                   </div>
 
                   <div>
-                    <label className="font-semibold block mb-1">Detailed Description</label>
+                    <label className="font-semibold text-[#2B2138] block mb-1">Detailed Description</label>
                     <textarea
                       rows={3}
                       required
                       value={editingValue.text || ""}
                       onChange={(e) => setEditingValue({ ...editingValue, text: e.target.value })}
-                      className="w-full rounded-xl border px-3 py-2 bg-card"
+                      className="w-full rounded-xl border border-[#E8E2EE] p-3 bg-white text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                       placeholder="Explain how this value guides your wedding planning..."
                     />
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-2 border-t">
+                <div className="flex justify-end gap-3 pt-3 border-t border-[#E8E2EE]">
                   <button
                     type="button"
                     onClick={() => setEditingValue(null)}
-                    className="px-4 py-2 rounded-full border text-xs"
+                    className="btn-modal-cancel"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5"
+                    className="btn-modal-primary"
                   >
                     Save Value
                   </button>
@@ -2019,7 +2991,7 @@ function AboutEditorModule({ site, showSaved }) {
               <div>
                 <h3 className="font-display text-xl text-ink">How Do We Work ({aboutData.howWeWork?.length || 0} Stages)</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  The 5-Stage Luxury Methodology roadmap on /about.
+                  The 5-Stage Luxury Methodology roadmap on the About page.
                 </p>
               </div>
 
@@ -2112,7 +3084,7 @@ function AboutEditorModule({ site, showSaved }) {
 
           {/* How We Work Modal */}
           {editingStep && (
-            <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/80 p-4">
+            <div className="fixed inset-0 z-100 flex items-center justify-center bg-[rgba(37,27,49,0.38)] backdrop-blur-md p-4 animate-fade-in">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -2138,72 +3110,72 @@ function AboutEditorModule({ site, showSaved }) {
                   saveAbout(next);
                   setEditingStep(null);
                 }}
-                className="glass-card max-w-md w-full rounded-3xl p-6 sm:p-8 space-y-4"
+                className="modal-dialog-luxury bg-[#FFFDFB] max-w-md w-full max-h-[88vh] overflow-y-auto no-scrollbar rounded-3xl p-6 sm:p-8 space-y-4 border border-[#E8E2EE] shadow-luxe"
               >
-                <div className="flex justify-between items-center border-b pb-3">
-                  <h4 className="font-display text-lg text-ink font-bold">
+                <div className="flex justify-between items-center border-b border-[#E8E2EE] pb-3.5">
+                  <h4 className="font-display text-lg text-[#2B2138] font-bold">
                     {editingStep.isNew ? "Add Methodology Stage" : "Edit Methodology Stage"}
                   </h4>
                   <button
                     type="button"
                     onClick={() => setEditingStep(null)}
-                    className="text-muted-foreground"
+                    className="p-1.5 rounded-full bg-[#F4F1F7] hover:bg-[#EAE4F0] text-[#2B2138] transition cursor-pointer"
                   >
-                    <X className="h-5 w-5" />
+                    <X className="h-4 w-4" />
                   </button>
                 </div>
 
-                <div className="space-y-3 text-xs">
+                <div className="space-y-3.5 text-xs">
                   <div className="grid grid-cols-3 gap-3">
                     <div>
-                      <label className="font-semibold block mb-1">Step Number</label>
+                      <label className="font-semibold text-[#2B2138] block mb-1">Step Number</label>
                       <input
                         type="text"
                         required
                         value={editingStep.num || ""}
                         onChange={(e) => setEditingStep({ ...editingStep, num: e.target.value })}
-                        className="w-full rounded-xl border px-3 py-2 bg-card"
+                        className="w-full rounded-xl border border-[#E8E2EE] px-3.5 py-2.5 bg-white text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                         placeholder="01"
                       />
                     </div>
                     <div className="col-span-2">
-                      <label className="font-semibold block mb-1">Timeline Tag</label>
+                      <label className="font-semibold text-[#2B2138] block mb-1">Timeline Tag</label>
                       <input
                         type="text"
                         value={editingStep.timeline || ""}
                         onChange={(e) => setEditingStep({ ...editingStep, timeline: e.target.value })}
-                        className="w-full rounded-xl border px-3 py-2 bg-card"
+                        className="w-full rounded-xl border border-[#E8E2EE] px-3.5 py-2.5 bg-white text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                         placeholder="Month 1 • Foundation"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="font-semibold block mb-1">Stage Title</label>
+                    <label className="font-semibold text-[#2B2138] block mb-1">Stage Title</label>
                     <input
                       type="text"
                       required
                       value={editingStep.title || ""}
                       onChange={(e) => setEditingStep({ ...editingStep, title: e.target.value })}
-                      className="w-full rounded-xl border px-3 py-2 bg-card"
+                      className="w-full rounded-xl border border-[#E8E2EE] px-3.5 py-2.5 bg-white text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                       placeholder="e.g. Discovery & Story Session"
                     />
                   </div>
 
                   <div>
-                    <label className="font-semibold block mb-1">Summary Description</label>
+                    <label className="font-semibold text-[#2B2138] block mb-1">Summary Description</label>
                     <textarea
                       rows={3}
                       required
                       value={editingStep.summary || ""}
                       onChange={(e) => setEditingStep({ ...editingStep, summary: e.target.value })}
-                      className="w-full rounded-xl border px-3 py-2 bg-card"
+                      className="w-full rounded-xl border border-[#E8E2EE] p-3 bg-white text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                       placeholder="Describe what happens in this stage..."
                     />
                   </div>
 
                   <div>
-                    <label className="font-semibold block mb-1">Key Deliverables (one per line)</label>
+                    <label className="font-semibold text-[#2B2138] block mb-1">Key Deliverables (one per line)</label>
                     <textarea
                       rows={3}
                       value={
@@ -2216,23 +3188,23 @@ function AboutEditorModule({ site, showSaved }) {
                       onChange={(e) =>
                         setEditingStep({ ...editingStep, deliverablesText: e.target.value })
                       }
-                      className="w-full rounded-xl border px-3 py-2 bg-card font-mono text-xs"
+                      className="w-full rounded-xl border border-[#E8E2EE] p-3 bg-white font-mono text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                       placeholder="Deliverable item 1&#10;Deliverable item 2"
                     />
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-2 border-t">
+                <div className="flex justify-end gap-3 pt-3 border-t border-[#E8E2EE]">
                   <button
                     type="button"
                     onClick={() => setEditingStep(null)}
-                    className="px-4 py-2 rounded-full border text-xs"
+                    className="btn-modal-cancel"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5"
+                    className="btn-modal-primary"
                   >
                     Save Stage
                   </button>
@@ -2263,7 +3235,7 @@ function AboutEditorModule({ site, showSaved }) {
                   </div>
                   <h3 className="font-display text-xl text-ink font-bold mt-1">About Page Header Banner</h3>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Customize the top hero banner title, subtitle, badge, and cover photo on <span className="text-primary font-semibold">/about</span>.
+                    Customize the top hero banner title, subtitle, badge, and cover photo on the <span className="text-primary font-semibold">About page</span>.
                   </p>
                 </div>
               </div>
@@ -2363,7 +3335,7 @@ function AboutEditorModule({ site, showSaved }) {
             <div className="lg:col-span-6 space-y-3 sticky top-6">
               <div className="flex items-center justify-between px-2">
                 <span className="text-[0.68rem] uppercase tracking-[0.25em] text-primary font-bold flex items-center gap-1.5">
-                  <Eye className="h-3.5 w-3.5 text-secondary" /> Live /about Header Preview
+                  <Eye className="h-3.5 w-3.5 text-secondary" /> Live About Header Preview
                 </span>
                 <span className="text-[0.62rem] text-muted-foreground font-mono">
                   Exact Frontend Replica
@@ -2418,17 +3390,29 @@ function ServicesEditorModule({ site, showSaved }) {
   const [editingService, setEditingService] = useState(null);
 
   useEffect(() => {
-    setServices(site.services || []);
+    if (Array.isArray(site.services)) {
+      const sanitized = site.services.map((s, idx) => ({
+        ...s,
+        category: s.category || (categories && categories[idx % categories.length]?.name) || "Signature Planning & Direction",
+      }));
+      setServices(sanitized);
+    }
   }, [site.services]);
 
-  const saveServiceList = (newList) => {
+  const saveServiceList = async (newList) => {
     setServices(newList);
-    site.update("services", newList);
-    showSaved();
+    try {
+      await site.update("services", newList);
+      showSaved("Services catalog saved successfully in MongoDB!");
+    } catch (err) {
+      console.error("Failed to save services:", err);
+    }
   };
 
   const deleteService = (id) => {
-    saveServiceList(services.filter((s) => s.id !== id && s._id !== id));
+    if (window.confirm("Are you sure you want to delete this service?")) {
+      saveServiceList(services.filter((s) => s.id !== id && s._id !== id));
+    }
   };
 
   const saveServiceModal = (e) => {
@@ -2442,9 +3426,10 @@ function ServicesEditorModule({ site, showSaved }) {
           .filter(Boolean)
       : [];
 
+    const defaultCatName = categories[0]?.name || categories[0]?.label || categories[0]?.id || "Signature Planning & Direction";
     const serviceData = {
       ...editingService,
-      category: editingService.category || "planning",
+      category: editingService.category || defaultCatName,
       badge: editingService.badge?.trim() || "Specialized Craft",
       features: parsedFeatures,
     };
@@ -2452,57 +3437,74 @@ function ServicesEditorModule({ site, showSaved }) {
     if (editingService.isNew) {
       const newService = {
         ...serviceData,
-        id: `service-${Date.now()}`,
-        isNew: undefined,
+        id: editingService.id || `service-${Date.now()}`,
       };
+      delete newService.isNew;
       saveServiceList([...services, newService]);
     } else {
-      saveServiceList(
-        services.map((s) =>
-          (s.id === editingService.id || (s._id && s._id === editingService._id))
-            ? serviceData
-            : s
-        )
-      );
+      const targetId = editingService.id;
+      const targetMongoId = editingService._id;
+      const updatedList = services.map((s) => {
+        const isMatch = Boolean(
+          (targetId && s.id === targetId) ||
+          (targetMongoId && (s._id === targetMongoId || s.id === targetMongoId)) ||
+          (targetId && s._id === targetId)
+        );
+        if (isMatch) {
+          const clean = { ...serviceData };
+          delete clean.isNew;
+          return clean;
+        }
+        return s;
+      });
+      saveServiceList(updatedList);
     }
     setEditingService(null);
   };
 
   // 2. Categories State
+  const defaultCategories = [
+    { id: "planning", name: "Signature Planning & Direction", label: "Signature Planning & Direction", slug: "planning", order: 1 },
+    { id: "decor", name: "Mandap & Spatial Decor", label: "Mandap & Spatial Decor", slug: "decor", order: 2 },
+    { id: "hospitality", name: "Royal Hospitality & Shadows", label: "Royal Hospitality & Shadows", slug: "hospitality", order: 3 },
+    { id: "rituals", name: "Rituals, Artists & F&B", label: "Rituals, Artists & F&B", slug: "rituals", order: 4 },
+  ];
+
   const [categories, setCategories] = useState(
-    site.serviceCategories && site.serviceCategories.length > 0
+    Array.isArray(site.serviceCategories) && site.serviceCategories.length > 0
       ? site.serviceCategories
-      : [
-          { id: "planning", label: "Signature Planning & Direction" },
-          { id: "decor", label: "Mandap & Spatial Decor" },
-          { id: "hospitality", label: "Royal Hospitality & Shadows" },
-          { id: "rituals", label: "Rituals, Artists & F&B" },
-        ]
+      : defaultCategories
   );
   const [editingCat, setEditingCat] = useState(null);
 
   useEffect(() => {
-    if (site.serviceCategories && site.serviceCategories.length > 0) {
+    if (Array.isArray(site.serviceCategories) && site.serviceCategories.length > 0) {
       setCategories(site.serviceCategories);
     }
   }, [site.serviceCategories]);
 
-  const saveCategoryList = (newList) => {
+  const saveCategoryList = async (newList) => {
     setCategories(newList);
-    site.update("serviceCategories", newList);
-    showSaved();
+    try {
+      await site.update("serviceCategories", newList);
+      showSaved("Service categories updated successfully in MongoDB!");
+    } catch (err) {
+      console.error("Failed to save service categories:", err);
+    }
   };
 
   const deleteCategory = (id) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
-      saveCategoryList(categories.filter((c) => c.id !== id));
+      saveCategoryList(categories.filter((c) => c.id !== id && c.name !== id && c.label !== id));
     }
   };
 
   const saveCategoryModal = (e) => {
     e.preventDefault();
-    const cleanLabel = (editingCat.label || "").trim();
-    const autoSlug = cleanLabel
+    const cleanName = (editingCat.name || editingCat.label || "").trim();
+    if (!cleanName) return;
+
+    const autoSlug = cleanName
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "");
@@ -2511,16 +3513,26 @@ function ServicesEditorModule({ site, showSaved }) {
 
     const catData = {
       id: slug,
-      label: cleanLabel,
+      name: cleanName,
+      label: cleanName,
+      slug: autoSlug,
+      order: editingCat.order || (editingCat.isNew ? categories.length + 1 : 1),
     };
 
+    let updated;
     if (editingCat.isNew) {
-      saveCategoryList([...categories, catData]);
+      updated = [...categories, catData];
     } else {
-      saveCategoryList(
-        categories.map((c) => (c.id === editingCat.id ? catData : c))
-      );
+      const origName = editingCat._origName || editingCat.name || editingCat.label;
+      const targetId = editingCat.id;
+      updated = categories.map((c) => {
+        if ((targetId && c.id === targetId) || (origName && (c.name === origName || c.label === origName))) {
+          return catData;
+        }
+        return c;
+      });
     }
+    saveCategoryList(updated);
     setEditingCat(null);
   };
 
@@ -2788,7 +3800,7 @@ function ServicesEditorModule({ site, showSaved }) {
                 setEditingService({
                   isNew: true,
                   title: "",
-                  category: categories[0]?.id || "planning",
+                  category: categories[0]?.name || categories[0]?.label || categories[0]?.id || "Signature Planning & Direction",
                   badge: "Specialized Craft",
                   description: "",
                   features: "",
@@ -2837,7 +3849,9 @@ function ServicesEditorModule({ site, showSaved }) {
                           </span>
                           {s.category && (
                             <span className="text-[0.6rem] px-1.5 py-0.2 rounded-md bg-secondary/15 text-secondary font-mono">
-                              {categories.find((c) => c.id === s.category)?.label || s.category}
+                              {categories.find((c) => c.id === s.category || c.name === s.category || c.label === s.category)?.name ||
+                               categories.find((c) => c.id === s.category || c.name === s.category || c.label === s.category)?.label ||
+                               s.category}
                             </span>
                           )}
                         </div>
@@ -2871,6 +3885,7 @@ function ServicesEditorModule({ site, showSaved }) {
                       onClick={() =>
                         setEditingService({
                           ...s,
+                          isNew: false,
                           features: Array.isArray(s.features) ? s.features.join("\n") : (s.features || ""),
                         })
                       }
@@ -2894,66 +3909,83 @@ function ServicesEditorModule({ site, showSaved }) {
           )}
 
           {editingService && (
-            <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/80 p-4">
+            <div className="fixed inset-0 z-100 flex items-center justify-center bg-[rgba(37,27,49,0.38)] backdrop-blur-md p-4 animate-fade-in">
               <form
                 onSubmit={saveServiceModal}
-                className="glass-card max-w-lg w-full rounded-3xl p-6 sm:p-8 space-y-4 max-h-[90vh] overflow-y-auto"
+                className="modal-dialog-luxury bg-[#FFFDFB] max-w-lg w-full rounded-3xl p-6 sm:p-8 space-y-4 max-h-[88vh] overflow-y-auto no-scrollbar border border-[#E8E2EE] shadow-luxe"
               >
-                <div className="flex justify-between items-center border-b pb-3">
-                  <h4 className="font-display text-lg text-ink">
+                <div className="flex justify-between items-center border-b border-[#E8E2EE] pb-3.5">
+                  <h4 className="font-display text-xl text-[#2B2138] font-bold">
                     {editingService.isNew ? "Add New Service" : "Edit Service"}
                   </h4>
                   <button
                     type="button"
                     onClick={() => setEditingService(null)}
-                    className="text-muted-foreground hover:text-foreground"
+                    className="p-1.5 rounded-full bg-[#F4F1F7] hover:bg-[#EAE4F0] text-[#2B2138] transition cursor-pointer"
                   >
-                    <X className="h-5 w-5" />
+                    <X className="h-4 w-4" />
                   </button>
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium block mb-1">Service Title</label>
+                  <label className="text-xs font-semibold text-[#2B2138] block mb-1">Service Title</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g., Full-Service Luxury Wedding Planning"
                     value={editingService.title}
                     onChange={(e) => setEditingService({ ...editingService, title: e.target.value })}
-                    className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
+                    className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-medium block mb-1">Filter Category</label>
+                    <label className="text-xs font-semibold text-[#2B2138] block mb-1">Filter Category</label>
                     <select
-                      value={editingService.category || categories[0]?.id || "planning"}
+                      value={
+                        editingService.category ||
+                        categories[0]?.name ||
+                        categories[0]?.label ||
+                        categories[0]?.id ||
+                        "Signature Planning & Direction"
+                      }
                       onChange={(e) => setEditingService({ ...editingService, category: e.target.value })}
-                      className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
+                      className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15 cursor-pointer"
                     >
-                      {categories.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.label}
-                        </option>
-                      ))}
+                      {categories.map((c) => {
+                        const cName = c.name || c.label || c.id;
+                        return (
+                          <option key={c.id || cName} value={cName}>
+                            {cName}
+                          </option>
+                        );
+                      })}
+                      {editingService.category &&
+                        !categories.some(
+                          (c) =>
+                            (c.name || c.label || c.id) === editingService.category ||
+                            c.id === editingService.category
+                        ) && (
+                          <option value={editingService.category}>{editingService.category}</option>
+                        )}
                     </select>
                   </div>
 
                   <div>
-                    <label className="text-xs font-medium block mb-1">Badge Tag</label>
+                    <label className="text-xs font-semibold text-[#2B2138] block mb-1">Badge Tag</label>
                     <input
                       type="text"
                       placeholder="e.g., Specialized Craft, VIP Concierge"
                       value={editingService.badge || ""}
                       onChange={(e) => setEditingService({ ...editingService, badge: e.target.value })}
-                      className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
+                      className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium block mb-1">Description</label>
+                  <label className="text-xs font-semibold text-[#2B2138] block mb-1">Description</label>
                   <textarea
                     rows={3}
                     required
@@ -2962,12 +3994,12 @@ function ServicesEditorModule({ site, showSaved }) {
                     onChange={(e) =>
                       setEditingService({ ...editingService, description: e.target.value })
                     }
-                    className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
+                    className="w-full rounded-xl border border-[#E8E2EE] bg-white p-3 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium block mb-1">
+                  <label className="text-xs font-semibold text-[#2B2138] block mb-1">
                     Features &amp; Deliverables (One per line)
                   </label>
                   <textarea
@@ -2977,9 +4009,9 @@ function ServicesEditorModule({ site, showSaved }) {
                     onChange={(e) =>
                       setEditingService({ ...editingService, features: e.target.value })
                     }
-                    className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm font-mono text-xs"
+                    className="w-full rounded-xl border border-[#E8E2EE] bg-white p-3 font-mono text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                   />
-                  <span className="text-[0.68rem] text-muted-foreground mt-1 block">
+                  <span className="text-[0.68rem] text-[#7E7688] mt-1 block">
                     Enter each highlight bullet on a new line. These will render with golden checkmarks on the Services card.
                   </span>
                 </div>
@@ -2990,17 +4022,17 @@ function ServicesEditorModule({ site, showSaved }) {
                   onChange={(url) => setEditingService({ ...editingService, image: url })}
                 />
 
-                <div className="flex justify-end gap-2 pt-2 border-t">
+                <div className="flex justify-end gap-3 pt-3 border-t border-[#E8E2EE]">
                   <button
                     type="button"
                     onClick={() => setEditingService(null)}
-                    className="px-4 py-2 rounded-full border text-xs"
+                    className="btn-modal-cancel"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5"
+                    className="btn-modal-primary"
                   >
                     Save Service
                   </button>
@@ -3020,7 +4052,7 @@ function ServicesEditorModule({ site, showSaved }) {
             <div>
               <h4 className="font-display text-lg text-ink">Service Filter Categories ({categories.length})</h4>
               <p className="text-xs text-muted-foreground">
-                Manage the dynamic category filter pills rendered on the public `/services` page.
+                Manage the dynamic category filter pills rendered on the public Services page.
               </p>
             </div>
             <button
@@ -3029,6 +4061,7 @@ function ServicesEditorModule({ site, showSaved }) {
                 setEditingCat({
                   isNew: true,
                   id: "",
+                  name: "",
                   label: "",
                 })
               }
@@ -3040,15 +4073,22 @@ function ServicesEditorModule({ site, showSaved }) {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {categories.map((cat) => {
-              const count = services.filter((s) => s.category === cat.id).length;
+            {categories.map((cat, idx) => {
+              const cName = cat.name || cat.label || cat.id;
+              const count = services.filter((s) => {
+                const sc = (s.category || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
+                const cid = (cat.id || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
+                const cnam = (cat.name || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
+                const clab = (cat.label || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
+                return Boolean(sc && (sc === cid || sc === cnam || sc === clab));
+              }).length;
               return (
                 <div
-                  key={cat.id}
+                  key={cat.id || idx}
                   className="glass-card rounded-2xl p-4 border border-border flex items-center justify-between"
                 >
                   <div>
-                    <h5 className="font-display text-base font-semibold text-ink">{cat.label}</h5>
+                    <h5 className="font-display text-base font-semibold text-ink">{cName}</h5>
                     <div className="flex items-center gap-2 mt-1.5">
                       <span className="text-[0.68rem] px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">
                         {count} {count === 1 ? "Service" : "Services"}
@@ -3058,7 +4098,14 @@ function ServicesEditorModule({ site, showSaved }) {
                   <div className="flex items-center gap-1.5">
                     <button
                       type="button"
-                      onClick={() => setEditingCat({ ...cat })}
+                      onClick={() =>
+                        setEditingCat({
+                          ...cat,
+                          name: cat.name || cat.label || "",
+                          label: cat.label || cat.name || "",
+                          _origName: cat.name || cat.label,
+                        })
+                      }
                       className="p-1.5 rounded-lg border border-border hover:bg-muted text-xs cursor-pointer"
                       title="Edit Category"
                     >
@@ -3066,7 +4113,7 @@ function ServicesEditorModule({ site, showSaved }) {
                     </button>
                     <button
                       type="button"
-                      onClick={() => deleteCategory(cat.id)}
+                      onClick={() => deleteCategory(cat.id || cat.name || cat.label)}
                       className="p-1.5 rounded-lg border border-border hover:bg-destructive/10 text-destructive text-xs cursor-pointer"
                       title="Delete Category"
                     >
@@ -3079,50 +4126,56 @@ function ServicesEditorModule({ site, showSaved }) {
           </div>
 
           {editingCat && (
-            <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/80 p-4">
+            <div className="fixed inset-0 z-100 flex items-center justify-center bg-[rgba(37,27,49,0.38)] backdrop-blur-md p-4 animate-fade-in">
               <form
                 onSubmit={saveCategoryModal}
-                className="glass-card max-w-md w-full rounded-3xl p-6 sm:p-8 space-y-4"
+                className="modal-dialog-luxury bg-[#FFFDFB] max-w-md w-full rounded-3xl p-6 sm:p-8 space-y-4 max-h-[88vh] overflow-y-auto no-scrollbar border border-[#E8E2EE] shadow-luxe"
               >
-                <div className="flex justify-between items-center border-b pb-3">
-                  <h4 className="font-display text-lg text-ink">
+                <div className="flex justify-between items-center border-b border-[#E8E2EE] pb-3.5">
+                  <h4 className="font-display text-lg text-[#2B2138] font-bold">
                     {editingCat.isNew ? "Add Filter Category" : "Edit Filter Category"}
                   </h4>
                   <button
                     type="button"
                     onClick={() => setEditingCat(null)}
-                    className="text-muted-foreground hover:text-foreground"
+                    className="p-1.5 rounded-full bg-[#F4F1F7] hover:bg-[#EAE4F0] text-[#2B2138] transition cursor-pointer"
                   >
-                    <X className="h-5 w-5" />
+                    <X className="h-4 w-4" />
                   </button>
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium block mb-1">Category Label</label>
+                  <label className="text-xs font-semibold text-[#2B2138] block mb-1">Category Name / Label</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Signature Planning & Direction"
-                    value={editingCat.label}
-                    onChange={(e) => setEditingCat({ ...editingCat, label: e.target.value })}
-                    className="w-full rounded-xl border border-border bg-card px-3.5 py-2.5 text-sm"
+                    value={editingCat.name ?? editingCat.label ?? ""}
+                    onChange={(e) =>
+                      setEditingCat({
+                        ...editingCat,
+                        name: e.target.value,
+                        label: e.target.value,
+                      })
+                    }
+                    className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                   />
-                  <p className="text-[0.68rem] text-muted-foreground mt-1.5">
-                    Filter pills on the public <span className="font-semibold text-primary">/services</span> page will update immediately.
+                  <p className="text-[0.68rem] text-[#7E7688] mt-1.5">
+                    Filter pills on the public <span className="font-semibold text-[#6A439E]">Services page</span> will update immediately.
                   </p>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-2 border-t">
+                <div className="flex justify-end gap-3 pt-3 border-t border-[#E8E2EE]">
                   <button
                     type="button"
                     onClick={() => setEditingCat(null)}
-                    className="px-4 py-2 rounded-full border text-xs"
+                    className="btn-modal-cancel"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5"
+                    className="btn-modal-primary"
                   >
                     Save Category
                   </button>
@@ -3278,63 +4331,63 @@ function ServicesEditorModule({ site, showSaved }) {
           )}
 
           {editingPkg && (
-            <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/80 p-4">
+            <div className="fixed inset-0 z-100 flex items-center justify-center bg-[rgba(37,27,49,0.38)] backdrop-blur-md p-4 animate-fade-in">
               <form
                 onSubmit={handleSavePkgModal}
-                className="glass-card max-w-md w-full rounded-3xl p-6 sm:p-8 space-y-4 max-h-[90vh] overflow-y-auto"
+                className="modal-dialog-luxury bg-[#FFFDFB] max-w-md w-full rounded-3xl p-6 sm:p-8 space-y-4 max-h-[88vh] overflow-y-auto no-scrollbar border border-[#E8E2EE] shadow-luxe"
               >
-                <div className="flex justify-between items-center border-b pb-3">
-                  <h4 className="font-display text-lg text-ink">
+                <div className="flex justify-between items-center border-b border-[#E8E2EE] pb-3.5">
+                  <h4 className="font-display text-lg text-[#2B2138] font-bold">
                     {editingPkg.isNew ? "Add New Package Tier" : "Edit Package Tier"}
                   </h4>
                   <button
                     type="button"
                     onClick={() => setEditingPkg(null)}
-                    className="text-muted-foreground hover:text-foreground"
+                    className="p-1.5 rounded-full bg-[#F4F1F7] hover:bg-[#EAE4F0] text-[#2B2138] transition cursor-pointer"
                   >
-                    <X className="h-5 w-5" />
+                    <X className="h-4 w-4" />
                   </button>
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold block mb-1">Tier Name</label>
+                  <label className="text-xs font-semibold text-[#2B2138] block mb-1">Tier Name</label>
                   <input
                     type="text"
                     required
                     value={editingPkg.name || ""}
                     onChange={(e) => setEditingPkg({ ...editingPkg, name: e.target.value })}
-                    className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
+                    className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                     placeholder="e.g. The Royal Heritage Experience"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-semibold block mb-1">Starting Price</label>
+                    <label className="text-xs font-semibold text-[#2B2138] block mb-1">Starting Price</label>
                     <input
                       type="text"
                       required
                       value={editingPkg.price || ""}
                       onChange={(e) => setEditingPkg({ ...editingPkg, price: e.target.value })}
-                      className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
+                      className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                       placeholder="e.g. ₹5,50,000"
                     />
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold block mb-1">Badge / Tag</label>
+                    <label className="text-xs font-semibold text-[#2B2138] block mb-1">Badge / Tag</label>
                     <input
                       type="text"
                       value={editingPkg.tag || ""}
                       onChange={(e) => setEditingPkg({ ...editingPkg, tag: e.target.value })}
-                      className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
+                      className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                       placeholder="e.g. Full-Service Luxury"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold block mb-1">
+                  <label className="text-xs font-semibold text-[#2B2138] block mb-1">
                     Included Features (one per line)
                   </label>
                   <textarea
@@ -3342,7 +4395,7 @@ function ServicesEditorModule({ site, showSaved }) {
                     required
                     value={editingPkg.features || ""}
                     onChange={(e) => setEditingPkg({ ...editingPkg, features: e.target.value })}
-                    className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs font-mono"
+                    className="w-full rounded-xl border border-[#E8E2EE] bg-white p-3 text-xs font-mono text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                     placeholder={"End-to-End Wedding Management\n3D Mandap & Stage Renders\nDedicated Bride & Groom Shadows"}
                   />
                 </div>
@@ -3353,24 +4406,24 @@ function ServicesEditorModule({ site, showSaved }) {
                     id="pkg-featured-toggle"
                     checked={Boolean(editingPkg.featured)}
                     onChange={(e) => setEditingPkg({ ...editingPkg, featured: e.target.checked })}
-                    className="h-4 w-4 rounded text-primary focus:ring-secondary cursor-pointer"
+                    className="h-4 w-4 rounded border-[#E8E2EE] text-[#6A439E] focus:ring-[#6A439E] cursor-pointer"
                   />
-                  <label htmlFor="pkg-featured-toggle" className="text-xs font-medium cursor-pointer">
+                  <label htmlFor="pkg-featured-toggle" className="text-xs font-semibold text-[#2B2138] cursor-pointer">
                     Highlight as Featured / Most Chosen Tier
                   </label>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-2 border-t">
+                <div className="flex justify-end gap-3 pt-3 border-t border-[#E8E2EE]">
                   <button
                     type="button"
                     onClick={() => setEditingPkg(null)}
-                    className="px-4 py-2 rounded-full border text-xs"
+                    className="btn-modal-cancel"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5"
+                    className="btn-modal-primary"
                   >
                     Save Package
                   </button>
@@ -3498,62 +4551,62 @@ function ServicesEditorModule({ site, showSaved }) {
           )}
 
           {editingCeremony && (
-            <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/80 p-4">
+            <div className="fixed inset-0 z-100 flex items-center justify-center bg-[rgba(37,27,49,0.38)] backdrop-blur-md p-4 animate-fade-in">
               <form
                 onSubmit={saveCeremonyModal}
-                className="glass-card max-w-lg w-full rounded-3xl p-6 sm:p-8 space-y-4 max-h-[90vh] overflow-y-auto"
+                className="modal-dialog-luxury bg-[#FFFDFB] max-w-lg w-full rounded-3xl p-6 sm:p-8 space-y-4 max-h-[88vh] overflow-y-auto no-scrollbar border border-[#E8E2EE] shadow-luxe"
               >
-                <div className="flex justify-between items-center border-b pb-3">
-                  <h4 className="font-display text-lg text-ink">
+                <div className="flex justify-between items-center border-b border-[#E8E2EE] pb-3.5">
+                  <h4 className="font-display text-lg text-[#2B2138] font-bold">
                     {editingCeremony.isNew ? "Add New Ceremony" : "Edit Ceremony"}
                   </h4>
                   <button
                     type="button"
                     onClick={() => setEditingCeremony(null)}
-                    className="text-muted-foreground hover:text-foreground"
+                    className="p-1.5 rounded-full bg-[#F4F1F7] hover:bg-[#EAE4F0] text-[#2B2138] transition cursor-pointer"
                   >
-                    <X className="h-5 w-5" />
+                    <X className="h-4 w-4" />
                   </button>
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium block mb-1">Ceremony Name</label>
+                  <label className="text-xs font-semibold text-[#2B2138] block mb-1">Ceremony Name</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Mehendi & Sangeet Soirée"
                     value={editingCeremony.name || ""}
                     onChange={(e) => setEditingCeremony({ ...editingCeremony, name: e.target.value })}
-                    className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
+                    className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-medium block mb-1">Subtitle</label>
+                    <label className="text-xs font-semibold text-[#2B2138] block mb-1">Subtitle</label>
                     <input
                       type="text"
                       placeholder="e.g. Rhythmic Celebrations & Glitz"
                       value={editingCeremony.subtitle || ""}
                       onChange={(e) => setEditingCeremony({ ...editingCeremony, subtitle: e.target.value })}
-                      className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
+                      className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                     />
                   </div>
 
                   <div>
-                    <label className="text-xs font-medium block mb-1">Theme Tag</label>
+                    <label className="text-xs font-semibold text-[#2B2138] block mb-1">Theme Tag</label>
                     <input
                       type="text"
                       placeholder="e.g. Bohemian Glamour, Vedic Heritage"
                       value={editingCeremony.theme || ""}
                       onChange={(e) => setEditingCeremony({ ...editingCeremony, theme: e.target.value })}
-                      className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
+                      className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium block mb-1">Description</label>
+                  <label className="text-xs font-semibold text-[#2B2138] block mb-1">Description</label>
                   <textarea
                     rows={3}
                     required
@@ -3562,12 +4615,12 @@ function ServicesEditorModule({ site, showSaved }) {
                     onChange={(e) =>
                       setEditingCeremony({ ...editingCeremony, description: e.target.value })
                     }
-                    className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
+                    className="w-full rounded-xl border border-[#E8E2EE] bg-white p-3 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium block mb-1">
+                  <label className="text-xs font-semibold text-[#2B2138] block mb-1">
                     Key Highlights &amp; Deliverables (One per line)
                   </label>
                   <textarea
@@ -3577,7 +4630,7 @@ function ServicesEditorModule({ site, showSaved }) {
                     onChange={(e) =>
                       setEditingCeremony({ ...editingCeremony, highlights: e.target.value })
                     }
-                    className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm font-mono text-xs"
+                    className="w-full rounded-xl border border-[#E8E2EE] bg-white p-3 font-mono text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                   />
                 </div>
 
@@ -3587,17 +4640,17 @@ function ServicesEditorModule({ site, showSaved }) {
                   onChange={(url) => setEditingCeremony({ ...editingCeremony, image: url })}
                 />
 
-                <div className="flex justify-end gap-2 pt-2 border-t">
+                <div className="flex justify-end gap-3 pt-3 border-t border-[#E8E2EE]">
                   <button
                     type="button"
                     onClick={() => setEditingCeremony(null)}
-                    className="px-4 py-2 rounded-full border text-xs"
+                    className="btn-modal-cancel"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5"
+                    className="btn-modal-primary"
                   >
                     Save Ceremony
                   </button>
@@ -3704,62 +4757,62 @@ function ServicesEditorModule({ site, showSaved }) {
           )}
 
           {editingStationery && (
-            <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/80 p-4">
+            <div className="fixed inset-0 z-100 flex items-center justify-center bg-[rgba(37,27,49,0.38)] backdrop-blur-md p-4 animate-fade-in">
               <form
                 onSubmit={saveStationeryModal}
-                className="glass-card max-w-md w-full rounded-3xl p-6 sm:p-8 space-y-4 max-h-[90vh] overflow-y-auto"
+                className="modal-dialog-luxury bg-[#FFFDFB] max-w-md w-full rounded-3xl p-6 sm:p-8 space-y-4 max-h-[88vh] overflow-y-auto no-scrollbar border border-[#E8E2EE] shadow-luxe"
               >
-                <div className="flex justify-between items-center border-b pb-3">
-                  <h4 className="font-display text-lg text-ink">
+                <div className="flex justify-between items-center border-b border-[#E8E2EE] pb-3.5">
+                  <h4 className="font-display text-lg text-[#2B2138] font-bold">
                     {editingStationery.isNew ? "Add Stationery Item" : "Edit Stationery Item"}
                   </h4>
                   <button
                     type="button"
                     onClick={() => setEditingStationery(null)}
-                    className="text-muted-foreground hover:text-foreground"
+                    className="p-1.5 rounded-full bg-[#F4F1F7] hover:bg-[#EAE4F0] text-[#2B2138] transition cursor-pointer"
                   >
-                    <X className="h-5 w-5" />
+                    <X className="h-4 w-4" />
                   </button>
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium block mb-1">Item Title</label>
+                  <label className="text-xs font-semibold text-[#2B2138] block mb-1">Item Title</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Bespoke Itinerary Cards"
                     value={editingStationery.title || ""}
                     onChange={(e) => setEditingStationery({ ...editingStationery, title: e.target.value })}
-                    className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
+                    className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-medium block mb-1">Subtitle</label>
+                    <label className="text-xs font-semibold text-[#2B2138] block mb-1">Subtitle</label>
                     <input
                       type="text"
                       placeholder="e.g. Room & Welcome Placements"
                       value={editingStationery.subtitle || ""}
                       onChange={(e) => setEditingStationery({ ...editingStationery, subtitle: e.target.value })}
-                      className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
+                      className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                     />
                   </div>
 
                   <div>
-                    <label className="text-xs font-medium block mb-1">Badge Tag</label>
+                    <label className="text-xs font-semibold text-[#2B2138] block mb-1">Badge Tag</label>
                     <input
                       type="text"
                       placeholder="e.g. Guest Itinerary, Key Jackets"
                       value={editingStationery.badge || ""}
                       onChange={(e) => setEditingStationery({ ...editingStationery, badge: e.target.value })}
-                      className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
+                      className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium block mb-1">Description</label>
+                  <label className="text-xs font-semibold text-[#2B2138] block mb-1">Description</label>
                   <textarea
                     rows={3}
                     required
@@ -3768,7 +4821,7 @@ function ServicesEditorModule({ site, showSaved }) {
                     onChange={(e) =>
                       setEditingStationery({ ...editingStationery, description: e.target.value })
                     }
-                    className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
+                    className="w-full rounded-xl border border-[#E8E2EE] bg-white p-3 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                   />
                 </div>
 
@@ -3778,17 +4831,17 @@ function ServicesEditorModule({ site, showSaved }) {
                   onChange={(url) => setEditingStationery({ ...editingStationery, image: url })}
                 />
 
-                <div className="flex justify-end gap-2 pt-2 border-t">
+                <div className="flex justify-end gap-3 pt-3 border-t border-[#E8E2EE]">
                   <button
                     type="button"
                     onClick={() => setEditingStationery(null)}
-                    className="px-4 py-2 rounded-full border text-xs"
+                    className="btn-modal-cancel"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5"
+                    className="btn-modal-primary"
                   >
                     Save Stationery Item
                   </button>
@@ -3910,6 +4963,60 @@ function ServicesEditorModule({ site, showSaved }) {
   );
 }
 
+/**
+ * Enforces a strict max limit of 4 featured testimonials for Homepage & Portfolio.
+ * If enabling a 5th review, automatically unticks the first/oldest selected review.
+ */
+function enforceMaxFeaturedTestimonials(list, newlySelectedId) {
+  const MAX_FEATURED = 4;
+  const featured = (list || []).filter((item) => Boolean(item.showOnPortfolio));
+
+  if (featured.length <= MAX_FEATURED) {
+    return list;
+  }
+
+  const excessCount = featured.length - MAX_FEATURED;
+  let evicted = 0;
+
+  return list.map((item) => {
+    const isThisItem =
+      (item.id && String(item.id) === String(newlySelectedId)) ||
+      (item._id && String(item._id) === String(newlySelectedId));
+
+    if (!isThisItem && item.showOnPortfolio && evicted < excessCount) {
+      evicted++;
+      return { ...item, showOnPortfolio: false };
+    }
+    return item;
+  });
+}
+
+// Rule: Maximum 6 Instagram posts featured on Homepage (View on Home).
+// If a user selects a 7th post with "showOnHome: true", automatically unselect the oldest/first selected one (FIFO).
+function enforceMaxFeaturedInstagram(list, newlySelectedId) {
+  const MAX_FEATURED = 6;
+  const featured = (list || []).filter((item) => Boolean(item.showOnHome));
+
+  if (featured.length <= MAX_FEATURED) {
+    return list;
+  }
+
+  const excessCount = featured.length - MAX_FEATURED;
+  let evicted = 0;
+
+  return list.map((item) => {
+    const isThisItem =
+      (item.id && String(item.id) === String(newlySelectedId)) ||
+      (item._id && String(item._id) === String(newlySelectedId));
+
+    if (!isThisItem && item.showOnHome && evicted < excessCount) {
+      evicted++;
+      return { ...item, showOnHome: false };
+    }
+    return item;
+  });
+}
+
 // -------------------------------------------------------------
 // MODULE 7: Portfolio Editor
 // -------------------------------------------------------------
@@ -3969,24 +5076,48 @@ function PortfolioEditorModule({ site, showSaved }) {
     ],
   });
 
-  // Sync state when context updates
+  // Keep local states in reactive sync with site context (isolated per slice)
   useEffect(() => {
-    if (site.portfolio) setItems(site.portfolio);
-    if (site.portfolioCategories) setCategories(site.portfolioCategories);
-    if (site.portfolioHeader) setHeaderData(site.portfolioHeader);
-    if (site.portfolioSection) setSectionData(site.portfolioSection);
-    if (site.testimonials) setTestimonials(site.testimonials);
-    if (site.testimonialsHeader) setTestimonialsHeader(site.testimonialsHeader);
-    if (site.portfolioCta) setCtaData(site.portfolioCta);
-  }, [
-    site.portfolio,
-    site.portfolioCategories,
-    site.portfolioHeader,
-    site.portfolioSection,
-    site.testimonials,
-    site.testimonialsHeader,
-    site.portfolioCta,
-  ]);
+    if (Array.isArray(site.portfolio)) {
+      setItems(site.portfolio);
+    }
+  }, [site.portfolio]);
+
+  useEffect(() => {
+    if (Array.isArray(site.portfolioCategories) && site.portfolioCategories.length > 0) {
+      setCategories(site.portfolioCategories);
+    }
+  }, [site.portfolioCategories]);
+
+  useEffect(() => {
+    if (site.portfolioHeader && Object.keys(site.portfolioHeader).length > 0) {
+      setHeaderData(site.portfolioHeader);
+    }
+  }, [site.portfolioHeader]);
+
+  useEffect(() => {
+    if (site.portfolioSection && Object.keys(site.portfolioSection).length > 0) {
+      setSectionData(site.portfolioSection);
+    }
+  }, [site.portfolioSection]);
+
+  useEffect(() => {
+    if (Array.isArray(site.testimonials)) {
+      setTestimonials(site.testimonials);
+    }
+  }, [site.testimonials]);
+
+  useEffect(() => {
+    if (site.testimonialsHeader && Object.keys(site.testimonialsHeader).length > 0) {
+      setTestimonialsHeader(site.testimonialsHeader);
+    }
+  }, [site.testimonialsHeader]);
+
+  useEffect(() => {
+    if (site.portfolioCta && Object.keys(site.portfolioCta).length > 0) {
+      setCtaData(site.portfolioCta);
+    }
+  }, [site.portfolioCta]);
 
   // Save Handlers with async/await and isSaving feedback
   const savePortfolioList = async (newList) => {
@@ -4080,12 +5211,14 @@ function PortfolioEditorModule({ site, showSaved }) {
     }
   };
 
+  const featuredCount = testimonials.filter((t) => Boolean(t.showOnPortfolio)).length;
+
   // Sub-tabs configuration
   const subTabs = [
     { id: "portfolio-works", label: `Signature Works (${items.length})` },
     { id: "categories", label: `Category Filter Pills (${categories.length})` },
     { id: "header-banner", label: "Page Header Banner" },
-    { id: "gratitude", label: `Words of Gratitude (${testimonials.length})` },
+    { id: "gratitude", label: `Words of Gratitude (${featuredCount}/4)` },
     { id: "cta-banner", label: "Consultation CTA Banner" },
   ];
 
@@ -4096,7 +5229,8 @@ function PortfolioEditorModule({ site, showSaved }) {
   const filteredAdminItems = items.filter((p) => {
     const matchCat =
       selectedFilterCategory === "All" ||
-      (p.category && p.category.toLowerCase() === selectedFilterCategory.toLowerCase());
+      ((p.category || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim() ===
+        selectedFilterCategory.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim());
     const matchSearch =
       !searchQuery.trim() ||
       p.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -4208,7 +5342,7 @@ function PortfolioEditorModule({ site, showSaved }) {
                   Portfolio Works Showcase ({items.length})
                 </h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Manage real wedding showcases rendered on <span className="text-primary font-semibold">/portfolio</span> and the Homepage. Deleting all items will strictly display 0 items.
+                  Manage real wedding showcases rendered on the <span className="text-primary font-semibold">Portfolio page</span> and Homepage. Deleting all items will strictly display 0 items.
                 </p>
               </div>
 
@@ -4338,7 +5472,7 @@ function PortfolioEditorModule({ site, showSaved }) {
                       <div className="flex items-center gap-1.5">
                         <button
                           type="button"
-                          onClick={() => setEditingProject({ ...p })}
+                          onClick={() => setEditingProject({ ...p, isNew: false })}
                           className="p-1.5 rounded-lg border border-border hover:bg-muted text-xs text-primary flex items-center gap-1 cursor-pointer"
                           title="Edit Project"
                         >
@@ -4369,7 +5503,7 @@ function PortfolioEditorModule({ site, showSaved }) {
 
           {/* Add / Edit Project Modal */}
           {editingProject && (
-            <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/80 p-4">
+            <div className="fixed inset-0 z-100 flex items-center justify-center bg-[rgba(37,27,49,0.38)] backdrop-blur-md p-4 animate-fade-in">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -4383,49 +5517,55 @@ function PortfolioEditorModule({ site, showSaved }) {
                   if (editingProject.isNew) {
                     updated = [cleanProject, ...items];
                   } else {
-                    updated = items.map((x) =>
-                      (x.id && x.id === editingProject.id) || (x._id && x._id === editingProject._id)
-                        ? cleanProject
-                        : x
-                    );
+                    const targetId = editingProject.id;
+                    const targetMongoId = editingProject._id;
+                    updated = items.map((x) => {
+                      const isMatch = Boolean(
+                        (targetId && x.id === targetId) ||
+                        (targetMongoId && (x._id === targetMongoId || x.id === targetMongoId)) ||
+                        (targetId && x._id === targetId)
+                      );
+                      if (isMatch) return cleanProject;
+                      return x;
+                    });
                   }
                   savePortfolioList(updated);
                   setEditingProject(null);
                 }}
-                className="glass-card max-w-lg w-full max-h-[90vh] overflow-y-auto rounded-3xl p-6 sm:p-8 space-y-4"
+                className="modal-dialog-luxury bg-[#FFFDFB] max-w-lg w-full max-h-[88vh] overflow-y-auto no-scrollbar rounded-3xl p-6 sm:p-8 space-y-4 border border-[#E8E2EE] shadow-luxe"
               >
-                <div className="flex justify-between items-center border-b pb-3">
-                  <h4 className="font-display text-lg text-ink font-bold">
+                <div className="flex justify-between items-center border-b border-[#E8E2EE] pb-3.5">
+                  <h4 className="font-display text-lg text-[#2B2138] font-bold">
                     {editingProject.isNew ? "Add Portfolio Project" : "Edit Portfolio Project"}
                   </h4>
                   <button
                     type="button"
                     onClick={() => setEditingProject(null)}
-                    className="text-muted-foreground hover:text-foreground cursor-pointer"
+                    className="p-1.5 rounded-full bg-[#F4F1F7] hover:bg-[#EAE4F0] text-[#2B2138] transition cursor-pointer"
                   >
-                    <X className="h-5 w-5" />
+                    <X className="h-4 w-4" />
                   </button>
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-foreground block mb-1">Project Title</label>
+                  <label className="text-xs font-semibold text-[#2B2138] block mb-1">Project Title</label>
                   <input
                     type="text"
                     required
                     value={editingProject.title || ""}
                     onChange={(e) => setEditingProject({ ...editingProject, title: e.target.value })}
-                    className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-medium"
+                    className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                     placeholder="e.g. Lakeside Royal Mandap"
                   />
                 </div>
 
-                <div className="grid sm:grid-cols-2 gap-4 text-xs">
+                <div className="grid sm:grid-cols-2 gap-3 text-xs">
                   <div>
-                    <label className="font-semibold text-foreground block mb-1">Category</label>
+                    <label className="font-semibold text-[#2B2138] block mb-1">Category</label>
                     <select
                       value={editingProject.category || categoryNames[0] || "Destination Weddings"}
                       onChange={(e) => setEditingProject({ ...editingProject, category: e.target.value })}
-                      className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs cursor-pointer"
+                      className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15 cursor-pointer"
                     >
                       {categoryNames.map((cName) => (
                         <option key={cName} value={cName}>
@@ -4439,12 +5579,12 @@ function PortfolioEditorModule({ site, showSaved }) {
                   </div>
 
                   <div>
-                    <label className="font-semibold text-foreground block mb-1">Venue / City Location</label>
+                    <label className="font-semibold text-[#2B2138] block mb-1">Venue / City Location</label>
                     <input
                       type="text"
                       value={editingProject.location || ""}
                       onChange={(e) => setEditingProject({ ...editingProject, location: e.target.value })}
-                      className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs"
+                      className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                       placeholder="e.g. Udaipur, Rajasthan"
                     />
                   </div>
@@ -4458,14 +5598,14 @@ function PortfolioEditorModule({ site, showSaved }) {
                 />
 
                 <div className="text-xs">
-                  <label className="font-semibold text-foreground block mb-1">
+                  <label className="font-semibold text-[#2B2138] block mb-1">
                     Highlight Story / Concept Description
                   </label>
                   <textarea
                     rows={3}
                     value={editingProject.description || ""}
                     onChange={(e) => setEditingProject({ ...editingProject, description: e.target.value })}
-                    className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs leading-relaxed"
+                    className="w-full rounded-xl border border-[#E8E2EE] bg-white p-3 text-xs leading-relaxed text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                     placeholder="Describe the architectural concept, floral conditioning, or custom decor elements..."
                   />
                 </div>
@@ -4476,24 +5616,24 @@ function PortfolioEditorModule({ site, showSaved }) {
                     id="featured-check"
                     checked={Boolean(editingProject.featured)}
                     onChange={(e) => setEditingProject({ ...editingProject, featured: e.target.checked })}
-                    className="rounded border-border text-secondary focus:ring-secondary cursor-pointer h-4 w-4"
+                    className="rounded border-[#E8E2EE] text-[#6A439E] focus:ring-[#6A439E] cursor-pointer h-4 w-4"
                   />
-                  <label htmlFor="featured-check" className="text-xs font-semibold text-foreground cursor-pointer">
+                  <label htmlFor="featured-check" className="text-xs font-semibold text-[#2B2138] cursor-pointer">
                     Mark as Featured Showcase Project
                   </label>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-3 border-t">
+                <div className="flex justify-end gap-3 pt-3 border-t border-[#E8E2EE]">
                   <button
                     type="button"
                     onClick={() => setEditingProject(null)}
-                    className="px-4 py-2 rounded-full border text-xs cursor-pointer"
+                    className="btn-modal-cancel"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5 cursor-pointer shadow-md"
+                    className="btn-modal-primary"
                   >
                     Save Project
                   </button>
@@ -4516,7 +5656,7 @@ function PortfolioEditorModule({ site, showSaved }) {
                   Portfolio Category Filter Pills ({categories.length})
                 </h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Manage the category pill filters displayed on the public <span className="text-primary font-semibold">/portfolio</span> and Homepage showcase.
+                  Manage the category pill filters displayed on the public <span className="text-primary font-semibold">Portfolio page</span> and Homepage showcase.
                 </p>
               </div>
 
@@ -4541,9 +5681,11 @@ function PortfolioEditorModule({ site, showSaved }) {
               {categories.map((cat, idx) => {
                 const cName = typeof cat === "string" ? cat : cat.name || cat.label;
                 const cId = typeof cat === "string" ? `cat-${idx}` : cat.id || `cat-${idx}`;
-                const count = items.filter(
-                  (p) => p.category && p.category.toLowerCase() === cName.toLowerCase()
-                ).length;
+                const count = items.filter((p) => {
+                  const pc = (p.category || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
+                  const nc = (cName || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
+                  return Boolean(pc && nc && pc === nc);
+                }).length;
 
                 return (
                   <div
@@ -4595,7 +5737,7 @@ function PortfolioEditorModule({ site, showSaved }) {
 
           {/* Category Add/Edit Modal */}
           {editingCategory && (
-            <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/80 p-4">
+            <div className="fixed inset-0 z-100 flex items-center justify-center bg-[rgba(37,27,49,0.38)] backdrop-blur-md p-4 animate-fade-in">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -4623,23 +5765,23 @@ function PortfolioEditorModule({ site, showSaved }) {
                   saveCategoriesList(updated);
                   setEditingCategory(null);
                 }}
-                className="glass-card max-w-sm w-full rounded-3xl p-6 space-y-4"
+                className="modal-dialog-luxury bg-[#FFFDFB] max-w-sm w-full rounded-3xl p-6 space-y-4 max-h-[88vh] overflow-y-auto no-scrollbar border border-[#E8E2EE] shadow-luxe"
               >
-                <div className="flex justify-between items-center border-b pb-3">
-                  <h4 className="font-display text-base text-ink font-bold">
+                <div className="flex justify-between items-center border-b border-[#E8E2EE] pb-3.5">
+                  <h4 className="font-display text-base text-[#2B2138] font-bold">
                     {editingCategory.isNew ? "Add Category" : "Edit Category"}
                   </h4>
                   <button
                     type="button"
                     onClick={() => setEditingCategory(null)}
-                    className="text-muted-foreground hover:text-foreground cursor-pointer"
+                    className="p-1.5 rounded-full bg-[#F4F1F7] hover:bg-[#EAE4F0] text-[#2B2138] transition cursor-pointer"
                   >
                     <X className="h-4 w-4" />
                   </button>
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-foreground block mb-1">
+                  <label className="text-xs font-semibold text-[#2B2138] block mb-1">
                     Category Name / Label
                   </label>
                   <input
@@ -4647,22 +5789,22 @@ function PortfolioEditorModule({ site, showSaved }) {
                     required
                     value={editingCategory.name || ""}
                     onChange={(e) => setEditingCategory({ ...editingCategory, name: e.target.value })}
-                    className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs"
+                    className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                     placeholder="e.g. Royal Baraat & Entry"
                   />
                 </div>
 
-                <div className="flex justify-end gap-2 pt-2 border-t">
+                <div className="flex justify-end gap-3 pt-3 border-t border-[#E8E2EE]">
                   <button
                     type="button"
                     onClick={() => setEditingCategory(null)}
-                    className="px-4 py-2 rounded-full border text-xs cursor-pointer"
+                    className="btn-modal-cancel"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5 cursor-pointer"
+                    className="btn-modal-primary"
                   >
                     Save Category
                   </button>
@@ -4695,7 +5837,7 @@ function PortfolioEditorModule({ site, showSaved }) {
                   </div>
                   <h3 className="font-display text-xl text-ink font-bold mt-1">Portfolio Header Banner</h3>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Customize the top hero banner title, subtitle, badge, and cover photo on <span className="text-primary font-semibold">/portfolio</span>.
+                    Customize the top hero banner title, subtitle, badge, and cover photo on the <span className="text-primary font-semibold">Portfolio page</span>.
                   </p>
                 </div>
               </div>
@@ -4821,7 +5963,7 @@ function PortfolioEditorModule({ site, showSaved }) {
             <div className="lg:col-span-6 space-y-3 sticky top-6">
               <div className="flex items-center justify-between px-2">
                 <span className="text-[0.68rem] uppercase tracking-[0.25em] text-primary font-bold flex items-center gap-1.5">
-                  <Eye className="h-3.5 w-3.5 text-secondary" /> Live /portfolio Header Preview
+                  <Eye className="h-3.5 w-3.5 text-secondary" /> Live Portfolio Header Preview
                 </span>
                 <span className="text-[0.62rem] text-muted-foreground font-mono">
                   Exact Frontend Replica
@@ -4958,7 +6100,7 @@ function PortfolioEditorModule({ site, showSaved }) {
                   Client Reviews &amp; Stories ({testimonials.length})
                 </h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Manage real couple testimonials rendered on <span className="text-primary font-semibold">/portfolio</span>, <span className="text-primary font-semibold">/testimonials</span>, and the Homepage.
+                  Manage real couple testimonials rendered on the <span className="text-primary font-semibold">Portfolio page</span>, <span className="text-primary font-semibold">Testimonials page</span>, and Homepage.
                 </p>
               </div>
 
@@ -4974,6 +6116,7 @@ function PortfolioEditorModule({ site, showSaved }) {
                     image: "",
                     text: "",
                     featured: true,
+                    showOnPortfolio: true,
                   })
                 }
                 className="btn-luxe gradient-royal text-primary-foreground text-xs py-2.5 px-5 flex items-center gap-2 cursor-pointer shadow-luxe"
@@ -5019,6 +6162,17 @@ function PortfolioEditorModule({ site, showSaved }) {
                               <span>•</span>
                               <span>{t.date}</span>
                             </div>
+                            <div className="mt-1">
+                              {t.showOnPortfolio ? (
+                                <span className="inline-block rounded-full bg-secondary/20 text-secondary text-[0.62rem] font-bold px-2 py-0.5 border border-secondary/40">
+                                  ✓ On Portfolio
+                                </span>
+                              ) : (
+                                <span className="inline-block rounded-full bg-muted text-muted-foreground text-[0.62rem] font-medium px-2 py-0.5">
+                                  Hidden from Portfolio
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
 
@@ -5035,28 +6189,55 @@ function PortfolioEditorModule({ site, showSaved }) {
                       </p>
                     </div>
 
-                    <div className="mt-4 pt-3 border-t border-border flex justify-end gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setEditingTestimonial({ ...t })}
-                        className="p-1.5 rounded-lg border border-border hover:bg-muted text-xs text-primary flex items-center gap-1 cursor-pointer"
-                      >
-                        <Edit2 className="h-3.5 w-3.5" />
-                        <span>Edit</span>
-                      </button>
+                    <div className="mt-4 pt-3 border-t border-border flex items-center justify-between gap-2">
                       <button
                         type="button"
                         onClick={() => {
-                          if (window.confirm(`Delete review from "${t.name}"?`)) {
-                            const updated = testimonials.filter((x) => (x.id || x._id) !== (t.id || t._id));
-                            saveTestimonialsList(updated);
+                          const targetId = t.id || t._id;
+                          const nextVal = !t.showOnPortfolio;
+                          let updated = testimonials.map((x) =>
+                            (x.id && x.id === targetId) || (x._id && x._id === targetId)
+                              ? { ...x, showOnPortfolio: nextVal }
+                              : x
+                          );
+                          if (nextVal) {
+                            updated = enforceMaxFeaturedTestimonials(updated, targetId);
                           }
+                          saveTestimonialsList(updated);
                         }}
-                        className="p-1.5 rounded-lg border border-border hover:bg-destructive/10 text-destructive text-xs flex items-center gap-1 cursor-pointer"
+                        className={`p-1.5 rounded-lg border text-xs flex items-center gap-1 cursor-pointer transition ${
+                          t.showOnPortfolio
+                            ? "border-secondary/60 bg-secondary/15 text-secondary font-semibold"
+                            : "border-border hover:bg-muted text-muted-foreground"
+                        }`}
+                        title={t.showOnPortfolio ? "Click to hide from Homepage & Portfolio Words of Gratitude" : "Click to feature on Homepage & Portfolio Words of Gratitude"}
                       >
-                        <Trash2 className="h-3.5 w-3.5" />
-                        <span>Delete</span>
+                        <span>{t.showOnPortfolio ? "On Home & Portfolio ✓" : "+ Feature on Home & Portfolio"}</span>
                       </button>
+
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setEditingTestimonial({ ...t })}
+                          className="p-1.5 rounded-lg border border-border hover:bg-muted text-xs text-primary flex items-center gap-1 cursor-pointer"
+                        >
+                          <Edit2 className="h-3.5 w-3.5" />
+                          <span>Edit</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (window.confirm(`Delete review from "${t.name}"?`)) {
+                              const updated = testimonials.filter((x) => (x.id || x._id) !== (t.id || t._id));
+                              saveTestimonialsList(updated);
+                            }
+                          }}
+                          className="p-1.5 rounded-lg border border-border hover:bg-destructive/10 text-destructive text-xs flex items-center gap-1 cursor-pointer"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          <span>Delete</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -5066,7 +6247,7 @@ function PortfolioEditorModule({ site, showSaved }) {
 
           {/* Testimonial Add / Edit Modal */}
           {editingTestimonial && (
-            <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/80 p-4">
+            <div className="fixed inset-0 z-100 flex items-center justify-center bg-[rgba(37,27,49,0.38)] backdrop-blur-md p-4 animate-fade-in">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -5088,39 +6269,42 @@ function PortfolioEditorModule({ site, showSaved }) {
                         : x
                     );
                   }
+                  if (cleanTestimonial.showOnPortfolio) {
+                    updated = enforceMaxFeaturedTestimonials(updated, cleanTestimonial.id || cleanTestimonial._id);
+                  }
                   saveTestimonialsList(updated);
                   setEditingTestimonial(null);
                 }}
-                className="glass-card max-w-md w-full max-h-[90vh] overflow-y-auto rounded-3xl p-6 sm:p-8 space-y-4"
+                className="modal-dialog-luxury bg-[#FFFDFB] max-w-md w-full max-h-[88vh] overflow-y-auto no-scrollbar rounded-3xl p-6 sm:p-8 space-y-4 border border-[#E8E2EE] shadow-luxe"
               >
-                <div className="flex justify-between items-center border-b pb-3">
-                  <h4 className="font-display text-lg text-ink font-bold">
+                <div className="flex justify-between items-center border-b border-[#E8E2EE] pb-3.5">
+                  <h4 className="font-display text-lg text-[#2B2138] font-bold">
                     {editingTestimonial.isNew ? "Add Couple Story" : "Edit Couple Story"}
                   </h4>
                   <button
                     type="button"
                     onClick={() => setEditingTestimonial(null)}
-                    className="text-muted-foreground hover:text-foreground cursor-pointer"
+                    className="p-1.5 rounded-full bg-[#F4F1F7] hover:bg-[#EAE4F0] text-[#2B2138] transition cursor-pointer"
                   >
-                    <X className="h-5 w-5" />
+                    <X className="h-4 w-4" />
                   </button>
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-foreground block mb-1">Couple Names *</label>
+                  <label className="text-xs font-semibold text-[#2B2138] block mb-1">Couple Names *</label>
                   <input
                     type="text"
                     required
                     value={editingTestimonial.name || ""}
                     onChange={(e) => setEditingTestimonial({ ...editingTestimonial, name: e.target.value })}
-                    className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-medium"
+                    className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15 font-medium"
                     placeholder="e.g. Sneha & Rohan Kulkarni"
                   />
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-3 text-xs">
                   <div>
-                    <label className="font-semibold text-foreground block mb-1">Relationship / Role</label>
+                    <label className="font-semibold text-[#2B2138] block mb-1">Relationship / Role</label>
                     {(() => {
                       const standardRoles = [
                         "Bride & Groom",
@@ -5154,7 +6338,7 @@ function PortfolioEditorModule({ site, showSaved }) {
                                 });
                               }
                             }}
-                            className="w-full rounded-xl border border-border bg-card px-3 py-1.5 text-xs cursor-pointer"
+                            className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3 py-2 text-xs text-[#2B2138] focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15 cursor-pointer"
                           >
                             {standardRoles.map((role) => (
                               <option key={role} value={role}>
@@ -5170,7 +6354,7 @@ function PortfolioEditorModule({ site, showSaved }) {
                               required
                               value={editingTestimonial.relationship || ""}
                               onChange={(e) => setEditingTestimonial({ ...editingTestimonial, relationship: e.target.value })}
-                              className="w-full rounded-xl border border-secondary/60 bg-card px-3 py-1.5 text-xs ring-1 ring-secondary/20 animate-fade-in"
+                              className="w-full rounded-xl border border-[#C2A438]/60 bg-white px-3 py-2 text-xs text-[#2B2138] ring-1 ring-[#C2A438]/20 animate-fade-in"
                               placeholder="e.g. Sister of the Bride, Family Friend, Groom's Cousin"
                             />
                           )}
@@ -5180,60 +6364,31 @@ function PortfolioEditorModule({ site, showSaved }) {
                   </div>
 
                   <div>
-                    <label className="font-semibold text-foreground block mb-1">Event Category</label>
+                    <label className="font-semibold text-[#2B2138] block mb-1">Event Category</label>
                     {(() => {
-                      const standardCats = [
-                        "Royal & Destination Weddings",
-                        "Mandap & Rituals",
-                        "Haldi & Sangeet",
-                        "Opulent Receptions",
-                        "Corporate Celebrations",
-                      ];
+                      const standardCats = Array.isArray(site.testimonialsCategories) && site.testimonialsCategories.length > 0
+                        ? site.testimonialsCategories.map((c) => (typeof c === "string" ? c : c.name || c.label)).filter(Boolean)
+                        : [
+                            "Royal & Destination Weddings",
+                            "Mandap & Rituals",
+                            "Haldi & Sangeet",
+                            "Opulent Receptions",
+                            "Corporate Celebrations",
+                          ];
                       const currentCat = editingTestimonial.category || standardCats[0];
-                      const isStandard = standardCats.includes(currentCat);
-                      const isOtherSelected = editingTestimonial._customCatMode || (!isStandard && currentCat !== "");
 
                       return (
-                        <div className="space-y-1.5">
-                          <select
-                            value={isOtherSelected ? "Other" : currentCat}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              if (val === "Other") {
-                                setEditingTestimonial({
-                                  ...editingTestimonial,
-                                  _customCatMode: true,
-                                  category: isStandard ? "" : currentCat,
-                                });
-                              } else {
-                                setEditingTestimonial({
-                                  ...editingTestimonial,
-                                  _customCatMode: false,
-                                  category: val,
-                                });
-                              }
-                            }}
-                            className="w-full rounded-xl border border-border bg-card px-3 py-1.5 text-xs cursor-pointer"
-                          >
-                            {standardCats.map((name) => (
-                              <option key={name} value={name}>
-                                {name}
-                              </option>
-                            ))}
-                            <option value="Other">Other</option>
-                          </select>
-
-                          {isOtherSelected && (
-                            <input
-                              type="text"
-                              required
-                              value={editingTestimonial.category || ""}
-                              onChange={(e) => setEditingTestimonial({ ...editingTestimonial, category: e.target.value })}
-                              className="w-full rounded-xl border border-secondary/60 bg-card px-3 py-1.5 text-xs ring-1 ring-secondary/20 animate-fade-in"
-                              placeholder="e.g. Sangeet Gala, Engagement, Anniversary Banquet"
-                            />
-                          )}
-                        </div>
+                        <select
+                          value={currentCat}
+                          onChange={(e) => setEditingTestimonial({ ...editingTestimonial, category: e.target.value })}
+                          className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3 py-2 text-xs text-[#2B2138] focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15 cursor-pointer"
+                        >
+                          {standardCats.map((name) => (
+                            <option key={name} value={name}>
+                              {name}
+                            </option>
+                          ))}
+                        </select>
                       );
                     })()}
                   </div>
@@ -5241,35 +6396,35 @@ function PortfolioEditorModule({ site, showSaved }) {
 
                 <div className="grid grid-cols-2 gap-3 text-xs">
                   <div>
-                    <label className="font-semibold text-foreground block mb-1">Wedding Location</label>
+                    <label className="font-semibold text-[#2B2138] block mb-1">Wedding Location</label>
                     <input
                       type="text"
                       value={editingTestimonial.location || ""}
                       onChange={(e) => setEditingTestimonial({ ...editingTestimonial, location: e.target.value })}
-                      className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs"
+                      className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                       placeholder="e.g. Udaipur & Pune"
                     />
                   </div>
                   <div>
-                    <label className="font-semibold text-foreground block mb-1">Wedding Date / Year</label>
+                    <label className="font-semibold text-[#2B2138] block mb-1">Wedding Date / Year</label>
                     <input
                       type="text"
                       value={editingTestimonial.date || ""}
                       onChange={(e) => setEditingTestimonial({ ...editingTestimonial, date: e.target.value })}
-                      className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs"
+                      className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                       placeholder="e.g. 14 Feb 2025"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-foreground block mb-1">
+                  <label className="text-xs font-semibold text-[#2B2138] block mb-1">
                     Rating Stars (1 to 5)
                   </label>
                   <select
                     value={editingTestimonial.rating || 5}
                     onChange={(e) => setEditingTestimonial({ ...editingTestimonial, rating: Number(e.target.value) })}
-                    className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs cursor-pointer"
+                    className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15 cursor-pointer"
                   >
                     <option value={5}>★★★★★ (5 Stars - Exceptional)</option>
                     <option value={4}>★★★★☆ (4 Stars - Very Good)</option>
@@ -5284,28 +6439,41 @@ function PortfolioEditorModule({ site, showSaved }) {
                 />
 
                 <div className="text-xs">
-                  <label className="font-semibold text-foreground block mb-1">Testimonial Quote / Narrative</label>
+                  <label className="font-semibold text-[#2B2138] block mb-1">Testimonial Quote / Narrative</label>
                   <textarea
                     rows={4}
                     required
                     value={editingTestimonial.text || ""}
                     onChange={(e) => setEditingTestimonial({ ...editingTestimonial, text: e.target.value })}
-                    className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs leading-relaxed"
+                    className="w-full rounded-xl border border-[#E8E2EE] bg-white p-3 text-xs leading-relaxed text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                     placeholder="Enter what the couple said about their wedding planning experience..."
                   />
                 </div>
 
-                <div className="flex justify-end gap-2 pt-3 border-t">
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="checkbox"
+                    id="test-show-on-portfolio"
+                    checked={Boolean(editingTestimonial.showOnPortfolio)}
+                    onChange={(e) => setEditingTestimonial({ ...editingTestimonial, showOnPortfolio: e.target.checked })}
+                    className="rounded border-[#E8E2EE] text-[#6A439E] focus:ring-[#6A439E] cursor-pointer h-4 w-4"
+                  />
+                  <label htmlFor="test-show-on-portfolio" className="text-xs font-semibold text-[#2B2138] cursor-pointer">
+                    Show on Homepage &amp; Portfolio (Words of Gratitude)
+                  </label>
+                </div>
+
+                <div className="flex justify-end gap-3 pt-3 border-t border-[#E8E2EE]">
                   <button
                     type="button"
                     onClick={() => setEditingTestimonial(null)}
-                    className="px-4 py-2 rounded-full border text-xs cursor-pointer"
+                    className="btn-modal-cancel"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5 cursor-pointer shadow-md"
+                    className="btn-modal-primary"
                   >
                     Save Review
                   </button>
@@ -5320,148 +6488,231 @@ function PortfolioEditorModule({ site, showSaved }) {
       {/* 5. PORTFOLIO CTA BANNER SUB-TAB */}
       {/* ------------------------------------------------------------- */}
       {subTab === "cta-banner" && (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            saveCta(ctaData);
-          }}
-          className="glass-card rounded-3xl p-6 sm:p-8 border border-border space-y-6 animate-fade-in"
-        >
-          <div className="flex items-center justify-between pb-3 border-b border-border/60">
-            <div>
-              <div className="flex items-center gap-1.5 text-primary text-xs uppercase tracking-[0.25em] font-bold">
-                <Sparkles className="h-4 w-4 text-secondary" />
-                <span>Portfolio Consultation Action</span>
+        <div className="grid lg:grid-cols-12 gap-8 animate-fade-in">
+          {/* Left Column: CTA Editor Form */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              saveCta(ctaData);
+            }}
+            className="lg:col-span-7 glass-card rounded-3xl p-6 sm:p-8 border border-border space-y-6"
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-border/60">
+              <div>
+                <div className="flex items-center gap-1.5 text-primary text-xs uppercase tracking-[0.25em] font-bold">
+                  <Sparkles className="h-4 w-4 text-secondary" />
+                  <span>Portfolio Consultation Action</span>
+                </div>
+                <h3 className="font-display text-xl text-ink font-bold mt-1">
+                  Private Consultation CTA Banner
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Customize the luxury action card displayed at the bottom of the <span className="text-primary font-semibold">Portfolio page</span>.
+                </p>
               </div>
-              <h3 className="font-display text-xl text-ink font-bold mt-1">
-                Private Consultation CTA Banner
-              </h3>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Customize the luxury action card displayed at the bottom of the <span className="text-primary font-semibold">/portfolio</span> page.
-              </p>
-            </div>
-            <button
-              type="submit"
-              disabled={isSaving}
-              className="btn-luxe gradient-royal text-primary-foreground text-xs py-2.5 px-6 flex items-center gap-2 disabled:opacity-60 cursor-pointer shadow-sm"
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin text-secondary" />
-                  <span>Saving...</span>
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4 text-secondary" />
-                  <span>Save Consultation CTA</span>
-                </>
-              )}
-            </button>
-          </div>
-
-          <div className="grid sm:grid-cols-2 gap-4 text-xs">
-            <div>
-              <label className="font-semibold text-foreground block mb-1">Eyebrow Badge</label>
-              <input
-                type="text"
-                value={ctaData.eyebrow || ""}
-                onChange={(e) => setCtaData({ ...ctaData, eyebrow: e.target.value })}
-                className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs uppercase tracking-wider"
-                placeholder="WHERE WEDDINGS BECOME STORIES"
-              />
-            </div>
-
-            <div>
-              <label className="font-semibold text-foreground block mb-1">Headline</label>
-              <input
-                type="text"
-                value={ctaData.headline || ""}
-                onChange={(e) => setCtaData({ ...ctaData, headline: e.target.value })}
-                className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-semibold"
-                placeholder="Want Your Wedding to Be Our Next Masterpiece?"
-              />
-            </div>
-          </div>
-
-          <div className="text-xs">
-            <label className="font-semibold text-foreground block mb-1">Subtitle Description</label>
-            <textarea
-              rows={3}
-              value={ctaData.subtitle || ""}
-              onChange={(e) => setCtaData({ ...ctaData, subtitle: e.target.value })}
-              className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs leading-relaxed"
-              placeholder="Connect directly with Ashish Wankhede and Rutik Pund to review your venue options..."
-            />
-          </div>
-
-          <div className="text-xs">
-            <label className="font-semibold text-foreground block mb-1">Primary Button Label</label>
-            <input
-              type="text"
-              value={ctaData.buttonText || ""}
-              onChange={(e) => setCtaData({ ...ctaData, buttonText: e.target.value, buttonLink: ctaData.buttonLink || "/contact" })}
-              className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs"
-              placeholder="Book Your Free Consultation"
-            />
-          </div>
-
-          <div>
-            <label className="text-xs font-semibold text-foreground block mb-1">Notice / Disclaimer</label>
-            <input
-              type="text"
-              value={ctaData.notice || ""}
-              onChange={(e) => setCtaData({ ...ctaData, notice: e.target.value })}
-              className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs"
-              placeholder="Free Consultation • No Commitment Required"
-            />
-          </div>
-
-          {/* Consultation Perks */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-semibold text-foreground">Consultation Perks &amp; Benefits</label>
               <button
-                type="button"
-                onClick={() =>
-                  setCtaData({
-                    ...ctaData,
-                    perks: [...(ctaData.perks || []), "New Consultation Perk"],
-                  })
-                }
-                className="text-[0.7rem] text-primary font-bold hover:underline cursor-pointer"
+                type="submit"
+                disabled={isSaving}
+                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2.5 px-6 flex items-center gap-2 disabled:opacity-60 cursor-pointer shadow-sm"
               >
-                + Add Perk
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin text-secondary" />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 text-secondary" />
+                    <span>Save Consultation CTA</span>
+                  </>
+                )}
               </button>
             </div>
 
-            <div className="space-y-2">
-              {(ctaData.perks || []).map((perk, pIdx) => (
-                <div key={pIdx} className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={perk}
-                    onChange={(e) => {
-                      const updated = [...ctaData.perks];
-                      updated[pIdx] = e.target.value;
-                      setCtaData({ ...ctaData, perks: updated });
-                    }}
-                    className="flex-1 rounded-xl border border-border bg-card px-3 py-1.5 text-xs"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const updated = ctaData.perks.filter((_, i) => i !== pIdx);
-                      setCtaData({ ...ctaData, perks: updated });
-                    }}
-                    className="text-destructive p-1 cursor-pointer"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
+            <div className="grid sm:grid-cols-2 gap-4 text-xs">
+              <div>
+                <label className="font-semibold text-foreground block mb-1">Eyebrow Badge</label>
+                <input
+                  type="text"
+                  value={ctaData.eyebrow || ""}
+                  onChange={(e) => setCtaData({ ...ctaData, eyebrow: e.target.value })}
+                  className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs uppercase tracking-wider"
+                  placeholder="WHERE WEDDINGS BECOME STORIES"
+                />
+              </div>
+
+              <div>
+                <label className="font-semibold text-foreground block mb-1">Headline</label>
+                <input
+                  type="text"
+                  value={ctaData.headline || ""}
+                  onChange={(e) => setCtaData({ ...ctaData, headline: e.target.value })}
+                  className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-semibold"
+                  placeholder="Want Your Wedding to Be Our Next Masterpiece?"
+                />
+              </div>
+            </div>
+
+            <div className="text-xs">
+              <label className="font-semibold text-foreground block mb-1">Subtitle Description</label>
+              <textarea
+                rows={3}
+                value={ctaData.subtitle || ""}
+                onChange={(e) => setCtaData({ ...ctaData, subtitle: e.target.value })}
+                className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs leading-relaxed"
+                placeholder="Connect directly with Ashish Wankhede and Rutik Pund to review your venue options..."
+              />
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-4 text-xs">
+              <div>
+                <label className="font-semibold text-foreground block mb-1">Primary Button Label</label>
+                <input
+                  type="text"
+                  value={ctaData.buttonText || ""}
+                  onChange={(e) => setCtaData({ ...ctaData, buttonText: e.target.value })}
+                  className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs"
+                  placeholder="Book Your Free Consultation"
+                />
+              </div>
+
+              <div>
+                <label className="font-semibold text-foreground block mb-1">Button Destination Link</label>
+                <input
+                  type="text"
+                  value={ctaData.buttonLink || "/contact"}
+                  onChange={(e) => setCtaData({ ...ctaData, buttonLink: e.target.value })}
+                  className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs"
+                  placeholder="/contact"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold text-foreground block mb-1">Notice / Disclaimer</label>
+              <input
+                type="text"
+                value={ctaData.notice || ""}
+                onChange={(e) => setCtaData({ ...ctaData, notice: e.target.value })}
+                className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs"
+                placeholder="Free Consultation • No Commitment Required"
+              />
+            </div>
+
+            {/* Consultation Perks */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-xs font-semibold text-foreground">Consultation Perks &amp; Benefits</label>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCtaData({
+                      ...ctaData,
+                      perks: [...(ctaData.perks || []), "New Consultation Perk"],
+                    })
+                  }
+                  className="text-[0.7rem] text-primary font-bold hover:underline cursor-pointer"
+                >
+                  + Add Perk
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                {(ctaData.perks || []).map((perk, pIdx) => (
+                  <div key={pIdx} className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={perk}
+                      onChange={(e) => {
+                        const updated = [...ctaData.perks];
+                        updated[pIdx] = e.target.value;
+                        setCtaData({ ...ctaData, perks: updated });
+                      }}
+                      className="flex-1 rounded-xl border border-border bg-card px-3 py-1.5 text-xs"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const updated = ctaData.perks.filter((_, i) => i !== pIdx);
+                        setCtaData({ ...ctaData, perks: updated });
+                      }}
+                      className="text-destructive p-1 cursor-pointer"
+                      title="Remove perk"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </form>
+
+          {/* Right Column: Live Luxury Preview */}
+          <div className="lg:col-span-5 space-y-4">
+            <div className="flex items-center gap-2 text-xs font-semibold text-foreground px-1">
+              <Eye className="h-4 w-4 text-primary" />
+              <span>Live Client Preview</span>
+              <span className="text-[0.68rem] font-normal text-muted-foreground ml-auto">
+                Simulated Portfolio Bottom Banner
+              </span>
+            </div>
+
+            <div className="relative rounded-3xl p-6 sm:p-8 bg-ink text-background overflow-hidden border border-white/10 shadow-2xl text-center">
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/30 via-ink to-ink pointer-events-none" />
+              <div className="absolute top-0 right-1/4 w-48 h-48 bg-secondary/15 rounded-full blur-2xl pointer-events-none" />
+
+              <div className="relative z-10 space-y-3">
+                <span className="inline-flex items-center gap-1.5 text-[0.65rem] uppercase tracking-[0.25em] text-secondary font-bold">
+                  <Sparkles className="h-3.5 w-3.5 text-secondary" />
+                  <span>{ctaData.eyebrow || "WHERE WEDDINGS BECOME STORIES"}</span>
+                </span>
+
+                <h3 className="font-display text-lg sm:text-xl text-white font-normal leading-snug">
+                  {ctaData.headline || "Want Your Wedding to Be Our Next Masterpiece?"}
+                </h3>
+
+                <div className="rule-gold mx-auto my-2" />
+
+                <p className="text-xs text-background/85 font-light leading-relaxed max-w-md mx-auto">
+                  {ctaData.subtitle ||
+                    "Connect directly with Ashish Wankhede and Rutik Pund to review your venue options, custom 3D decor concepts, and complete management timeline."}
+                </p>
+
+                {/* Consultation Perks Chips */}
+                {Array.isArray(ctaData.perks) && ctaData.perks.length > 0 && (
+                  <div className="flex flex-wrap items-center justify-center gap-1.5 pt-2 pb-1">
+                    {ctaData.perks.map((perk, pIdx) => (
+                      <span
+                        key={pIdx}
+                        className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[0.68rem] text-champagne backdrop-blur-md border border-white/15"
+                      >
+                        <CheckCircle2 className="h-3 w-3 text-secondary shrink-0" />
+                        <span>{perk}</span>
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Simulated Action Buttons */}
+                <div className="pt-3 flex flex-wrap items-center justify-center gap-2">
+                  <div className="btn-luxe gradient-gold text-ink font-bold py-2 px-4 text-[0.7rem] tracking-wider uppercase flex items-center gap-1.5 shadow-md">
+                    <span>{ctaData.buttonText || "Book Your Free Consultation"}</span>
+                  </div>
+                  <div className="btn-luxe bg-white/10 text-white border border-white/20 py-2 px-3 text-[0.7rem] font-semibold flex items-center gap-1.5">
+                    <Phone className="h-3 w-3 text-secondary" />
+                    <span>Call Us</span>
+                  </div>
                 </div>
-              ))}
+
+                {ctaData.notice && (
+                  <p className="text-[0.65rem] text-background/60 font-light pt-2">
+                    {ctaData.notice}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
-        </form>
+        </div>
       )}
     </div>
   );
@@ -5476,6 +6727,7 @@ function GalleryEditorModule({ site, showSaved }) {
   const [editingPhoto, setEditingPhoto] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [isSaving, setIsSaving] = useState(false);
 
   // Keep local states in reactive sync with site context
   useEffect(() => {
@@ -5678,21 +6930,27 @@ function GalleryEditorModule({ site, showSaved }) {
 
   // Persist Instagram Feed & Header
   const saveInstagram = async (newPosts) => {
+    setIsSaving(true);
     setInstagramPosts(newPosts);
     try {
       await site.update("instagram", newPosts);
       showSaved("Instagram posts updated successfully in MongoDB!");
     } catch (err) {
       console.error("Failed to save instagram posts:", err);
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const saveInstagramHeader = async () => {
+    setIsSaving(true);
     try {
       await site.update("instagramHeader", instaHeader);
       showSaved("Instagram header settings saved successfully in MongoDB!");
     } catch (err) {
       console.error("Failed to save instagram header:", err);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -5718,6 +6976,8 @@ function GalleryEditorModule({ site, showSaved }) {
       (item.category || "").toLowerCase().includes(searchQuery.toLowerCase());
     return matchCat && matchSearch;
   });
+
+  const featuredOnHomeCount = (instagramPosts || []).filter((p) => Boolean(p.showOnHome)).length;
 
   return (
     <div className="space-y-6">
@@ -5765,7 +7025,7 @@ function GalleryEditorModule({ site, showSaved }) {
           { id: "categories", label: `Categories (${categories.length})`, icon: Layers },
           { id: "header", label: "Hero Header Banner", icon: Sliders },
           { id: "highlights", label: `Spatial Highlights (${highlights.length})`, icon: Sparkles },
-          { id: "instagram", label: `Follow Journey (${instagramPosts.length})`, icon: MessageSquareQuote },
+          { id: "instagram", label: `Follow Journey (${featuredOnHomeCount}/6 on Home)`, icon: MessageSquareQuote },
           { id: "cta", label: "Consultation CTA", icon: PhoneCall },
         ].map((tab) => {
           const IconComp = tab.icon;
@@ -5873,7 +7133,7 @@ function GalleryEditorModule({ site, showSaved }) {
                       <div className="flex items-center gap-1">
                         <button
                           type="button"
-                          onClick={() => setEditingPhoto({ ...g })}
+                          onClick={() => setEditingPhoto({ ...g, isNew: false })}
                           className="p-1 rounded-lg bg-accent text-foreground hover:text-secondary transition"
                           title="Edit Photo"
                         >
@@ -6256,10 +7516,18 @@ function GalleryEditorModule({ site, showSaved }) {
             </div>
             <button
               type="button"
+              disabled={isSaving}
               onClick={saveInstagramHeader}
-              className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5 font-semibold"
+              className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5 font-semibold cursor-pointer flex items-center gap-1.5"
             >
-              Save Instagram Settings
+              {isSaving ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin text-secondary" />
+                  <span>Saving...</span>
+                </>
+              ) : (
+                <span>Save Instagram Settings</span>
+              )}
             </button>
           </div>
 
@@ -6268,7 +7536,7 @@ function GalleryEditorModule({ site, showSaved }) {
             <div className="flex items-center justify-between gap-4 p-4 bg-card rounded-2xl border border-border">
               <div>
                 <h4 className="font-display text-base text-ink font-semibold">
-                  Instagram Posts & Reels Showcase ({instagramPosts.length})
+                  Instagram Posts &amp; Reels Showcase ({instagramPosts.length})
                 </h4>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   Posts rendered in the "Follow Our Journey" grid on homepage and gallery.
@@ -6283,11 +7551,12 @@ function GalleryEditorModule({ site, showSaved }) {
                     caption: "",
                     image: "",
                     url: instaHeader.url || "https://www.instagram.com/confianza_events",
+                    showOnHome: featuredOnHomeCount < 6,
                   })
                 }
-                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-4 flex items-center gap-1.5 cursor-pointer"
+                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-4 flex items-center gap-1.5 cursor-pointer shadow-sm"
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-4 w-4 text-secondary" />
                 <span>Add Post Card</span>
               </button>
             </div>
@@ -6304,48 +7573,101 @@ function GalleryEditorModule({ site, showSaved }) {
               </div>
             ) : (
               <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
-                {instagramPosts.map((post) => (
-                  <div
-                    key={post.id}
-                    className="relative group rounded-2xl overflow-hidden border border-border bg-card shadow-xs"
-                  >
-                    <div className="aspect-square w-full overflow-hidden bg-muted/40">
-                      <img
-                        src={post.image}
-                        alt="Instagram Post"
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                    <div className="p-2.5 bg-card text-xs">
-                      <div className="flex items-center justify-between gap-1 text-[0.68rem] text-secondary font-medium">
-                        <span>❤️ {post.likes || 0}</span>
-                      </div>
-                      <p className="text-[0.62rem] text-muted-foreground line-clamp-1 mt-1">
-                        {post.caption || "Instagram Reel"}
-                      </p>
-                      <div className="flex items-center justify-end gap-1 mt-2 pt-1.5 border-t border-border/50">
-                        <button
-                          type="button"
-                          onClick={() => setEditingInstaPost({ ...post })}
-                          className="p-1 rounded-lg bg-accent text-foreground hover:text-secondary"
-                        >
-                          <Edit2 className="h-3 w-3" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (confirm("Delete this Instagram post?")) {
-                              saveInstagram(instagramPosts.filter((p) => p.id !== post.id));
-                            }
+                {instagramPosts.map((post, pIdx) => {
+                  const pId = post.id || post._id || `insta-${pIdx}`;
+                  return (
+                    <div
+                      key={pId}
+                      className="relative group rounded-2xl overflow-hidden border border-border bg-card shadow-xs flex flex-col justify-between"
+                    >
+                      <div className="aspect-square w-full overflow-hidden bg-muted/40 relative">
+                        <img
+                          src={post.image || "/images/hero-1.jpg"}
+                          alt={post.caption || "Instagram Post"}
+                          className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            e.currentTarget.src = "/images/hero-1.jpg";
                           }}
-                          className="p-1 rounded-lg bg-destructive/15 text-destructive hover:bg-destructive hover:text-white"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </button>
+                        />
+                        {post.showOnHome && (
+                          <div className="absolute top-2 right-2">
+                            <span className="px-2 py-0.5 rounded-full bg-secondary text-primary-foreground text-[0.6rem] font-bold shadow-xs">
+                              ✓ Home
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-2.5 bg-card text-xs flex-1 flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between gap-1 text-[0.68rem] text-secondary font-medium">
+                            <span>❤️ {(post.likes || 0).toLocaleString()}</span>
+                          </div>
+                          <p className="text-[0.62rem] text-muted-foreground line-clamp-2 mt-1 leading-tight">
+                            {post.caption || "Instagram Reel"}
+                          </p>
+                        </div>
+                        <div className="flex items-center justify-between gap-1 mt-2 pt-1.5 border-t border-border/50">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const willShow = !post.showOnHome;
+                              const targetId = post.id || post._id || `insta-${pIdx}`;
+                              let updated = instagramPosts.map((p, idx) => {
+                                const pMatch =
+                                  (p.id && targetId && String(p.id) === String(targetId)) ||
+                                  (p._id && targetId && String(p._id) === String(targetId)) ||
+                                  idx === pIdx;
+                                return pMatch ? { ...p, showOnHome: willShow } : p;
+                              });
+                              if (willShow) {
+                                updated = enforceMaxFeaturedInstagram(updated, targetId);
+                              }
+                              saveInstagram(updated);
+                            }}
+                            className={`px-2 py-1 rounded-lg text-[0.62rem] font-semibold transition cursor-pointer flex items-center gap-1 ${
+                              post.showOnHome
+                                ? "bg-secondary text-primary-foreground shadow-xs"
+                                : "bg-muted text-muted-foreground hover:text-foreground"
+                            }`}
+                            title={
+                              post.showOnHome
+                                ? "Featured on Homepage (Click to disable)"
+                                : "Click to feature on Homepage (Max 6, auto-replaces oldest)"
+                            }
+                          >
+                            {post.showOnHome ? "✓ On Home" : "View on Home"}
+                          </button>
+                          <div className="flex items-center gap-1">
+                            <button
+                              type="button"
+                              onClick={() => setEditingInstaPost({ ...post, isNew: false })}
+                              className="p-1 rounded-lg bg-accent text-foreground hover:text-secondary cursor-pointer"
+                              title="Edit Post Card"
+                            >
+                              <Edit2 className="h-3 w-3" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (window.confirm("Delete this Instagram post card?")) {
+                                  const targetId = post.id || post._id;
+                                  const updated = instagramPosts.filter(
+                                    (p) => (p.id ? p.id !== targetId : p._id !== targetId) && p !== post
+                                  );
+                                  saveInstagram(updated);
+                                }
+                              }}
+                              className="p-1 rounded-lg bg-destructive/15 text-destructive hover:bg-destructive hover:text-white cursor-pointer"
+                              title="Delete Post Card"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -6458,60 +7780,72 @@ function GalleryEditorModule({ site, showSaved }) {
 
       {/* MODAL 1: Add/Edit Photo Modal */}
       {editingPhoto && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/80 p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-[rgba(37,27,49,0.38)] backdrop-blur-md p-4 animate-fade-in">
           <form
             onSubmit={(e) => {
               e.preventDefault();
               if (editingPhoto.isNew) {
-                saveGalleryPhotos([
-                  ...gallery,
-                  {
-                    ...editingPhoto,
-                    id: `gallery-${Date.now()}`,
-                    order: Number(editingPhoto.order) || gallery.length + 1,
-                  },
-                ]);
+                const newPhoto = {
+                  ...editingPhoto,
+                  id: editingPhoto.id || `gallery-${Date.now()}`,
+                  order: Number(editingPhoto.order) || gallery.length + 1,
+                };
+                delete newPhoto.isNew;
+                saveGalleryPhotos([...gallery, newPhoto]);
               } else {
-                saveGalleryPhotos(
-                  gallery.map((x) => (x.id === editingPhoto.id ? editingPhoto : x))
-                );
+                const targetId = editingPhoto.id;
+                const targetMongoId = editingPhoto._id;
+                const updatedList = gallery.map((x) => {
+                  const isMatch = Boolean(
+                    (targetId && x.id === targetId) ||
+                    (targetMongoId && (x._id === targetMongoId || x.id === targetMongoId)) ||
+                    (targetId && x._id === targetId)
+                  );
+                  if (isMatch) {
+                    const clean = { ...editingPhoto };
+                    delete clean.isNew;
+                    return clean;
+                  }
+                  return x;
+                });
+                saveGalleryPhotos(updatedList);
               }
               setEditingPhoto(null);
             }}
-            className="glass-card max-w-lg w-full rounded-3xl p-6 sm:p-8 space-y-4 max-h-[90vh] overflow-y-auto"
+            className="modal-dialog-luxury bg-[#FFFDFB] max-w-lg w-full rounded-3xl p-6 sm:p-8 space-y-4 max-h-[88vh] overflow-y-auto no-scrollbar border border-[#E8E2EE] shadow-luxe"
           >
-            <div className="flex justify-between items-center border-b pb-3">
-              <h4 className="font-display text-lg text-ink font-semibold">
+            <div className="flex justify-between items-center border-b border-[#E8E2EE] pb-3.5">
+              <h4 className="font-display text-lg text-[#2B2138] font-bold">
                 {editingPhoto.isNew ? "Add Gallery Photo" : "Edit Photo Details"}
               </h4>
               <button
                 type="button"
                 onClick={() => setEditingPhoto(null)}
-                className="text-muted-foreground hover:text-foreground"
+                className="p-1.5 rounded-full bg-[#F4F1F7] hover:bg-[#EAE4F0] text-[#2B2138] transition cursor-pointer"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 
             <div>
-              <label className="text-xs font-medium block mb-1">Photo Caption / Title</label>
+              <label className="text-xs font-semibold text-[#2B2138] block mb-1">Photo Caption / Title</label>
               <input
                 type="text"
                 required
                 value={editingPhoto.caption || ""}
                 onChange={(e) => setEditingPhoto({ ...editingPhoto, caption: e.target.value })}
                 placeholder="e.g. Sacred Vedic Mandap with Lotus Arch"
-                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
+                className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
               />
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-2 text-xs">
               <div>
-                <label className="text-xs font-medium block mb-1">Category</label>
+                <label className="font-semibold text-[#2B2138] block mb-1">Category</label>
                 <select
                   value={editingPhoto.category || categories[1]?.name || "Mandap Architecture"}
                   onChange={(e) => setEditingPhoto({ ...editingPhoto, category: e.target.value })}
-                  className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs"
+                  className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15 cursor-pointer"
                 >
                   {categories
                     .filter((c) => c.id !== "all")
@@ -6524,13 +7858,13 @@ function GalleryEditorModule({ site, showSaved }) {
               </div>
 
               <div>
-                <label className="text-xs font-medium block mb-1">Location</label>
+                <label className="font-semibold text-[#2B2138] block mb-1">Location</label>
                 <input
                   type="text"
                   value={editingPhoto.location || ""}
                   onChange={(e) => setEditingPhoto({ ...editingPhoto, location: e.target.value })}
                   placeholder="e.g. Udaipur, Rajasthan or Pune"
-                  className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs"
+                  className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                 />
               </div>
             </div>
@@ -6542,26 +7876,26 @@ function GalleryEditorModule({ site, showSaved }) {
             />
 
             <div>
-              <label className="text-xs font-medium block mb-1">Display Order #</label>
+              <label className="text-xs font-semibold text-[#2B2138] block mb-1">Display Order #</label>
               <input
                 type="number"
                 value={editingPhoto.order || 1}
                 onChange={(e) => setEditingPhoto({ ...editingPhoto, order: Number(e.target.value) })}
-                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs"
+                className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
               />
             </div>
 
-            <div className="flex justify-end gap-2 pt-3 border-t border-border/60">
+            <div className="flex justify-end gap-3 pt-3 border-t border-[#E8E2EE]">
               <button
                 type="button"
                 onClick={() => setEditingPhoto(null)}
-                className="px-4 py-2 rounded-full border text-xs"
+                className="btn-modal-cancel"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-6 font-semibold"
+                className="btn-modal-primary"
               >
                 Save Photo
               </button>
@@ -6572,7 +7906,7 @@ function GalleryEditorModule({ site, showSaved }) {
 
       {/* MODAL 2: Add/Edit Category Modal */}
       {editingCategory && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/80 p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-[rgba(37,27,49,0.38)] backdrop-blur-md p-4 animate-fade-in">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -6595,23 +7929,23 @@ function GalleryEditorModule({ site, showSaved }) {
               }
               setEditingCategory(null);
             }}
-            className="glass-card max-w-md w-full rounded-3xl p-6 sm:p-8 space-y-4"
+            className="modal-dialog-luxury bg-[#FFFDFB] max-w-md w-full rounded-3xl p-6 sm:p-8 space-y-4 max-h-[88vh] overflow-y-auto no-scrollbar border border-[#E8E2EE] shadow-luxe"
           >
-            <div className="flex justify-between items-center border-b pb-3">
-              <h4 className="font-display text-lg text-ink font-semibold">
+            <div className="flex justify-between items-center border-b border-[#E8E2EE] pb-3">
+              <h4 className="font-display text-lg text-[#2B2138] font-semibold">
                 {editingCategory.isNew ? "Add New Category" : "Edit Category"}
               </h4>
               <button
                 type="button"
                 onClick={() => setEditingCategory(null)}
-                className="text-muted-foreground hover:text-foreground"
+                className="text-[#7E7688] hover:text-[#2B2138] cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <div>
-              <label className="text-xs font-medium block mb-1">Category Name</label>
+              <label className="text-xs font-semibold text-[#2B2138] block mb-1">Category Name</label>
               <input
                 type="text"
                 required
@@ -6623,21 +7957,21 @@ function GalleryEditorModule({ site, showSaved }) {
                   })
                 }
                 placeholder="e.g. Mandap Architecture"
-                className="w-full rounded-xl border border-border bg-card px-3.5 py-2.5 text-sm focus:outline-none focus:border-secondary"
+                className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
               />
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="flex justify-end gap-3 pt-3 border-t border-[#E8E2EE]">
               <button
                 type="button"
                 onClick={() => setEditingCategory(null)}
-                className="px-4 py-2 rounded-full border text-xs"
+                className="btn-modal-cancel"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5 font-semibold cursor-pointer"
+                className="btn-modal-primary"
               >
                 Save Category
               </button>
@@ -6648,7 +7982,7 @@ function GalleryEditorModule({ site, showSaved }) {
 
       {/* MODAL 3: Add/Edit Highlight Card Modal */}
       {editingHighlight && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/80 p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-[rgba(37,27,49,0.38)] backdrop-blur-md p-4 animate-fade-in">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -6664,72 +7998,72 @@ function GalleryEditorModule({ site, showSaved }) {
               }
               setEditingHighlight(null);
             }}
-            className="glass-card max-w-md w-full rounded-3xl p-6 sm:p-8 space-y-4"
+            className="modal-dialog-luxury bg-[#FFFDFB] max-w-md w-full rounded-3xl p-6 sm:p-8 space-y-4 max-h-[88vh] overflow-y-auto no-scrollbar border border-[#E8E2EE] shadow-luxe"
           >
-            <div className="flex justify-between items-center border-b pb-3">
-              <h4 className="font-display text-lg text-ink font-semibold">
+            <div className="flex justify-between items-center border-b border-[#E8E2EE] pb-3">
+              <h4 className="font-display text-lg text-[#2B2138] font-semibold">
                 {editingHighlight.isNew ? "Add Spatial Highlight" : "Edit Highlight"}
               </h4>
               <button
                 type="button"
                 onClick={() => setEditingHighlight(null)}
-                className="text-muted-foreground"
+                className="text-[#7E7688] hover:text-[#2B2138] cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <div>
-              <label className="text-xs font-medium block mb-1">Card Title</label>
+              <label className="text-xs font-semibold text-[#2B2138] block mb-1">Card Title</label>
               <input
                 type="text"
                 required
                 value={editingHighlight.title || ""}
                 onChange={(e) => setEditingHighlight({ ...editingHighlight, title: e.target.value })}
                 placeholder="e.g. Mandap Architecture & Vedic Sanctums"
-                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
+                className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
               />
             </div>
 
             <div>
-              <label className="text-xs font-medium block mb-1">Subtitle</label>
+              <label className="text-xs font-semibold text-[#2B2138] block mb-1">Subtitle</label>
               <input
                 type="text"
                 value={editingHighlight.subtitle || ""}
                 onChange={(e) => setEditingHighlight({ ...editingHighlight, subtitle: e.target.value })}
                 placeholder="e.g. Auspicious Engineering & Floral Art"
-                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs"
+                className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
               />
             </div>
 
             <div>
-              <label className="text-xs font-medium block mb-1">Description</label>
+              <label className="text-xs font-semibold text-[#2B2138] block mb-1">Description</label>
               <textarea
                 rows={3}
                 required
                 value={editingHighlight.description || ""}
                 onChange={(e) => setEditingHighlight({ ...editingHighlight, description: e.target.value })}
-                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs"
+                className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
               />
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <label className="text-xs font-medium block mb-1">Badge</label>
+                <label className="text-xs font-semibold text-[#2B2138] block mb-1">Badge</label>
                 <input
                   type="text"
                   value={editingHighlight.badge || ""}
                   onChange={(e) => setEditingHighlight({ ...editingHighlight, badge: e.target.value })}
                   placeholder="e.g. Vedic Precision"
-                  className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs"
+                  className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                 />
               </div>
               <div>
-                <label className="text-xs font-medium block mb-1">Icon</label>
+                <label className="text-xs font-semibold text-[#2B2138] block mb-1">Icon</label>
                 <select
                   value={editingHighlight.icon || "Sparkles"}
                   onChange={(e) => setEditingHighlight({ ...editingHighlight, icon: e.target.value })}
-                  className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs"
+                  className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15 cursor-pointer"
                 >
                   <option value="Sparkles">Sparkles</option>
                   <option value="Layers">Layers</option>
@@ -6739,17 +8073,17 @@ function GalleryEditorModule({ site, showSaved }) {
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="flex justify-end gap-3 pt-3 border-t border-[#E8E2EE]">
               <button
                 type="button"
                 onClick={() => setEditingHighlight(null)}
-                className="px-4 py-2 rounded-full border text-xs"
+                className="btn-modal-cancel"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5 font-semibold"
+                className="btn-modal-primary"
               >
                 Save Highlight
               </button>
@@ -6760,16 +8094,17 @@ function GalleryEditorModule({ site, showSaved }) {
 
       {/* MODAL 4: Add/Edit Instagram Post Modal */}
       {editingInstaPost && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/80 p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-[rgba(37,27,49,0.38)] backdrop-blur-md p-4 animate-fade-in">
           <form
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
               if (!editingInstaPost.image || !editingInstaPost.image.trim()) {
                 alert("Please upload or enter an image for the Instagram post card.");
                 return;
               }
+              const targetId = editingInstaPost.id || editingInstaPost._id;
               const cleanPost = {
-                id: editingInstaPost.id || `insta-${Date.now()}`,
+                id: targetId || `insta-${Date.now()}`,
                 image: editingInstaPost.image.trim(),
                 likes: Number(editingInstaPost.likes) || 0,
                 caption: (editingInstaPost.caption || "").trim(),
@@ -6777,29 +8112,39 @@ function GalleryEditorModule({ site, showSaved }) {
                   (editingInstaPost.url || "").trim() ||
                   instaHeader.url ||
                   "https://www.instagram.com/confianza_events",
+                showOnHome: Boolean(editingInstaPost.showOnHome),
               };
 
               let updatedList;
               if (editingInstaPost.isNew) {
                 updatedList = [...instagramPosts, cleanPost];
               } else {
-                updatedList = instagramPosts.map((p) =>
-                  p.id === editingInstaPost.id ? cleanPost : p
-                );
+                updatedList = instagramPosts.map((p) => {
+                  const isMatch = Boolean(
+                    (targetId && (p.id === targetId || p._id === targetId)) ||
+                    (p.image && p.image === editingInstaPost.image)
+                  );
+                  return isMatch ? cleanPost : p;
+                });
               }
-              saveInstagram(updatedList);
+
+              if (cleanPost.showOnHome) {
+                updatedList = enforceMaxFeaturedInstagram(updatedList, cleanPost.id || cleanPost._id);
+              }
+
+              await saveInstagram(updatedList);
               setEditingInstaPost(null);
             }}
-            className="glass-card max-w-md w-full rounded-3xl p-6 sm:p-8 space-y-4"
+            className="modal-dialog-luxury bg-[#FFFDFB] max-w-md w-full rounded-3xl p-6 sm:p-8 space-y-4 max-h-[88vh] overflow-y-auto no-scrollbar border border-[#E8E2EE] shadow-luxe"
           >
-            <div className="flex justify-between items-center border-b pb-3">
-              <h4 className="font-display text-lg text-ink font-semibold">
+            <div className="flex justify-between items-center border-b border-[#E8E2EE] pb-3">
+              <h4 className="font-display text-lg text-[#2B2138] font-semibold">
                 {editingInstaPost.isNew ? "Add Instagram Post" : "Edit Post Card"}
               </h4>
               <button
                 type="button"
                 onClick={() => setEditingInstaPost(null)}
-                className="text-muted-foreground hover:text-foreground"
+                className="text-[#7E7688] hover:text-[#2B2138] cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -6812,19 +8157,19 @@ function GalleryEditorModule({ site, showSaved }) {
             />
 
             <div>
-              <label className="text-xs font-medium block mb-1">Likes Count</label>
+              <label className="text-xs font-semibold text-[#2B2138] block mb-1">Likes Count</label>
               <input
                 type="number"
                 value={editingInstaPost.likes || 0}
                 onChange={(e) =>
                   setEditingInstaPost({ ...editingInstaPost, likes: Number(e.target.value) })
                 }
-                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs focus:outline-none focus:border-secondary"
+                className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
               />
             </div>
 
             <div>
-              <label className="text-xs font-medium block mb-1">Caption / Hashtags</label>
+              <label className="text-xs font-semibold text-[#2B2138] block mb-1">Caption / Hashtags</label>
               <input
                 type="text"
                 value={editingInstaPost.caption || ""}
@@ -6832,12 +8177,12 @@ function GalleryEditorModule({ site, showSaved }) {
                   setEditingInstaPost({ ...editingInstaPost, caption: e.target.value })
                 }
                 placeholder="e.g. Mandap reveal at Lake Pichola #ConfianzaWeddings"
-                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs focus:outline-none focus:border-secondary"
+                className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
               />
             </div>
 
             <div>
-              <label className="text-xs font-medium block mb-1">Post / Reel Link (Optional)</label>
+              <label className="text-xs font-semibold text-[#2B2138] block mb-1">Post / Reel Link (Optional)</label>
               <input
                 type="text"
                 value={editingInstaPost.url || ""}
@@ -6845,23 +8190,51 @@ function GalleryEditorModule({ site, showSaved }) {
                   setEditingInstaPost({ ...editingInstaPost, url: e.target.value })
                 }
                 placeholder="https://www.instagram.com/p/..."
-                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs focus:outline-none focus:border-secondary"
+                className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
               />
             </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-border/60">
+            <div className="p-3 rounded-2xl bg-[#F9F8FB] border border-[#E8E2EE] flex items-start gap-3">
+              <input
+                type="checkbox"
+                id="insta-show-on-home"
+                checked={Boolean(editingInstaPost.showOnHome)}
+                onChange={(e) =>
+                  setEditingInstaPost({ ...editingInstaPost, showOnHome: e.target.checked })
+                }
+                className="mt-0.5 h-4 w-4 rounded border-[#E8E2EE] text-[#6A439E] focus:ring-[#6A439E] cursor-pointer"
+              />
+              <label htmlFor="insta-show-on-home" className="text-xs cursor-pointer select-none">
+                <span className="font-semibold text-[#2B2138] block">
+                  View on Home ({featuredOnHomeCount}/6 selected)
+                </span>
+                <span className="text-[0.68rem] text-[#7E7688] block mt-0.5 leading-tight">
+                  Feature this post in the Homepage "Follow Our Journey" grid. If 6 are already selected, selecting this will automatically replace the oldest selected post.
+                </span>
+              </label>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-3 border-t border-[#E8E2EE]">
               <button
                 type="button"
                 onClick={() => setEditingInstaPost(null)}
-                className="px-4 py-2 rounded-full border text-xs"
+                className="btn-modal-cancel"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5 font-semibold cursor-pointer"
+                disabled={isSaving}
+                className="btn-modal-primary flex items-center gap-1.5"
               >
-                Save Post
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin text-[#C2A438]" />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <span>Save Post</span>
+                )}
               </button>
             </div>
           </form>
@@ -6995,6 +8368,31 @@ function TestimonialsEditorModule({ site, showSaved }) {
     ]
   );
 
+  // Sync local state when site context updates from server/background
+  useEffect(() => {
+    if (Array.isArray(site.testimonialsCategories) && site.testimonialsCategories.length > 0) {
+      setCategories(site.testimonialsCategories);
+    }
+  }, [site.testimonialsCategories]);
+
+  useEffect(() => {
+    if (site.testimonialsHeader && Object.keys(site.testimonialsHeader).length > 0) {
+      setHeaderData(site.testimonialsHeader);
+    }
+  }, [site.testimonialsHeader]);
+
+  useEffect(() => {
+    if (Array.isArray(site.testimonialsExperience) && site.testimonialsExperience.length > 0) {
+      setExperiencePillars(site.testimonialsExperience);
+    }
+  }, [site.testimonialsExperience]);
+
+  useEffect(() => {
+    if (Array.isArray(site.testimonialsFaq) && site.testimonialsFaq.length > 0) {
+      setFaqs(site.testimonialsFaq);
+    }
+  }, [site.testimonialsFaq]);
+
   // 1-Click Moderation Actions
   const handleModerate = async (action, id, data = null) => {
     try {
@@ -7031,32 +8429,54 @@ function TestimonialsEditorModule({ site, showSaved }) {
     setAllReviews(newList);
     await site.update("testimonials", newList);
     setIsSaving(false);
-    showSaved();
+    showSaved("Testimonials saved successfully in MongoDB!");
   };
 
   // Save Header & Trust Stats
   const saveHeader = async (newHeader) => {
     setIsSaving(true);
+    setHeaderData(newHeader);
     await site.update("testimonialsHeader", newHeader);
     setIsSaving(false);
-    showSaved();
+    showSaved("Testimonials hero header saved successfully in MongoDB!");
   };
 
   // Save Categories
   const saveCategories = async (newCategories) => {
     setIsSaving(true);
+    setCategories(newCategories);
     await site.update("testimonialsCategories", newCategories);
     setIsSaving(false);
-    showSaved();
+    showSaved("Testimonials categories updated successfully in MongoDB!");
   };
 
   // Save Experience & FAQs
+  const saveFaqs = async (newList) => {
+    const listToSave = Array.isArray(newList) ? newList : faqs;
+    setIsSaving(true);
+    setFaqs(listToSave);
+    await site.update("testimonialsFaq", listToSave);
+    setIsSaving(false);
+    showSaved("Testimonials FAQs saved successfully in MongoDB!");
+  };
+
+  const saveExperiencePillars = async (newList) => {
+    const listToSave = Array.isArray(newList) ? newList : experiencePillars;
+    setIsSaving(true);
+    setExperiencePillars(listToSave);
+    await site.update("testimonialsExperience", listToSave);
+    setIsSaving(false);
+    showSaved("Experience pillars saved successfully in MongoDB!");
+  };
+
   const saveExperienceAndFaqs = async () => {
     setIsSaving(true);
+    setExperiencePillars(experiencePillars);
+    setFaqs(faqs);
     await site.update("testimonialsExperience", experiencePillars);
     await site.update("testimonialsFaq", faqs);
     setIsSaving(false);
-    showSaved();
+    showSaved("Experience pillars and FAQs saved successfully in MongoDB!");
   };
 
   // Filtered Published Reviews
@@ -7065,8 +8485,9 @@ function TestimonialsEditorModule({ site, showSaved }) {
       if (selectedCategory === "Video Reviews & Reels") {
         if (!t.videoUrl) return false;
       } else {
-        const cat = t.category || "";
-        if (cat.toLowerCase() !== selectedCategory.toLowerCase()) return false;
+        const norm1 = (t.category || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
+        const norm2 = selectedCategory.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
+        if (norm1 !== norm2) return false;
       }
     }
     if (searchQuery.trim()) {
@@ -7172,7 +8593,7 @@ function TestimonialsEditorModule({ site, showSaved }) {
                   </span>
                 </h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Reviews submitted by couples &amp; guests from <span className="text-primary font-semibold">/testimonials</span>. Once approved, they go live on the website.
+                  Reviews submitted by couples &amp; guests from the <span className="text-primary font-semibold">Testimonials page</span>. Once approved, they go live on the website.
                 </p>
               </div>
               <ModuleRefreshButton site={site} showSaved={showSaved} label="Refresh Queue" />
@@ -7313,7 +8734,7 @@ function TestimonialsEditorModule({ site, showSaved }) {
                   Published Live Testimonials ({publishedReviews.length})
                 </h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Currently active couple stories rendered on <span className="text-primary font-semibold">/testimonials</span>, <span className="text-primary font-semibold">/portfolio</span>, and the Homepage.
+                  Currently active couple stories rendered on the <span className="text-primary font-semibold">Testimonials page</span>, <span className="text-primary font-semibold">Portfolio page</span>, and Homepage.
                 </p>
               </div>
 
@@ -7335,6 +8756,7 @@ function TestimonialsEditorModule({ site, showSaved }) {
                     videoUrl: "",
                     text: "",
                     featured: true,
+                    showOnPortfolio: false,
                     status: "approved",
                   })
                 }
@@ -7439,11 +8861,22 @@ function TestimonialsEditorModule({ site, showSaved }) {
                         </div>
                       </div>
 
-                      {t.category && (
-                        <span className="inline-block mt-2 text-[0.65rem] uppercase tracking-wider text-primary font-semibold bg-primary/10 px-2 py-0.5 rounded">
-                          {t.category}
-                        </span>
-                      )}
+                      <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                        {t.category && (
+                          <span className="text-[0.65rem] uppercase tracking-wider text-primary font-semibold bg-primary/10 px-2 py-0.5 rounded">
+                            {t.category}
+                          </span>
+                        )}
+                        {t.showOnPortfolio ? (
+                          <span className="text-[0.65rem] uppercase tracking-wider text-secondary font-bold bg-secondary/15 border border-secondary/40 px-2 py-0.5 rounded">
+                            ✓ On Portfolio
+                          </span>
+                        ) : (
+                          <span className="text-[0.65rem] uppercase tracking-wider text-muted-foreground font-medium bg-muted px-2 py-0.5 rounded">
+                            Hidden from Portfolio
+                          </span>
+                        )}
+                      </div>
 
                       <p className="text-xs text-foreground/85 italic leading-relaxed mt-2">
                         "{t.text}"
@@ -7458,13 +8891,35 @@ function TestimonialsEditorModule({ site, showSaved }) {
                     </div>
 
                     <div className="pt-3 border-t border-border flex items-center justify-between gap-2">
-                      <span className="text-[0.65rem] text-muted-foreground font-mono">
-                        Date: {t.date || "2026"}
-                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const targetId = t.id || t._id;
+                          const nextVal = !t.showOnPortfolio;
+                          let updated = allReviews.map((x) =>
+                            (x.id && x.id === targetId) || (x._id && x._id === targetId)
+                              ? { ...x, showOnPortfolio: nextVal }
+                              : x
+                          );
+                          if (nextVal) {
+                            updated = enforceMaxFeaturedTestimonials(updated, targetId);
+                          }
+                          saveReviewsList(updated);
+                        }}
+                        className={`p-1.5 rounded-lg border text-xs flex items-center gap-1 cursor-pointer transition ${
+                          t.showOnPortfolio
+                            ? "border-secondary/60 bg-secondary/15 text-secondary font-semibold"
+                            : "border-border hover:bg-muted text-muted-foreground"
+                        }`}
+                        title={t.showOnPortfolio ? "Click to hide from Homepage & Portfolio Words of Gratitude" : "Click to feature on Homepage & Portfolio Words of Gratitude"}
+                      >
+                        <span>{t.showOnPortfolio ? "On Home & Portfolio ✓" : "+ Feature on Home & Portfolio"}</span>
+                      </button>
+
                       <div className="flex items-center gap-1.5">
                         <button
                           type="button"
-                          onClick={() => setEditingReview({ ...t })}
+                          onClick={() => setEditingReview({ ...t, isNew: false })}
                           className="p-1.5 rounded-lg border border-border hover:bg-muted text-xs text-primary flex items-center gap-1 cursor-pointer"
                         >
                           <Edit2 className="h-3.5 w-3.5" />
@@ -7515,7 +8970,7 @@ function TestimonialsEditorModule({ site, showSaved }) {
                   </div>
                   <h3 className="font-display text-xl text-ink font-bold mt-1">Page Hero &amp; Trust Strip</h3>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Customize the hero header, cover image, and trust metrics on <span className="text-primary font-semibold">/testimonials</span>.
+                    Customize the hero header, cover image, and trust metrics on the <span className="text-primary font-semibold">Testimonials page</span>.
                   </p>
                 </div>
               </div>
@@ -7641,7 +9096,7 @@ function TestimonialsEditorModule({ site, showSaved }) {
             <div className="lg:col-span-6 space-y-3 sticky top-6">
               <div className="flex items-center justify-between px-2">
                 <span className="text-[0.68rem] uppercase tracking-[0.25em] text-primary font-bold flex items-center gap-1.5">
-                  <Eye className="h-3.5 w-3.5 text-secondary" /> Live /testimonials Hero Preview
+                  <Eye className="h-3.5 w-3.5 text-secondary" /> Live Testimonials Hero Preview
                 </span>
               </div>
 
@@ -7707,7 +9162,7 @@ function TestimonialsEditorModule({ site, showSaved }) {
                   Testimonials Category Filter Pills ({categories.length})
                 </h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Manage the filter pills displayed on the public <span className="text-primary font-semibold">/testimonials</span> page.
+                  Manage the filter pills displayed on the public <span className="text-primary font-semibold">Testimonials page</span>.
                 </p>
               </div>
 
@@ -7732,9 +9187,11 @@ function TestimonialsEditorModule({ site, showSaved }) {
               {categories.map((cat, idx) => {
                 const cName = typeof cat === "string" ? cat : cat.name || cat.label;
                 const cId = typeof cat === "string" ? `cat-${idx}` : cat.id || `cat-${idx}`;
-                const count = allReviews.filter(
-                  (t) => t.category && t.category.toLowerCase() === cName.toLowerCase()
-                ).length;
+                const count = allReviews.filter((t) => {
+                  const norm1 = (t.category || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
+                  const norm2 = cName.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
+                  return Boolean(norm1 && norm2 && norm1 === norm2);
+                }).length;
 
                 return (
                   <div
@@ -7786,7 +9243,7 @@ function TestimonialsEditorModule({ site, showSaved }) {
 
           {/* Add / Edit Category Modal */}
           {editingCategory && (
-            <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/80 p-4">
+            <div className="fixed inset-0 z-100 flex items-center justify-center bg-[rgba(37,27,49,0.38)] backdrop-blur-md p-4 animate-fade-in">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -7804,31 +9261,33 @@ function TestimonialsEditorModule({ site, showSaved }) {
                     updated = [...categories, cleanCat];
                   } else {
                     updated = categories.map((c) => {
+                      const currId = typeof c === "string" ? c : c.id;
                       const currName = typeof c === "string" ? c : c.name || c.label;
-                      if (currName === editingCategory._origName) return cleanCat;
+                      if (editingCategory.id && currId === editingCategory.id) return cleanCat;
+                      if (editingCategory._origName && currName === editingCategory._origName) return cleanCat;
                       return c;
                     });
                   }
                   saveCategories(updated);
                   setEditingCategory(null);
                 }}
-                className="glass-card max-w-sm w-full rounded-3xl p-6 space-y-4"
+                className="modal-dialog-luxury bg-[#FFFDFB] max-w-sm w-full rounded-3xl p-6 sm:p-8 space-y-4 max-h-[88vh] overflow-y-auto no-scrollbar border border-[#E8E2EE] shadow-luxe"
               >
-                <div className="flex justify-between items-center border-b pb-3">
-                  <h4 className="font-display text-base text-ink font-bold">
+                <div className="flex justify-between items-center border-b border-[#E8E2EE] pb-3">
+                  <h4 className="font-display text-base text-[#2B2138] font-bold">
                     {editingCategory.isNew ? "Add Category" : "Edit Category"}
                   </h4>
                   <button
                     type="button"
                     onClick={() => setEditingCategory(null)}
-                    className="text-muted-foreground hover:text-foreground cursor-pointer"
+                    className="text-[#7E7688] hover:text-[#2B2138] cursor-pointer"
                   >
                     <X className="h-4 w-4" />
                   </button>
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-foreground block mb-1">
+                  <label className="text-xs font-semibold text-[#2B2138] block mb-1">
                     Category Name / Label
                   </label>
                   <input
@@ -7836,22 +9295,22 @@ function TestimonialsEditorModule({ site, showSaved }) {
                     required
                     value={editingCategory.name || ""}
                     onChange={(e) => setEditingCategory({ ...editingCategory, name: e.target.value })}
-                    className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs"
+                    className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                     placeholder="e.g. Royal Baraat &amp; Entry"
                   />
                 </div>
 
-                <div className="flex justify-end gap-2 pt-2 border-t">
+                <div className="flex justify-end gap-3 pt-3 border-t border-[#E8E2EE]">
                   <button
                     type="button"
                     onClick={() => setEditingCategory(null)}
-                    className="px-4 py-2 rounded-full border text-xs cursor-pointer"
+                    className="btn-modal-cancel"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5 cursor-pointer"
+                    className="btn-modal-primary"
                   >
                     Save Category
                   </button>
@@ -7881,12 +9340,12 @@ function TestimonialsEditorModule({ site, showSaved }) {
 
               <button
                 type="button"
-                onClick={saveExperienceAndFaqs}
+                onClick={() => saveExperiencePillars(experiencePillars)}
                 disabled={isSaving}
-                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2.5 px-5 flex items-center gap-2 cursor-pointer shadow-sm disabled:opacity-60"
+                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2.5 px-5 flex items-center gap-2 cursor-pointer shadow-sm disabled:opacity-60 font-semibold"
               >
                 {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4 text-secondary" />}
-                <span>Save Pillars &amp; FAQ</span>
+                <span>Save Experience Pillars</span>
               </button>
             </div>
 
@@ -7952,6 +9411,18 @@ function TestimonialsEditorModule({ site, showSaved }) {
                 </div>
               ))}
             </div>
+
+            <div className="flex justify-end pt-3 border-t border-border/60">
+              <button
+                type="button"
+                onClick={() => saveExperiencePillars(experiencePillars)}
+                disabled={isSaving}
+                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-6 flex items-center gap-2 cursor-pointer shadow-sm disabled:opacity-60 font-semibold"
+              >
+                {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4 text-secondary" />}
+                <span>Save All Pillars</span>
+              </button>
+            </div>
           </div>
 
           {/* FAQs Editor */}
@@ -7966,59 +9437,109 @@ function TestimonialsEditorModule({ site, showSaved }) {
                 </p>
               </div>
 
-              <button
-                type="button"
-                onClick={() =>
-                  setFaqs([
-                    ...faqs,
-                    {
-                      question: "New Question?",
-                      answer: "New answer explanation...",
-                    },
-                  ])
-                }
-                className="text-xs text-primary font-bold hover:underline cursor-pointer"
-              >
-                + Add FAQ Item
-              </button>
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newFaq = {
+                      id: `faq-${Date.now()}`,
+                      question: "New FAQ Question?",
+                      answer: "New detailed answer...",
+                    };
+                    const updated = [...faqs, newFaq];
+                    setFaqs(updated);
+                  }}
+                  className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-4 flex items-center gap-1.5 cursor-pointer shadow-sm font-semibold"
+                >
+                  <Plus className="h-4 w-4 text-secondary" />
+                  <span>Add FAQ Item</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => saveFaqs(faqs)}
+                  disabled={isSaving}
+                  className="btn-luxe gradient-gold text-ink text-xs py-2 px-5 flex items-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-60 font-bold"
+                >
+                  {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                  <span>Save FAQs</span>
+                </button>
+              </div>
             </div>
 
-            <div className="space-y-3">
-              {faqs.map((faq, fIdx) => (
-                <div key={fIdx} className="p-4 rounded-2xl bg-card border border-border space-y-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <input
-                      type="text"
-                      value={faq.question}
+            {faqs.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-border p-8 text-center text-muted-foreground bg-card/40">
+                <p className="text-xs">No FAQ items yet. Click "+ Add FAQ Item" above to create one.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {faqs.map((faq, fIdx) => (
+                  <div key={faq.id || fIdx} className="p-4 rounded-2xl bg-card border border-border space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <input
+                        type="text"
+                        value={faq.question || ""}
+                        onChange={(e) => {
+                          const updated = [...faqs];
+                          updated[fIdx] = { ...updated[fIdx], question: e.target.value };
+                          setFaqs(updated);
+                        }}
+                        className="flex-1 rounded-xl border border-border bg-card px-3 py-1.5 text-xs font-semibold"
+                        placeholder="Question title..."
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = faqs.filter((_, i) => i !== fIdx);
+                          saveFaqs(updated);
+                        }}
+                        className="text-destructive p-1.5 rounded-lg hover:bg-destructive/10 cursor-pointer transition"
+                        title="Delete Question"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <textarea
+                      rows={2}
+                      value={faq.answer || ""}
                       onChange={(e) => {
                         const updated = [...faqs];
-                        updated[fIdx].question = e.target.value;
+                        updated[fIdx] = { ...updated[fIdx], answer: e.target.value };
                         setFaqs(updated);
                       }}
-                      className="flex-1 rounded-xl border border-border bg-card px-3 py-1.5 text-xs font-semibold"
-                      placeholder="Question..."
+                      className="w-full rounded-xl border border-border bg-card px-3 py-1.5 text-xs leading-relaxed"
+                      placeholder="Detailed answer explanation..."
                     />
-                    <button
-                      type="button"
-                      onClick={() => setFaqs(faqs.filter((_, i) => i !== fIdx))}
-                      className="text-destructive p-1 cursor-pointer"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
                   </div>
-                  <textarea
-                    rows={2}
-                    value={faq.answer}
-                    onChange={(e) => {
-                      const updated = [...faqs];
-                      updated[fIdx].answer = e.target.value;
-                      setFaqs(updated);
-                    }}
-                    className="w-full rounded-xl border border-border bg-card px-3 py-1.5 text-xs leading-relaxed"
-                    placeholder="Answer..."
-                  />
-                </div>
-              ))}
+                ))}
+              </div>
+            )}
+
+            <div className="flex items-center justify-between gap-3 pt-4 border-t border-border/60">
+              <button
+                type="button"
+                onClick={() => {
+                  const newFaq = {
+                    id: `faq-${Date.now()}`,
+                    question: "New FAQ Question?",
+                    answer: "New detailed answer...",
+                  };
+                  setFaqs([...faqs, newFaq]);
+                }}
+                className="px-4 py-2 rounded-xl border border-border bg-card text-xs hover:bg-muted font-semibold cursor-pointer text-primary"
+              >
+                + Add Another Question
+              </button>
+
+              <button
+                type="button"
+                onClick={() => saveFaqs(faqs)}
+                disabled={isSaving}
+                className="btn-luxe gradient-gold text-ink text-xs py-2 px-6 flex items-center gap-2 cursor-pointer shadow-sm disabled:opacity-60 font-bold"
+              >
+                {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                <span>Save All FAQs</span>
+              </button>
             </div>
           </div>
         </div>
@@ -8028,7 +9549,7 @@ function TestimonialsEditorModule({ site, showSaved }) {
       {/* REVIEW ADD / EDIT MODAL */}
       {/* ============================================================= */}
       {editingReview && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/80 p-4 animate-fade-in">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-[rgba(37,27,49,0.38)] backdrop-blur-md p-4 animate-fade-in">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -8053,20 +9574,27 @@ function TestimonialsEditorModule({ site, showSaved }) {
                 if (editingReview.isNew) {
                   updated = [cleanReview, ...allReviews];
                 } else {
-                  updated = allReviews.map((x) =>
-                    (x.id && x.id === editingReview.id) || (x._id && x._id === editingReview._id)
-                      ? cleanReview
-                      : x
-                  );
+                  const targetId = editingReview.id ? String(editingReview.id) : "";
+                  const targetMongoId = editingReview._id ? String(editingReview._id) : "";
+                  updated = allReviews.map((x) => {
+                    const isMatch = Boolean(
+                      (targetId && (String(x.id) === targetId || String(x._id) === targetId)) ||
+                      (targetMongoId && (String(x._id) === targetMongoId || String(x.id) === targetMongoId))
+                    );
+                    return isMatch ? cleanReview : x;
+                  });
+                }
+                if (cleanReview.showOnPortfolio) {
+                  updated = enforceMaxFeaturedTestimonials(updated, cleanReview.id || cleanReview._id);
                 }
                 saveReviewsList(updated);
               }
               setEditingReview(null);
             }}
-            className="glass-card max-w-lg w-full max-h-[90vh] overflow-y-auto rounded-3xl p-6 sm:p-8 space-y-4"
+            className="modal-dialog-luxury bg-[#FFFDFB] max-w-lg w-full max-h-[88vh] overflow-y-auto no-scrollbar rounded-3xl p-6 sm:p-8 space-y-4 border border-[#E8E2EE] shadow-luxe"
           >
-            <div className="flex justify-between items-center border-b pb-3">
-              <h4 className="font-display text-lg text-ink font-bold">
+            <div className="flex justify-between items-center border-b border-[#E8E2EE] pb-3">
+              <h4 className="font-display text-lg text-[#2B2138] font-bold">
                 {editingReview.isNew
                   ? "Add New Client Review"
                   : editingReview.isModerationEdit
@@ -8076,7 +9604,7 @@ function TestimonialsEditorModule({ site, showSaved }) {
               <button
                 type="button"
                 onClick={() => setEditingReview(null)}
-                className="text-muted-foreground hover:text-foreground cursor-pointer"
+                className="text-[#7E7688] hover:text-[#2B2138] cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -8084,19 +9612,19 @@ function TestimonialsEditorModule({ site, showSaved }) {
 
             <div className="grid sm:grid-cols-2 gap-3 text-xs">
               <div>
-                <label className="font-semibold text-foreground block mb-1">Couple / Client Name *</label>
+                <label className="font-semibold text-[#2B2138] block mb-1">Couple / Client Name *</label>
                 <input
                   type="text"
                   required
                   value={editingReview.name || ""}
                   onChange={(e) => setEditingReview({ ...editingReview, name: e.target.value })}
-                  className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-semibold"
+                  className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] font-semibold placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                   placeholder="e.g. Ananya & Rohit Roy"
                 />
               </div>
 
               <div>
-                <label className="font-semibold text-foreground block mb-1">Relationship / Role</label>
+                <label className="font-semibold text-[#2B2138] block mb-1">Relationship / Role</label>
                 {(() => {
                   const standardRoles = [
                     "Bride & Groom",
@@ -8130,7 +9658,7 @@ function TestimonialsEditorModule({ site, showSaved }) {
                             });
                           }
                         }}
-                        className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs cursor-pointer"
+                        className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15 cursor-pointer"
                       >
                         {standardRoles.map((role) => (
                           <option key={role} value={role}>
@@ -8146,7 +9674,7 @@ function TestimonialsEditorModule({ site, showSaved }) {
                           required
                           value={editingReview.relationship || ""}
                           onChange={(e) => setEditingReview({ ...editingReview, relationship: e.target.value })}
-                          className="w-full rounded-xl border border-secondary/60 bg-card px-3.5 py-2 text-xs ring-1 ring-secondary/20 animate-fade-in"
+                          className="w-full rounded-xl border border-[#C2A438] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] ring-1 ring-[#C2A438]/20 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15 animate-fade-in"
                           placeholder="e.g. Sister of the Bride, Family Friend, Groom's Cousin"
                         />
                       )}
@@ -8158,65 +9686,34 @@ function TestimonialsEditorModule({ site, showSaved }) {
 
             <div className="grid sm:grid-cols-2 gap-3 text-xs">
               <div>
-                <label className="font-semibold text-foreground block mb-1">Event Category</label>
+                <label className="font-semibold text-[#2B2138] block mb-1">Event Category</label>
                 {(() => {
                   const catNames = categories.map((c) => (typeof c === "string" ? c : c.name || c.label)).filter(Boolean);
                   const currentCat = editingReview.category || catNames[0] || "Royal & Destination Weddings";
-                  const isStandard = catNames.includes(currentCat);
-                  const isOtherSelected = editingReview._customCatMode || (!isStandard && currentCat !== "");
 
                   return (
-                    <div className="space-y-1.5">
-                      <select
-                        value={isOtherSelected ? "Other" : currentCat}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          if (val === "Other") {
-                            setEditingReview({
-                              ...editingReview,
-                              _customCatMode: true,
-                              category: isStandard ? "" : currentCat,
-                            });
-                          } else {
-                            setEditingReview({
-                              ...editingReview,
-                              _customCatMode: false,
-                              category: val,
-                            });
-                          }
-                        }}
-                        className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs cursor-pointer"
-                      >
-                        {catNames.map((name) => (
-                          <option key={name} value={name}>
-                            {name}
-                          </option>
-                        ))}
-                        <option value="Other">Other</option>
-                      </select>
-
-                      {isOtherSelected && (
-                        <input
-                          type="text"
-                          required
-                          value={editingReview.category || ""}
-                          onChange={(e) => setEditingReview({ ...editingReview, category: e.target.value })}
-                          className="w-full rounded-xl border border-secondary/60 bg-card px-3.5 py-2 text-xs ring-1 ring-secondary/20 animate-fade-in"
-                          placeholder="e.g. Sangeet Gala, Engagement, Anniversary Banquet"
-                        />
-                      )}
-                    </div>
+                    <select
+                      value={currentCat}
+                      onChange={(e) => setEditingReview({ ...editingReview, category: e.target.value })}
+                      className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15 cursor-pointer"
+                    >
+                      {catNames.map((name) => (
+                        <option key={name} value={name}>
+                          {name}
+                        </option>
+                      ))}
+                    </select>
                   );
                 })()}
               </div>
 
               <div>
-                <label className="font-semibold text-foreground block mb-1">Venue / City Location</label>
+                <label className="font-semibold text-[#2B2138] block mb-1">Venue / City Location</label>
                 <input
                   type="text"
                   value={editingReview.location || ""}
                   onChange={(e) => setEditingReview({ ...editingReview, location: e.target.value })}
-                  className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs"
+                  className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                   placeholder="e.g. Udaipur Destination Wedding"
                 />
               </div>
@@ -8224,11 +9721,11 @@ function TestimonialsEditorModule({ site, showSaved }) {
 
             <div className="grid sm:grid-cols-2 gap-3 text-xs">
               <div>
-                <label className="font-semibold text-foreground block mb-1">Star Rating (0 to 5)</label>
+                <label className="font-semibold text-[#2B2138] block mb-1">Star Rating (0 to 5)</label>
                 <select
                   value={editingReview.rating || 5}
                   onChange={(e) => setEditingReview({ ...editingReview, rating: Number(e.target.value) })}
-                  className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs cursor-pointer font-semibold"
+                  className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15 cursor-pointer font-semibold"
                 >
                   <option value={5}>★★★★★ (5 Stars - Exceptional)</option>
                   <option value={4}>★★★★☆ (4 Stars - Wonderful)</option>
@@ -8239,12 +9736,12 @@ function TestimonialsEditorModule({ site, showSaved }) {
               </div>
 
               <div>
-                <label className="font-semibold text-foreground block mb-1">Date / Year</label>
+                <label className="font-semibold text-[#2B2138] block mb-1">Date / Year</label>
                 <input
                   type="text"
                   value={editingReview.date || ""}
                   onChange={(e) => setEditingReview({ ...editingReview, date: e.target.value })}
-                  className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs"
+                  className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                   placeholder="e.g. November 2025"
                 />
               </div>
@@ -8257,60 +9754,73 @@ function TestimonialsEditorModule({ site, showSaved }) {
             />
 
             <div className="text-xs">
-              <label className="font-semibold text-foreground block mb-1">Video Testimonial Link (Optional)</label>
+              <label className="font-semibold text-[#2B2138] block mb-1">Video Testimonial Link (Optional)</label>
               <input
                 type="url"
                 value={editingReview.videoUrl || ""}
                 onChange={(e) => setEditingReview({ ...editingReview, videoUrl: e.target.value })}
-                className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-mono"
+                className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] font-mono placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                 placeholder="https://www.youtube.com/watch?v=..."
               />
             </div>
 
             <div className="text-xs">
-              <label className="font-semibold text-foreground block mb-1">Review Quote / Love Story Narrative *</label>
+              <label className="font-semibold text-[#2B2138] block mb-1">Review Quote / Love Story Narrative *</label>
               <textarea
                 rows={4}
                 required
                 value={editingReview.text || ""}
                 onChange={(e) => setEditingReview({ ...editingReview, text: e.target.value })}
-                className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs leading-relaxed"
+                className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] leading-relaxed placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                 placeholder="Enter what the couple said about their wedding..."
               />
             </div>
 
-            <div className="flex items-center gap-4 pt-1">
+            <div className="flex flex-wrap items-center gap-4 pt-1">
               <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   id="rev-featured"
                   checked={Boolean(editingReview.featured)}
                   onChange={(e) => setEditingReview({ ...editingReview, featured: e.target.checked })}
-                  className="rounded border-border text-secondary focus:ring-secondary cursor-pointer h-4 w-4"
+                  className="rounded border-[#E8E2EE] text-[#6A439E] focus:ring-[#6A439E] cursor-pointer h-4 w-4"
                 />
-                <label htmlFor="rev-featured" className="text-xs font-semibold text-foreground cursor-pointer">
+                <label htmlFor="rev-featured" className="text-xs font-semibold text-[#2B2138] cursor-pointer">
                   Featured Review
                 </label>
               </div>
 
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="rev-show-on-portfolio"
+                  checked={Boolean(editingReview.showOnPortfolio)}
+                  onChange={(e) => setEditingReview({ ...editingReview, showOnPortfolio: e.target.checked })}
+                  className="rounded border-[#E8E2EE] text-[#6A439E] focus:ring-[#6A439E] cursor-pointer h-4 w-4"
+                />
+                <label htmlFor="rev-show-on-portfolio" className="text-xs font-semibold text-[#2B2138] cursor-pointer">
+                  Show on Homepage &amp; Portfolio (Words of Gratitude)
+                </label>
+              </div>
+
               {editingReview.status === "pending" && (
-                <span className="text-[0.68rem] text-secondary font-bold bg-secondary/10 px-2 py-0.5 rounded">
+                <span className="text-[0.68rem] text-[#6A439E] font-bold bg-[#6A439E]/10 px-2 py-0.5 rounded">
                   Will be approved &amp; published on save
                 </span>
               )}
             </div>
 
-            <div className="flex justify-end gap-2 pt-3 border-t">
+            <div className="flex justify-end gap-3 pt-3 border-t border-[#E8E2EE]">
               <button
                 type="button"
                 onClick={() => setEditingReview(null)}
-                className="px-4 py-2 rounded-full border text-xs cursor-pointer hover:bg-muted"
+                className="btn-modal-cancel"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-6 rounded-full cursor-pointer shadow-md font-bold"
+                className="btn-modal-primary"
               >
                 {editingReview.isModerationEdit ? "Save & Approve" : "Save Review"}
               </button>
@@ -8455,7 +9965,7 @@ function TeamEditorModule({ site, showSaved }) {
 
       {/* Member Add/Edit Modal */}
       {editingMember && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/80 p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-[rgba(37,27,49,0.38)] backdrop-blur-md p-4 animate-fade-in">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -8484,16 +9994,16 @@ function TeamEditorModule({ site, showSaved }) {
               saveTeam(updated);
               setEditingMember(null);
             }}
-            className="glass-card max-w-lg w-full max-h-[90vh] overflow-y-auto rounded-3xl p-6 sm:p-8 space-y-4 shadow-2xl"
+            className="modal-dialog-luxury bg-[#FFFDFB] max-w-lg w-full max-h-[88vh] overflow-y-auto no-scrollbar rounded-3xl p-6 sm:p-8 space-y-4 border border-[#E8E2EE] shadow-luxe"
           >
-            <div className="flex justify-between items-center border-b pb-3">
-              <h4 className="font-display text-lg text-ink font-bold">
+            <div className="flex justify-between items-center border-b border-[#E8E2EE] pb-3">
+              <h4 className="font-display text-lg text-[#2B2138] font-bold">
                 {editingMember.isNew ? "Add Team Member" : "Edit Team Member"}
               </h4>
               <button
                 type="button"
                 onClick={() => setEditingMember(null)}
-                className="text-muted-foreground hover:text-foreground"
+                className="text-[#7E7688] hover:text-[#2B2138] cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -8507,25 +10017,25 @@ function TeamEditorModule({ site, showSaved }) {
 
             <div className="grid sm:grid-cols-2 gap-3 text-xs">
               <div>
-                <label className="font-semibold text-foreground block mb-1">Full Name</label>
+                <label className="font-semibold text-[#2B2138] block mb-1">Full Name</label>
                 <input
                   type="text"
                   required
                   value={editingMember.name || ""}
                   onChange={(e) => setEditingMember({ ...editingMember, name: e.target.value })}
-                  className="w-full rounded-xl border border-border bg-card px-3 py-2"
+                  className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                   placeholder="e.g. Radhika Deshmukh"
                 />
               </div>
 
               <div>
-                <label className="font-semibold text-foreground block mb-1">Designation / Role</label>
+                <label className="font-semibold text-[#2B2138] block mb-1">Designation / Role</label>
                 <input
                   type="text"
                   required
                   value={editingMember.role || ""}
                   onChange={(e) => setEditingMember({ ...editingMember, role: e.target.value })}
-                  className="w-full rounded-xl border border-border bg-card px-3 py-2"
+                  className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                   placeholder="e.g. Lead Floral Architect"
                 />
               </div>
@@ -8533,31 +10043,31 @@ function TeamEditorModule({ site, showSaved }) {
 
             <div className="grid sm:grid-cols-2 gap-3 text-xs">
               <div>
-                <label className="font-semibold text-foreground block mb-1">Official Email</label>
+                <label className="font-semibold text-[#2B2138] block mb-1">Official Email</label>
                 <input
                   type="email"
                   required
                   value={editingMember.email || ""}
                   onChange={(e) => setEditingMember({ ...editingMember, email: e.target.value })}
-                  className="w-full rounded-xl border border-border bg-card px-3 py-2"
+                  className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                   placeholder="name@confianzaevents.com"
                 />
               </div>
 
               <div>
-                <label className="font-semibold text-foreground block mb-1">Experience</label>
+                <label className="font-semibold text-[#2B2138] block mb-1">Experience</label>
                 <input
                   type="text"
                   value={editingMember.experience || ""}
                   onChange={(e) => setEditingMember({ ...editingMember, experience: e.target.value })}
-                  className="w-full rounded-xl border border-border bg-card px-3 py-2"
+                  className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                   placeholder="e.g. 6+ Years"
                 />
               </div>
             </div>
 
             <div className="text-xs">
-              <label className="font-semibold text-foreground block mb-1">
+              <label className="font-semibold text-[#2B2138] block mb-1">
                 Specialties &amp; Domain (comma-separated)
               </label>
               <input
@@ -8572,33 +10082,33 @@ function TeamEditorModule({ site, showSaved }) {
                 onChange={(e) =>
                   setEditingMember({ ...editingMember, specialtiesText: e.target.value })
                 }
-                className="w-full rounded-xl border border-border bg-card px-3 py-2"
+                className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                 placeholder="Luxury Decor, Spatial Design, Guest Concierge"
               />
             </div>
 
             <div className="text-xs">
-              <label className="font-semibold text-foreground block mb-1">Bio / Profile Description</label>
+              <label className="font-semibold text-[#2B2138] block mb-1">Bio / Profile Description</label>
               <textarea
                 rows={3}
                 value={editingMember.bio || ""}
                 onChange={(e) => setEditingMember({ ...editingMember, bio: e.target.value })}
-                className="w-full rounded-xl border border-border bg-card px-3 py-2"
+                className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                 placeholder="Describe their role and mastery in wedding coordination..."
               />
             </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t">
+            <div className="flex justify-end gap-3 pt-3 border-t border-[#E8E2EE]">
               <button
                 type="button"
                 onClick={() => setEditingMember(null)}
-                className="px-4 py-2 rounded-full border text-xs hover:bg-accent/30"
+                className="btn-modal-cancel"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-6"
+                className="btn-modal-primary"
               >
                 Save Member
               </button>
@@ -8761,7 +10271,7 @@ function BlogsEditorModule({ site, showSaved }) {
       </div>
 
       {editing && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/80 p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-[rgba(37,27,49,0.38)] backdrop-blur-md p-4 animate-fade-in">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -8772,88 +10282,88 @@ function BlogsEditorModule({ site, showSaved }) {
               }
               setEditing(null);
             }}
-            className="glass-card max-w-2xl w-full max-h-[90vh] overflow-y-auto rounded-3xl p-6 sm:p-8 space-y-4"
+            className="modal-dialog-luxury bg-[#FFFDFB] max-w-2xl w-full max-h-[88vh] overflow-y-auto no-scrollbar rounded-3xl p-6 sm:p-8 space-y-4 border border-[#E8E2EE] shadow-luxe"
           >
-            <div className="flex justify-between items-center border-b pb-3">
-              <h4 className="font-display text-lg text-ink">
+            <div className="flex justify-between items-center border-b border-[#E8E2EE] pb-3">
+              <h4 className="font-display text-lg text-[#2B2138] font-bold">
                 {editing.isNew ? "Write Article" : "Edit Article"}
               </h4>
               <button
                 type="button"
                 onClick={() => setEditing(null)}
-                className="text-muted-foreground"
+                className="text-[#7E7688] hover:text-[#2B2138] cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <div>
-              <label className="text-xs font-medium block mb-1">Title</label>
+              <label className="text-xs font-semibold text-[#2B2138] block mb-1">Title</label>
               <input
                 type="text"
                 required
                 value={editing.title}
                 onChange={(e) => setEditing({ ...editing, title: e.target.value })}
-                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
+                className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
               />
             </div>
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-medium block mb-1">Category</label>
+                <label className="text-xs font-semibold text-[#2B2138] block mb-1">Category</label>
                 <input
                   type="text"
                   required
                   value={editing.category}
                   onChange={(e) => setEditing({ ...editing, category: e.target.value })}
-                  className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
+                  className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                 />
               </div>
               <div>
-                <label className="text-xs font-medium block mb-1">Date</label>
+                <label className="text-xs font-semibold text-[#2B2138] block mb-1">Date</label>
                 <input
                   type="text"
                   required
                   value={editing.date}
                   onChange={(e) => setEditing({ ...editing, date: e.target.value })}
-                  className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
+                  className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-medium block mb-1">Excerpt Summary</label>
+              <label className="text-xs font-semibold text-[#2B2138] block mb-1">Excerpt Summary</label>
               <textarea
                 rows={2}
                 required
                 value={editing.excerpt}
                 onChange={(e) => setEditing({ ...editing, excerpt: e.target.value })}
-                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
+                className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
               />
             </div>
 
             <div>
-              <label className="text-xs font-medium block mb-1">Full Article Content</label>
+              <label className="text-xs font-semibold text-[#2B2138] block mb-1">Full Article Content</label>
               <textarea
                 rows={5}
                 required
                 value={editing.content}
                 onChange={(e) => setEditing({ ...editing, content: e.target.value })}
-                className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
+                className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15 leading-relaxed"
               />
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="flex justify-end gap-3 pt-3 border-t border-[#E8E2EE]">
               <button
                 type="button"
                 onClick={() => setEditing(null)}
-                className="px-4 py-2 rounded-full border text-xs"
+                className="btn-modal-cancel"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5"
+                className="btn-modal-primary"
               >
                 Publish Article
               </button>
@@ -8862,147 +10372,6 @@ function BlogsEditorModule({ site, showSaved }) {
         </div>
       )}
     </div>
-  );
-}
-
-// -------------------------------------------------------------
-// MODULE 14: Contact & Business Details Editor
-// -------------------------------------------------------------
-function ContactEditorModule({ site, showSaved }) {
-  const [contact, setContact] = useState(site.contact);
-
-  const handleSave = (e) => {
-    e.preventDefault();
-    site.update("contact", contact);
-    showSaved();
-  };
-
-  return (
-    <form onSubmit={handleSave} className="glass-card rounded-3xl p-6 sm:p-8 border border-border space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-border/50">
-        <div>
-          <h3 className="font-display text-xl text-ink font-semibold">Contact Details &amp; Business Address</h3>
-          <p className="text-xs text-muted-foreground mt-0.5">Manage phone numbers, WhatsApp, official email, and physical studio address</p>
-        </div>
-        <ModuleRefreshButton site={site} showSaved={showSaved} label="Refresh Contact" />
-      </div>
-
-      <div className="grid sm:grid-cols-2 gap-4 text-xs">
-        <div>
-          <label className="font-medium text-foreground block mb-1">Business Name</label>
-          <input
-            type="text"
-            value={contact.business}
-            onChange={(e) => setContact({ ...contact, business: e.target.value })}
-            className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground"
-          />
-        </div>
-        <div>
-          <label className="font-medium text-foreground block mb-1">Business Owner / Founder</label>
-          <input
-            type="text"
-            value={contact.owner}
-            onChange={(e) => setContact({ ...contact, owner: e.target.value })}
-            className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground"
-          />
-        </div>
-        <div>
-          <label className="font-medium text-foreground block mb-1">Phone Number</label>
-          <input
-            type="text"
-            value={contact.phone}
-            onChange={(e) => setContact({ ...contact, phone: e.target.value })}
-            className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground"
-          />
-        </div>
-        <div>
-          <label className="font-medium text-foreground block mb-1">WhatsApp Number (e.g. 919850983389)</label>
-          <input
-            type="text"
-            value={contact.whatsapp}
-            onChange={(e) => setContact({ ...contact, whatsapp: e.target.value })}
-            className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground"
-          />
-        </div>
-        <div>
-          <label className="font-medium text-foreground block mb-1">Email Address</label>
-          <input
-            type="email"
-            value={contact.email}
-            onChange={(e) => setContact({ ...contact, email: e.target.value })}
-            className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground"
-          />
-        </div>
-        <div>
-          <label className="font-medium text-foreground block mb-1">Instagram URL</label>
-          <input
-            type="text"
-            value={contact.instagram}
-            onChange={(e) => setContact({ ...contact, instagram: e.target.value })}
-            className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-3 pt-2 text-xs">
-        <h4 className="font-semibold text-ink">Physical Studio Address</h4>
-        <div className="grid sm:grid-cols-2 gap-3">
-          <input
-            type="text"
-            placeholder="Address Line 1"
-            value={contact.address?.line1}
-            onChange={(e) =>
-              setContact({
-                ...contact,
-                address: { ...contact.address, line1: e.target.value },
-              })
-            }
-            className="rounded-xl border border-border bg-card px-3 py-2 text-sm"
-          />
-          <input
-            type="text"
-            placeholder="Address Line 2"
-            value={contact.address?.line2}
-            onChange={(e) =>
-              setContact({
-                ...contact,
-                address: { ...contact.address, line2: e.target.value },
-              })
-            }
-            className="rounded-xl border border-border bg-card px-3 py-2 text-sm"
-          />
-          <input
-            type="text"
-            placeholder="City"
-            value={contact.address?.city}
-            onChange={(e) =>
-              setContact({
-                ...contact,
-                address: { ...contact.address, city: e.target.value },
-              })
-            }
-            className="rounded-xl border border-border bg-card px-3 py-2 text-sm"
-          />
-          <input
-            type="text"
-            placeholder="Pincode"
-            value={contact.address?.pincode}
-            onChange={(e) =>
-              setContact({
-                ...contact,
-                address: { ...contact.address, pincode: e.target.value },
-              })
-            }
-            className="rounded-xl border border-border bg-card px-3 py-2 text-sm"
-          />
-        </div>
-      </div>
-
-      <button type="submit" className="btn-luxe gradient-royal text-primary-foreground text-xs">
-        <Save className="h-4 w-4" />
-        <span>Save Contact Details</span>
-      </button>
-    </form>
   );
 }
 

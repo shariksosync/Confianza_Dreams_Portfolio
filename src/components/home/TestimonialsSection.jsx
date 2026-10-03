@@ -6,10 +6,15 @@ import { Star, Quote, MapPin, Calendar, ArrowRight } from "lucide-react";
 import { useSite } from "../../context/SiteContext";
 import SectionHeading from "../ui/SectionHeading";
 
-export default function TestimonialsSection() {
+export default function TestimonialsSection({ showOnlyPortfolio = true }) {
   const { testimonials, testimonialsHeader } = useSite();
 
-  const reviews = testimonials || [];
+  const allReviews = testimonials || [];
+  const reviews = showOnlyPortfolio
+    ? allReviews.filter((t) => Boolean(t.showOnPortfolio))
+    : allReviews;
+
+  const displayedReviews = reviews.slice(0, 4);
 
   return (
     <section id="testimonials" className="section-pad relative bg-background overflow-hidden">
@@ -26,12 +31,16 @@ export default function TestimonialsSection() {
         {reviews.length === 0 ? (
           <div className="mt-14 glass-card rounded-3xl p-10 text-center text-muted-foreground border border-border transition-all duration-300">
             <Quote className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
-            <h3 className="font-display text-lg text-ink font-semibold">No Testimonials Yet</h3>
-            <p className="text-xs text-muted-foreground mt-1">Client reviews will appear here once added in the admin panel.</p>
+            <h3 className="font-display text-lg text-ink font-semibold">
+              No Featured Testimonials Selected
+            </h3>
+            <p className="text-xs text-muted-foreground mt-1 max-w-md mx-auto">
+              Select client stories in the Admin Panel by ticking &ldquo;Show on Homepage &amp; Portfolio (Words of Gratitude)&rdquo; to feature them here.
+            </p>
           </div>
         ) : (
           <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4 transition-all duration-300">
-            {reviews.map((rev, idx) => (
+            {displayedReviews.map((rev, idx) => (
               <div
                 key={rev.id || idx}
                 className="glass-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between transition-all duration-500 hover:-translate-y-2 hover:shadow-luxe border border-border/80"
@@ -87,9 +96,9 @@ export default function TestimonialsSection() {
           <div className="reveal mt-12 text-center">
             <Link
               href="/testimonials"
-              className="btn-luxe gradient-royal text-primary-foreground text-xs shadow-luxe"
+              className="btn-luxe gradient-royal text-primary-foreground text-xs shadow-luxe py-3.5 px-8 inline-flex items-center gap-2 hover:scale-105 transition font-semibold tracking-wider uppercase"
             >
-              <span>Read More Couple Stories &amp; Highlights</span>
+              <span>Explore All Love Stories &amp; Reviews</span>
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>

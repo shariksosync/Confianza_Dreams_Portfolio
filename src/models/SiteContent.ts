@@ -192,15 +192,20 @@ const SiteContentSchema = new Schema(
     },
     instagram: [
       {
-        id: { type: Number },
-        image: { type: String },
-        likes: { type: Number },
+        id: { type: Schema.Types.Mixed, required: true },
+        image: { type: String, required: true },
+        likes: { type: Number, default: 0 },
+        caption: { type: String, default: "" },
+        url: { type: String, default: "" },
       },
     ],
     serviceCategories: [
       {
         id: { type: String, required: true },
-        label: { type: String, required: true },
+        label: { type: String },
+        name: { type: String },
+        slug: { type: String },
+        order: { type: Number, default: 0 },
       },
     ],
     ceremonies: [

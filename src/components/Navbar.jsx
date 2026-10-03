@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, Sun, Moon } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 import { useSite } from "../context/SiteContext";
 import EnquiryModal from "./EnquiryModal";
@@ -20,7 +20,7 @@ const LINKS = [
 
 /** Modern luxury navbar styled like reference with prominent large logo, active pill tabs, and glowing Enquire Now button. */
 export default function Navbar() {
-  const { settings, theme, setTheme } = useSite();
+  const { settings } = useSite();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [enquiryOpen, setEnquiryOpen] = useState(false);
@@ -32,8 +32,6 @@ export default function Navbar() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  const isDarkTheme = theme === "luxury";
 
   // Sleek dark bar with backdrop blur matching reference
   const headerClass = scrolled
@@ -96,23 +94,8 @@ export default function Navbar() {
             })}
           </ul>
 
-          {/* Right Actions: Enquire Now glowing button + Theme Toggle + Mobile Hamburger */}
+          {/* Right Actions: Enquire Now glowing button + Mobile Hamburger */}
           <div className="flex items-center gap-3 shrink-0">
-            {/* Theme Toggle */}
-            <button
-              type="button"
-              aria-label="Toggle luxury theme"
-              onClick={() => setTheme(theme === "luxury" ? "light" : "luxury")}
-              className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/20 bg-white/10 text-white hover:border-secondary hover:text-secondary transition backdrop-blur-md"
-              title={theme === "luxury" ? "Switch to Light Ivory Theme" : "Switch to Dark Royale Theme"}
-            >
-              {theme === "luxury" ? (
-                <Sun className="h-4 w-4 text-secondary" />
-              ) : (
-                <Moon className="h-4 w-4" />
-              )}
-            </button>
-
             {/* Glowing • Enquire Now Pill Button (Opens Modal) */}
             <button
               type="button"

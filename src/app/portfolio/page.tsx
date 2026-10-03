@@ -39,7 +39,7 @@ export default function PortfolioPage() {
   return (
     <SiteLayout revealKey="portfolio-page">
       {/* 1. Dynamic Hero Banner */}
-      <section className="relative bg-ink pt-32 pb-20 sm:pt-40 sm:pb-24 text-background overflow-hidden">
+      <section className="relative bg-ink pt-36 pb-20 sm:pt-40 lg:pt-44 sm:pb-24 text-background overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-25">
           <img
             src={header.image || "/images/hero-2.jpg"}
@@ -89,8 +89,8 @@ export default function PortfolioPage() {
       {/* 2. Main Portfolio Grid with Categories Filter, Search & Lightbox */}
       <PortfolioSection isStandalone={true} />
 
-      {/* 3. Words of Gratitude (Client Testimonials & Stories) */}
-      <TestimonialsSection />
+      {/* 3. Words of Gratitude (Client Testimonials & Stories - Only Selected Portfolio Testimonials) */}
+      <TestimonialsSection showOnlyPortfolio={true} />
 
       {/* 4. Private Consultation CTA Banner */}
       <section className="relative py-20 px-4 sm:px-6 lg:px-8 bg-ink text-background overflow-hidden border-t border-white/10">

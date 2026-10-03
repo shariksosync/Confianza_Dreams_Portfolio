@@ -1,8 +1,9 @@
 import mongoose, { Schema, model, models, Model, Document } from "mongoose";
 
 export interface IService extends Document {
-  id: string;
+  id: any;
   title: string;
+  category: string;
   description: string;
   image: string;
   features: string[];
@@ -12,15 +13,16 @@ export interface IService extends Document {
 
 const ServiceSchema = new Schema<IService>(
   {
-    id: { type: String, required: true, unique: true },
+    id: { type: Schema.Types.Mixed, required: true },
     title: { type: String, required: true },
+    category: { type: String, default: "Signature Planning & Direction" },
     description: { type: String, required: true },
     image: { type: String, required: true },
     features: { type: [String], default: [] },
     badge: { type: String, default: "Specialized Craft" },
     order: { type: Number, default: 0 },
   },
-  { timestamps: true }
+  { timestamps: true, strict: false }
 );
 
 export const Service: Model<IService> =

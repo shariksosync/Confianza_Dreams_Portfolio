@@ -9,7 +9,7 @@ export default function PackagesPage() {
   return (
     <SiteLayout revealKey="packages-page">
       {/* Hero Banner */}
-      <section className="relative bg-ink pt-32 pb-20 sm:pt-40 sm:pb-24 text-background overflow-hidden">
+      <section className="relative bg-ink pt-36 pb-20 sm:pt-40 lg:pt-44 sm:pb-24 text-background overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-25">
           <img
             src="/images/stage.jpg"

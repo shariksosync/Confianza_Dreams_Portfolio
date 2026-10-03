@@ -59,6 +59,7 @@ export async function GET(req: Request) {
       portfolioHeader: base.portfolioHeader || {},
       portfolioSection: base.portfolioSection || {},
       portfolioCategories: base.portfolioCategories || [],
+      portfolioCta: base.portfolioCta || {},
       gallery: gallery || [],
       galleryHeader: base.galleryHeader || {},
       galleryCategories: base.galleryCategories || [],
@@ -121,6 +122,7 @@ export async function PUT(req: Request) {
             return {
               ...cleanV,
               id: String(cleanV.id || `service-${Date.now()}-${idx}`),
+              category: cleanV.category || "Signature Planning & Direction",
               order: idx + 1,
             };
           })
@@ -177,6 +179,7 @@ export async function PUT(req: Request) {
             return {
               ...cleanV,
               id: String(cleanV.id || Date.now() + idx),
+              showOnPortfolio: Boolean(cleanV.showOnPortfolio),
               order: idx + 1,
             };
           })
