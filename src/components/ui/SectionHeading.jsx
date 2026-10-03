@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 /** Shared eyebrow + title + subtitle block used by every section. */
 export default function SectionHeading({ eyebrow, title, subtitle, align = "center", light = false }) {
@@ -15,7 +15,7 @@ export default function SectionHeading({ eyebrow, title, subtitle, align = "cent
         </span>
       )}
       <h2
-        className={`max-w-3xl text-3xl leading-tight sm:text-4xl lg:text-5xl ${
+        className={`max-w-3xl font-display text-2xl leading-tight sm:text-3xl md:text-4xl lg:text-5xl ${
           light ? "text-background" : "text-ink"
         }`}
       >
@@ -24,7 +24,7 @@ export default function SectionHeading({ eyebrow, title, subtitle, align = "cent
       <span className="rule-gold" />
       {subtitle && (
         <p
-          className={`max-w-2xl text-sm leading-relaxed sm:text-base ${
+          className={`max-w-2xl text-xs leading-relaxed sm:text-sm md:text-base ${
             light ? "text-background/75" : "text-muted-foreground"
           }`}
         >

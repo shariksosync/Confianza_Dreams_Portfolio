@@ -19,7 +19,7 @@ export default function AboutPage() {
   return (
     <SiteLayout revealKey="about-page">
       {/* 1. Hero Header Banner */}
-      <section className="relative bg-ink pt-36 pb-20 sm:pt-40 lg:pt-44 sm:pb-24 text-background overflow-hidden">
+      <section className="relative bg-ink pt-28 pb-14 sm:pt-36 sm:pb-20 lg:pt-44 lg:pb-24 text-background overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-25">
           <img
             src={about?.headerBanner?.image || "/images/hero-1.jpg"}
@@ -29,16 +29,16 @@ export default function AboutPage() {
           <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/85 to-ink/50" />
         </div>
 
-        <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8 lg:px-10 text-center">
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-1 text-xs uppercase tracking-[0.32em] text-secondary font-medium backdrop-blur-md">
-            <Sparkles className="h-3.5 w-3.5 text-secondary" />
+        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 text-center">
+          <span className="inline-flex items-center gap-1.5 sm:gap-2 rounded-full bg-white/10 border border-white/20 px-3.5 sm:px-4 py-1 text-[0.65rem] sm:text-xs uppercase tracking-[0.25em] sm:tracking-[0.32em] text-secondary font-semibold backdrop-blur-md">
+            <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-secondary" />
             <span>{about?.headerBanner?.badge || "Since 2018 • Warje, Pune"}</span>
           </span>
-          <h1 className="mt-4 font-display text-4xl sm:text-5xl lg:text-6xl text-background font-normal">
+          <h1 className="mt-2.5 sm:mt-4 font-display text-3xl sm:text-5xl lg:text-6xl text-background font-normal leading-tight">
             {about?.headerBanner?.title || about?.heading || "Where Weddings Become Stories"}
           </h1>
-          <div className="rule-gold mx-auto my-5" />
-          <p className="mx-auto max-w-2xl text-sm sm:text-base text-background/80 font-light leading-relaxed">
+          <div className="rule-gold mx-auto my-4 sm:my-5" />
+          <p className="mx-auto max-w-2xl text-xs sm:text-sm lg:text-base text-background/80 font-light leading-relaxed px-2">
             {about?.headerBanner?.subtitle ||
               about?.story ||
               "At Confianza, we're the romantic and elegant wedding experts who bring love stories to life with passion and precision. For us, your event is no less than our own."}
@@ -71,25 +71,27 @@ export default function AboutPage() {
       <PartnerMarqueeSection />
 
       {/* Bottom Consultation Booking CTA */}
-      <section className="relative bg-ink py-20 text-background overflow-hidden text-center border-t border-white/10">
-        <div className="relative z-10 mx-auto max-w-3xl px-5">
-          <span className="text-[0.68rem] uppercase tracking-[0.3em] text-secondary font-medium">
+      <section className="relative bg-ink py-14 sm:py-20 text-background overflow-hidden text-center border-t border-white/10">
+        <div className="relative z-10 mx-auto max-w-3xl px-4 sm:px-6">
+          <span className="text-[0.65rem] sm:text-[0.68rem] uppercase tracking-[0.25em] sm:tracking-[0.3em] text-secondary font-semibold">
             Begin With A Conversation
           </span>
-          <h2 className="mt-2 font-display text-3xl sm:text-4xl text-background">
+          <h2 className="mt-2 font-display text-2xl sm:text-3xl lg:text-4xl text-background font-normal leading-tight">
             Let's Plan Your Wedding Story Together
           </h2>
-          <div className="rule-gold mx-auto my-4" />
-          <p className="text-sm text-background/80 font-light leading-relaxed mb-8">
+          <div className="rule-gold mx-auto my-3 sm:my-4" />
+          <p className="text-xs sm:text-sm text-background/80 font-light leading-relaxed mb-6 sm:mb-8 max-w-xl mx-auto px-2">
             Schedule an in-person meeting at our Pune studio or connect with us over a call to review your dates and preliminary mood boards.
           </p>
-          <Link
-            href="/contact"
-            className="btn-luxe gradient-gold text-ink font-semibold shadow-luxe"
-          >
-            <span>Book Consultation With Ashish</span>
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+          <div className="flex justify-center">
+            <Link
+              href="/contact"
+              className="btn-luxe gradient-gold text-ink font-semibold shadow-luxe py-3 px-6 sm:px-8 text-xs uppercase tracking-wider flex items-center justify-center gap-2 w-full sm:w-auto"
+            >
+              <span>Book Consultation With Ashish</span>
+              <ArrowRight className="h-4 w-4 shrink-0" />
+            </Link>
+          </div>
         </div>
       </section>
     </SiteLayout>

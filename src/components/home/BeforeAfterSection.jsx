@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { Sparkles, SlidersHorizontal, ArrowLeftRight } from "lucide-react";
@@ -21,11 +21,11 @@ export default function BeforeAfterSection() {
         />
 
         {/* View Mode Controls */}
-        <div className="reveal mt-8 flex justify-center gap-2">
+        <div className="reveal mt-6 sm:mt-8 flex flex-wrap justify-center gap-1.5 sm:gap-2.5">
           <button
             type="button"
             onClick={() => setMode("slider")}
-            className={`rounded-full px-4 py-1.5 text-xs font-medium uppercase tracking-wider transition ${
+            className={`rounded-full px-3 sm:px-4 py-1 sm:py-1.5 text-[0.68rem] sm:text-xs font-medium uppercase tracking-wider transition cursor-pointer ${
               mode === "slider"
                 ? "gradient-royal text-primary-foreground shadow-luxe"
                 : "glass-card text-muted-foreground hover:text-foreground"
@@ -36,7 +36,7 @@ export default function BeforeAfterSection() {
           <button
             type="button"
             onClick={() => setMode("before")}
-            className={`rounded-full px-4 py-1.5 text-xs font-medium uppercase tracking-wider transition ${
+            className={`rounded-full px-3 sm:px-4 py-1 sm:py-1.5 text-[0.68rem] sm:text-xs font-medium uppercase tracking-wider transition cursor-pointer ${
               mode === "before"
                 ? "gradient-royal text-primary-foreground shadow-luxe"
                 : "glass-card text-muted-foreground hover:text-foreground"
@@ -47,7 +47,7 @@ export default function BeforeAfterSection() {
           <button
             type="button"
             onClick={() => setMode("after")}
-            className={`rounded-full px-4 py-1.5 text-xs font-medium uppercase tracking-wider transition ${
+            className={`rounded-full px-3 sm:px-4 py-1 sm:py-1.5 text-[0.68rem] sm:text-xs font-medium uppercase tracking-wider transition cursor-pointer ${
               mode === "after"
                 ? "gradient-royal text-primary-foreground shadow-luxe"
                 : "glass-card text-muted-foreground hover:text-foreground"
@@ -58,8 +58,8 @@ export default function BeforeAfterSection() {
         </div>
 
         {/* Interactive Comparison Container */}
-        <div className="reveal mt-10 mx-auto max-w-5xl">
-          <div className="relative h-[340px] sm:h-[480px] md:h-[540px] w-full select-none overflow-hidden rounded-3xl border border-primary/20 shadow-luxe">
+        <div className="reveal mt-8 sm:mt-10 mx-auto max-w-5xl">
+          <div className="relative h-[280px] sm:h-[420px] md:h-[500px] w-full select-none overflow-hidden rounded-2xl sm:rounded-3xl border border-primary/20 shadow-luxe">
             {mode === "slider" ? (
               <>
                 {/* Background (After) Image */}
@@ -68,7 +68,7 @@ export default function BeforeAfterSection() {
                   alt="After: Luxury Wedding Decor"
                   className="absolute inset-0 h-full w-full object-cover"
                 />
-                <div className="absolute top-5 right-5 rounded-full bg-ink/75 px-3.5 py-1 text-[0.7rem] uppercase tracking-wider text-secondary font-medium backdrop-blur-md border border-secondary/30">
+                <div className="absolute top-3 sm:top-5 right-3 sm:right-5 rounded-full bg-ink/75 px-2.5 sm:px-3.5 py-0.5 sm:py-1 text-[0.62rem] sm:text-[0.7rem] uppercase tracking-wider text-secondary font-medium backdrop-blur-md border border-secondary/30 whitespace-nowrap">
                   After: Grand Reception
                 </div>
 
@@ -84,7 +84,7 @@ export default function BeforeAfterSection() {
                     alt="Before: Raw Venue Space"
                     className="absolute inset-0 h-full w-full object-cover filter brightness-90"
                   />
-                  <div className="absolute top-5 left-5 rounded-full bg-ink/75 px-3.5 py-1 text-[0.7rem] uppercase tracking-wider text-background font-medium backdrop-blur-md border border-white/20">
+                  <div className="absolute top-3 sm:top-5 left-3 sm:left-5 rounded-full bg-ink/75 px-2.5 sm:px-3.5 py-0.5 sm:py-1 text-[0.62rem] sm:text-[0.7rem] uppercase tracking-wider text-background font-medium backdrop-blur-md border border-white/20 whitespace-nowrap">
                     Before: Raw Banquet
                   </div>
                 </div>
@@ -95,8 +95,8 @@ export default function BeforeAfterSection() {
                   style={{ left: `${sliderPosition}%` }}
                 >
                   {/* Draggable Circle Handle */}
-                  <div className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full gradient-gold text-ink shadow-luxe ring-4 ring-ink/30 cursor-ew-resize">
-                    <ArrowLeftRight className="h-4 w-4" />
+                  <div className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 grid h-8 w-8 sm:h-10 sm:w-10 place-items-center rounded-full gradient-gold text-ink shadow-luxe ring-4 ring-ink/30 cursor-ew-resize">
+                    <ArrowLeftRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   </div>
                 </div>
 
@@ -118,7 +118,7 @@ export default function BeforeAfterSection() {
                   alt="Before Decor Setup"
                   className="h-full w-full object-cover"
                 />
-                <div className="absolute top-5 left-5 rounded-full bg-ink/75 px-4 py-1.5 text-xs uppercase tracking-wider text-background backdrop-blur-md">
+                <div className="absolute top-3 sm:top-5 left-3 sm:left-5 rounded-full bg-ink/75 px-3 sm:px-4 py-1 sm:py-1.5 text-[0.68rem] sm:text-xs uppercase tracking-wider text-background backdrop-blur-md whitespace-nowrap">
                   Raw Space Before Work
                 </div>
               </div>
@@ -129,7 +129,7 @@ export default function BeforeAfterSection() {
                   alt="After Confianza Luxury Decor"
                   className="h-full w-full object-cover"
                 />
-                <div className="absolute top-5 right-5 rounded-full gradient-gold px-4 py-1.5 text-xs uppercase tracking-wider text-ink font-semibold backdrop-blur-md">
+                <div className="absolute top-3 sm:top-5 right-3 sm:right-5 rounded-full gradient-gold px-3 sm:px-4 py-1 sm:py-1.5 text-[0.68rem] sm:text-xs uppercase tracking-wider text-ink font-semibold backdrop-blur-md whitespace-nowrap">
                   Final Masterpiece
                 </div>
               </div>
@@ -137,29 +137,29 @@ export default function BeforeAfterSection() {
           </div>
 
           {/* Metrics summary */}
-          <div className="reveal mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <div className="glass-card rounded-2xl p-4 text-center">
-              <span className="font-display text-xl text-primary font-bold">11 Hours</span>
-              <p className="text-[0.7rem] uppercase tracking-wider text-muted-foreground mt-0.5">
+          <div className="reveal mt-6 sm:mt-8 grid grid-cols-2 gap-2.5 sm:gap-4 sm:grid-cols-4">
+            <div className="glass-card rounded-2xl p-3.5 sm:p-4 text-center">
+              <span className="font-display text-lg sm:text-xl text-primary font-bold">11 Hours</span>
+              <p className="text-[0.62rem] sm:text-[0.7rem] uppercase tracking-wider text-muted-foreground mt-0.5 leading-snug">
                 Overnight Build
               </p>
             </div>
-            <div className="glass-card rounded-2xl p-4 text-center">
-              <span className="font-display text-xl text-secondary font-bold">4,000+</span>
-              <p className="text-[0.7rem] uppercase tracking-wider text-muted-foreground mt-0.5">
+            <div className="glass-card rounded-2xl p-3.5 sm:p-4 text-center">
+              <span className="font-display text-lg sm:text-xl text-secondary font-bold">4,000+</span>
+              <p className="text-[0.62rem] sm:text-[0.7rem] uppercase tracking-wider text-muted-foreground mt-0.5 leading-snug">
                 Fresh Exotic Stems
               </p>
             </div>
-            <div className="glass-card rounded-2xl p-4 text-center">
-              <span className="font-display text-xl text-primary font-bold">100% Custom</span>
-              <p className="text-[0.7rem] uppercase tracking-wider text-muted-foreground mt-0.5">
+            <div className="glass-card rounded-2xl p-3.5 sm:p-4 text-center">
+              <span className="font-display text-lg sm:text-xl text-primary font-bold">100% Custom</span>
+              <p className="text-[0.62rem] sm:text-[0.7rem] uppercase tracking-wider text-muted-foreground mt-0.5 leading-snug">
                 Fabricated Stage &amp; Drapes
               </p>
             </div>
-            <div className="glass-card rounded-2xl p-4 text-center">
-              <span className="font-display text-xl text-secondary font-bold">36 Specialists</span>
-              <p className="text-[0.7rem] uppercase tracking-wider text-muted-foreground mt-0.5">
-                On-Ground Production Crew
+            <div className="glass-card rounded-2xl p-3.5 sm:p-4 text-center">
+              <span className="font-display text-lg sm:text-xl text-secondary font-bold">36 Specialists</span>
+              <p className="text-[0.62rem] sm:text-[0.7rem] uppercase tracking-wider text-muted-foreground mt-0.5 leading-snug">
+                On-Ground Crew
               </p>
             </div>
           </div>

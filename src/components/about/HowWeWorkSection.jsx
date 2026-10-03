@@ -54,35 +54,35 @@ export default function HowWeWorkSection() {
 
   return (
     <section className="section-pad relative bg-background overflow-hidden border-t border-border/60">
-      <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
         <SectionHeading
           eyebrow="Our 3-Phase Luxury Roadmap"
           title="How Do We Work"
           subtitle="From your initial 60–90 minute vision consultation to flawless on-ground show running, here is our transparent, stress-free execution process."
         />
 
-        <div className="reveal mt-16 space-y-8">
+        <div className="reveal mt-10 sm:mt-16 space-y-6 sm:space-y-8">
           {steps.map((step, idx) => {
             const Icon = step.icon;
             const isEven = idx % 2 === 1;
             return (
               <div
                 key={step.num}
-                className="glass-card rounded-3xl p-6 sm:p-8 lg:p-10 border border-border/80 shadow-soft transition-all duration-500 hover:shadow-luxe hover:border-primary/40 relative overflow-hidden"
+                className="glass-card rounded-2xl sm:rounded-3xl p-5 sm:p-8 lg:p-10 border border-border/80 shadow-soft transition-all duration-500 hover:shadow-luxe hover:border-primary/40 relative overflow-hidden"
               >
-                <div className="grid gap-8 lg:grid-cols-12 lg:items-center">
+                <div className="grid gap-6 lg:gap-8 lg:grid-cols-12 lg:items-center">
                   {/* Left: Step Number & Icon */}
-                  <div className="lg:col-span-4 flex items-center gap-5">
+                  <div className="lg:col-span-4 flex items-center gap-4 sm:gap-5">
                     <div className="relative">
-                      <span className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gold-gradient block">
+                      <span className="font-display text-3xl sm:text-5xl lg:text-6xl font-extrabold text-gold-gradient block">
                         {step.num}
                       </span>
                     </div>
                     <div>
-                      <span className="text-[0.68rem] uppercase tracking-widest text-primary font-bold block">
+                      <span className="text-[0.62rem] sm:text-[0.68rem] uppercase tracking-widest text-primary font-bold block">
                         {step.timeline}
                       </span>
-                      <h3 className="font-display text-xl sm:text-2xl text-ink font-bold mt-1">
+                      <h3 className="font-display text-lg sm:text-2xl text-ink font-bold mt-0.5 sm:mt-1">
                         {step.title}
                       </h3>
                     </div>
@@ -97,14 +97,14 @@ export default function HowWeWorkSection() {
 
                   {/* Right: Key Deliverables */}
                   {Array.isArray(step.deliverables) && step.deliverables.length > 0 && (
-                    <div className="lg:col-span-3 rounded-2xl bg-card/80 p-4 border border-border/60 text-xs space-y-2">
-                      <span className="text-[0.65rem] uppercase tracking-wider text-secondary font-bold block mb-1">
+                    <div className="lg:col-span-3 rounded-xl sm:rounded-2xl bg-card/80 p-3.5 sm:p-4 border border-border/60 text-xs space-y-2">
+                      <span className="text-[0.62rem] sm:text-[0.65rem] uppercase tracking-wider text-secondary font-bold block mb-1">
                         Key Deliverables:
                       </span>
                       {step.deliverables.map((item, dIdx) => (
                         <div key={dIdx} className="flex items-start gap-2 text-foreground/85">
                           <CheckCircle2 className="h-3.5 w-3.5 text-secondary shrink-0 mt-0.5" />
-                          <span className="text-[0.72rem] leading-tight">{item}</span>
+                          <span className="text-[0.68rem] sm:text-[0.72rem] leading-tight">{item}</span>
                         </div>
                       ))}
                     </div>

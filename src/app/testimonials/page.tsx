@@ -347,7 +347,7 @@ export default function TestimonialsPage() {
   return (
     <SiteLayout revealKey="testimonials-page">
       {/* 1. Dynamic Hero Banner */}
-      <section className="relative bg-ink pt-36 pb-20 sm:pt-40 lg:pt-44 sm:pb-24 text-background overflow-hidden">
+      <section className="relative bg-ink pt-28 pb-14 sm:pt-36 sm:pb-20 lg:pt-44 lg:pb-24 text-background overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-25">
           <img
             src={header.image || "https://res.cloudinary.com/tridevsosync/image/upload/v1790838224/confianza_portfolio/portfolio_hero_banner.jpg"}
@@ -357,52 +357,52 @@ export default function TestimonialsPage() {
           <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/80 to-ink/40" />
         </div>
 
-        <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8 lg:px-10 text-center">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/20 px-3.5 py-1 text-[0.68rem] uppercase tracking-[0.3em] text-secondary font-medium backdrop-blur-md">
+        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 text-center">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/20 px-3.5 py-1 text-[0.65rem] sm:text-[0.68rem] uppercase tracking-[0.25em] sm:tracking-[0.3em] text-secondary font-semibold backdrop-blur-md">
             <Sparkles className="h-3 w-3 text-secondary" />
             <span>{header.badge || "Couples & Families"}</span>
           </span>
 
-          <h1 className="mt-4 font-display text-4xl sm:text-5xl lg:text-6xl text-background font-normal">
+          <h1 className="mt-2.5 sm:mt-4 font-display text-3xl sm:text-5xl lg:text-6xl text-background font-normal leading-tight">
             {header.title || "Testimonials & Love Stories"}
           </h1>
 
-          <div className="rule-gold mx-auto my-5" />
+          <div className="rule-gold mx-auto my-4 sm:my-5" />
 
-          <p className="mx-auto max-w-2xl text-sm sm:text-base text-background/85 font-light leading-relaxed">
+          <p className="mx-auto max-w-2xl text-xs sm:text-sm lg:text-base text-background/85 font-light leading-relaxed px-2">
             {header.subtitle ||
               "Read first-hand accounts of couples and families who entrusted their most sacred wedding milestones to Confianza's aesthetic vision and care."}
           </p>
 
           {/* Dual Action CTA Buttons in Hero */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+          <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 max-w-md sm:max-w-none mx-auto w-full sm:w-auto">
             <button
               type="button"
               onClick={openSubmissionModal}
-              className="btn-luxe gradient-gold text-ink font-bold shadow-luxe py-3 px-7 text-xs tracking-wider uppercase flex items-center gap-2 cursor-pointer transition hover:scale-105"
+              className="btn-luxe gradient-gold text-ink font-bold shadow-luxe py-2.5 sm:py-3 px-6 sm:px-7 text-xs tracking-wider uppercase flex items-center justify-center gap-2 cursor-pointer transition hover:scale-105 w-full sm:w-auto"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4 shrink-0" />
               <span>Share Your Love Story</span>
             </button>
 
             <Link
               href="/contact"
-              className="btn-luxe bg-white/10 text-white border border-white/25 hover:bg-white/20 text-xs py-3 px-7 uppercase tracking-wider font-semibold transition"
+              className="btn-luxe bg-white/10 text-white border border-white/25 hover:bg-white/20 text-xs py-2.5 sm:py-3 px-6 sm:px-7 uppercase tracking-wider font-semibold transition flex items-center justify-center gap-2 w-full sm:w-auto"
             >
               <span>Book A Consultation</span>
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 shrink-0" />
             </Link>
           </div>
 
           {/* Dynamic Trust Metric Tags */}
           {Array.isArray(header.stats) && header.stats.length > 0 && (
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-2.5 sm:gap-3.5">
+            <div className="mt-6 sm:mt-10 flex flex-wrap items-center justify-center gap-2 sm:gap-3 max-w-2xl mx-auto">
               {header.stats.map((stat: string, sIdx: number) => (
                 <span
                   key={sIdx}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-4 py-1.5 text-xs text-champagne backdrop-blur-md border border-white/15 shadow-sm font-medium"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-full bg-white/10 px-3 sm:px-4 py-1 sm:py-1.5 text-[0.7rem] sm:text-xs text-champagne backdrop-blur-md border border-white/15 shadow-sm font-medium text-center"
                 >
-                  <span className="h-1.5 w-1.5 rounded-full bg-secondary" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-secondary shrink-0" />
                   <span>{stat}</span>
                 </span>
               ))}
@@ -412,43 +412,43 @@ export default function TestimonialsPage() {
       </section>
 
       {/* 2. Trust Metrics Highlight Strip */}
-      <section className="bg-primary/5 border-y border-border/80 py-10">
-        <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-            <div className="p-4 rounded-2xl bg-card border border-border/60 shadow-sm">
-              <div className="flex items-center justify-center gap-1 text-secondary mb-1">
+      <section className="bg-primary/5 border-y border-border/80 py-8 sm:py-10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 text-center">
+            <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-card border border-border/60 shadow-sm">
+              <div className="flex items-center justify-center gap-0.5 sm:gap-1 text-secondary mb-1">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} className="h-4 w-4 fill-secondary text-secondary" />
+                  <Star key={i} className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-secondary text-secondary" />
                 ))}
               </div>
-              <div className="font-display text-2xl font-bold text-ink">5.0 / 5.0</div>
-              <div className="text-[0.72rem] text-muted-foreground uppercase tracking-wider font-medium mt-1">
+              <div className="font-display text-xl sm:text-2xl font-bold text-ink">5.0 / 5.0</div>
+              <div className="text-[0.65rem] sm:text-[0.72rem] text-muted-foreground uppercase tracking-wider font-medium mt-1">
                 Couple Satisfaction
               </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-card border border-border/60 shadow-sm">
-              <div className="font-display text-2xl font-bold text-secondary">500+</div>
-              <div className="text-[0.72rem] text-muted-foreground uppercase tracking-wider font-medium mt-1">
+            <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-card border border-border/60 shadow-sm">
+              <div className="font-display text-xl sm:text-2xl font-bold text-secondary">500+</div>
+              <div className="text-[0.65rem] sm:text-[0.72rem] text-muted-foreground uppercase tracking-wider font-medium mt-1">
                 Weddings Managed
               </div>
-              <div className="text-[0.65rem] text-primary font-medium mt-0.5">Across 15+ Cities</div>
+              <div className="text-[0.62rem] sm:text-[0.65rem] text-primary font-medium mt-0.5">Across 15+ Cities</div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-card border border-border/60 shadow-sm">
-              <div className="font-display text-2xl font-bold text-ink">100%</div>
-              <div className="text-[0.72rem] text-muted-foreground uppercase tracking-wider font-medium mt-1">
+            <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-card border border-border/60 shadow-sm">
+              <div className="font-display text-xl sm:text-2xl font-bold text-ink">100%</div>
+              <div className="text-[0.65rem] sm:text-[0.72rem] text-muted-foreground uppercase tracking-wider font-medium mt-1">
                 On-Time Show Runner
               </div>
-              <div className="text-[0.65rem] text-secondary font-medium mt-0.5">Live Cue Execution</div>
+              <div className="text-[0.62rem] sm:text-[0.65rem] text-secondary font-medium mt-0.5">Live Cue Execution</div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-card border border-border/60 shadow-sm">
-              <div className="font-display text-2xl font-bold text-secondary">0%</div>
-              <div className="text-[0.72rem] text-muted-foreground uppercase tracking-wider font-medium mt-1">
+            <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-card border border-border/60 shadow-sm">
+              <div className="font-display text-xl sm:text-2xl font-bold text-secondary">0%</div>
+              <div className="text-[0.65rem] sm:text-[0.72rem] text-muted-foreground uppercase tracking-wider font-medium mt-1">
                 Day-Of Family Stress
               </div>
-              <div className="text-[0.65rem] text-primary font-medium mt-0.5">Shadow Management</div>
+              <div className="text-[0.62rem] sm:text-[0.65rem] text-primary font-medium mt-0.5">Shadow Management</div>
             </div>
           </div>
         </div>
@@ -456,7 +456,7 @@ export default function TestimonialsPage() {
 
       {/* 3. Main Testimonials Showcase & Filters */}
       <section className="section-pad relative bg-background">
-        <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
           <SectionHeading
             eyebrow={header.eyebrow || "Heartfelt Reviews"}
             title="Real Weddings. Lasting Memories."
@@ -464,14 +464,14 @@ export default function TestimonialsPage() {
           />
 
           {/* Filter Bar & Search */}
-          <div className="mt-12 space-y-4">
-            <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+          <div className="mt-8 sm:mt-12 space-y-4">
+            <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 sm:gap-4">
               {/* Category Pills */}
-              <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+              <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-2 scrollbar-none no-scrollbar">
                 <button
                   type="button"
                   onClick={() => setSelectedCategory("All")}
-                  className={`px-4 py-2 rounded-full text-xs font-semibold tracking-wide transition shrink-0 cursor-pointer ${
+                  className={`px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-[0.7rem] sm:text-xs font-semibold tracking-wide transition shrink-0 cursor-pointer ${
                     isAllCategory(selectedCategory)
                       ? "gradient-royal text-primary-foreground shadow-md"
                       : "bg-card border border-border text-foreground hover:bg-muted"
@@ -493,7 +493,7 @@ export default function TestimonialsPage() {
                       key={catName}
                       type="button"
                       onClick={() => setSelectedCategory(catName)}
-                      className={`px-4 py-2 rounded-full text-xs font-medium tracking-wide transition shrink-0 cursor-pointer ${
+                      className={`px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-[0.7rem] sm:text-xs font-medium tracking-wide transition shrink-0 cursor-pointer ${
                         isSelected
                           ? "gradient-royal text-primary-foreground shadow-md font-semibold"
                           : "bg-card border border-border text-foreground hover:bg-muted"
@@ -514,14 +514,14 @@ export default function TestimonialsPage() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search couples, venues..."
-                    className="w-full rounded-xl border border-border bg-card pl-9 pr-3 py-1.5 text-xs focus:border-primary focus:outline-none"
+                    className="w-full rounded-xl border border-border bg-card pl-9 pr-3 py-1.5 sm:py-2 text-xs focus:border-primary focus:outline-none"
                   />
                 </div>
 
                 <select
                   value={selectedRating}
                   onChange={(e) => setSelectedRating(e.target.value)}
-                  className="rounded-xl border border-border bg-card px-3 py-1.5 text-xs text-foreground focus:outline-none cursor-pointer"
+                  className="rounded-xl border border-border bg-card px-3 py-1.5 sm:py-2 text-xs text-foreground focus:outline-none cursor-pointer"
                 >
                   <option value="All">All Ratings</option>
                   <option value="5-star">5 Stars Only ★</option>
@@ -532,23 +532,23 @@ export default function TestimonialsPage() {
 
           {/* Testimonials Grid */}
           {filteredReviews.length > 0 ? (
-            <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-8 sm:mt-10 grid gap-6 sm:gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {filteredReviews.map((rev: any, idx: number) => {
                 const hasVideo = Boolean(rev.videoUrl);
 
                 return (
                   <div
                     key={rev.id || idx}
-                    className="glass-card rounded-3xl p-7 border border-border flex flex-col justify-between transition-all duration-500 hover:-translate-y-2 hover:shadow-luxe group relative overflow-hidden"
+                    className="glass-card rounded-2xl sm:rounded-3xl p-5 sm:p-7 border border-border flex flex-col justify-between transition-all duration-500 hover:-translate-y-2 hover:shadow-luxe group relative overflow-hidden"
                   >
                     {/* Top Section */}
                     <div>
-                      <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center justify-between mb-3 sm:mb-4">
                         <div className="flex items-center gap-1">
                           {Array.from({ length: rev.rating || 5 }).map((_, i) => (
                             <Star
                               key={i}
-                              className="h-4 w-4 fill-secondary text-secondary transition-transform group-hover:scale-110"
+                              className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-secondary text-secondary transition-transform group-hover:scale-110"
                             />
                           ))}
                         </div>
@@ -557,35 +557,35 @@ export default function TestimonialsPage() {
                           <button
                             type="button"
                             onClick={() => setActiveVideoUrl(rev.videoUrl)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full gradient-gold text-ink text-[0.65rem] font-bold shadow-sm hover:scale-105 transition cursor-pointer"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full gradient-gold text-ink text-[0.62rem] sm:text-[0.65rem] font-bold shadow-sm hover:scale-105 transition cursor-pointer"
                           >
                             <Play className="h-3 w-3 fill-ink" />
                             <span>Video Story</span>
                           </button>
                         ) : (
-                          <Quote className="h-7 w-7 text-primary/20" />
+                          <Quote className="h-6 w-6 sm:h-7 sm:w-7 text-primary/20" />
                         )}
                       </div>
 
                       {rev.category && (
-                        <span className="inline-block text-[0.65rem] uppercase tracking-wider text-primary font-semibold mb-2 bg-primary/10 px-2.5 py-0.5 rounded-md">
+                        <span className="inline-block text-[0.62rem] sm:text-[0.65rem] uppercase tracking-wider text-primary font-semibold mb-2 bg-primary/10 px-2.5 py-0.5 rounded-md">
                           {rev.category}
                         </span>
                       )}
 
-                      <p className="text-sm sm:text-base leading-relaxed text-foreground/85 italic">
+                      <p className="text-xs sm:text-sm lg:text-base leading-relaxed text-foreground/85 italic">
                         "{rev.text}"
                       </p>
                     </div>
 
                     {/* Bottom Reviewer Footer */}
-                    <div className="mt-8 pt-6 border-t border-border/60 flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3.5">
+                    <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-border/60 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 sm:gap-3.5">
                         <div className="relative">
                           <img
                             src={rev.image || "https://res.cloudinary.com/tridevsosync/image/upload/v1790838237/confianza_portfolio/testimonial_ananya_rohit_roy.jpg"}
                             alt={rev.name}
-                            className="h-13 w-13 rounded-full object-cover ring-2 ring-secondary/60 shadow-sm"
+                            className="h-11 w-11 sm:h-13 sm:w-13 rounded-full object-cover ring-2 ring-secondary/60 shadow-sm"
                             onError={(e) => {
                               e.currentTarget.src =
                                 "https://res.cloudinary.com/tridevsosync/image/upload/v1790838237/confianza_portfolio/testimonial_ananya_rohit_roy.jpg";
@@ -604,13 +604,13 @@ export default function TestimonialsPage() {
                         </div>
 
                         <div>
-                          <h4 className="font-display text-base font-bold text-ink leading-tight">
+                          <h4 className="font-display text-sm sm:text-base font-bold text-ink leading-tight">
                             {rev.name}
                           </h4>
-                          <span className="text-[0.68rem] text-primary font-medium block">
+                          <span className="text-[0.65rem] sm:text-[0.68rem] text-primary font-medium block">
                             {rev.relationship || "Bride & Groom"}
                           </span>
-                          <div className="flex items-center gap-2 text-[0.65rem] text-muted-foreground mt-0.5">
+                          <div className="flex items-center gap-2 text-[0.62rem] sm:text-[0.65rem] text-muted-foreground mt-0.5">
                             {rev.location && (
                               <span className="flex items-center gap-1">
                                 <MapPin className="h-3 w-3 text-secondary" />
@@ -632,9 +632,9 @@ export default function TestimonialsPage() {
               })}
             </div>
           ) : (
-            <div className="mt-16 text-center py-16 px-6 rounded-3xl bg-card/40 border border-dashed border-border max-w-xl mx-auto space-y-4">
-              <Quote className="w-12 h-12 text-secondary/40 mx-auto" />
-              <h3 className="font-display text-xl text-ink font-semibold">
+            <div className="mt-12 sm:mt-16 text-center py-12 sm:py-16 px-4 sm:px-6 rounded-2xl sm:rounded-3xl bg-card/40 border border-dashed border-border max-w-xl mx-auto space-y-4">
+              <Quote className="w-10 h-10 sm:w-12 sm:h-12 text-secondary/40 mx-auto" />
+              <h3 className="font-display text-lg sm:text-xl text-ink font-semibold">
                 {allApproved.length === 0 ? "0 Testimonials in Database" : "No Matching Stories"}
               </h3>
               <p className="text-xs text-muted-foreground max-w-md mx-auto">
@@ -651,7 +651,7 @@ export default function TestimonialsPage() {
                       setSelectedRating("All");
                       setSearchQuery("");
                     }}
-                    className="px-5 py-2 rounded-full border border-border bg-card text-xs font-semibold text-foreground hover:bg-muted transition cursor-pointer"
+                    className="px-4 sm:px-5 py-2 rounded-full border border-border bg-card text-xs font-semibold text-foreground hover:bg-muted transition cursor-pointer"
                   >
                     Reset Filters
                   </button>
@@ -659,7 +659,7 @@ export default function TestimonialsPage() {
                 <button
                   type="button"
                   onClick={openSubmissionModal}
-                  className="btn-luxe gradient-gold text-ink text-xs font-bold py-2.5 px-6 rounded-full cursor-pointer shadow-sm"
+                  className="btn-luxe gradient-gold text-ink text-xs font-bold py-2.5 px-5 sm:px-6 rounded-full cursor-pointer shadow-sm"
                 >
                   + Submit Your Love Story
                 </button>
@@ -672,21 +672,21 @@ export default function TestimonialsPage() {
       {/* 4. "The Confianza Care Experience" Service Pillars (From PDF) */}
       <section className="section-pad bg-ink text-background relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/20 via-ink to-ink pointer-events-none" />
-        <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
           <div className="text-center max-w-3xl mx-auto">
-            <span className="text-xs uppercase tracking-[0.3em] text-secondary font-bold">
+            <span className="text-[0.65rem] sm:text-xs uppercase tracking-[0.25em] sm:tracking-[0.3em] text-secondary font-bold">
               Why Couples Love Confianza
             </span>
-            <h2 className="mt-3 font-display text-3xl sm:text-4xl text-background font-normal">
+            <h2 className="mt-2.5 sm:mt-3 font-display text-2xl sm:text-3xl lg:text-4xl text-background font-normal leading-tight">
               The Signature Care Experience
             </h2>
-            <div className="rule-gold mx-auto my-4" />
-            <p className="text-sm text-background/80 font-light leading-relaxed">
+            <div className="rule-gold mx-auto my-3 sm:my-4" />
+            <p className="text-xs sm:text-sm text-background/80 font-light leading-relaxed px-2">
               Extracted from our core wedding management ethos, here is how we ensure zero-stress celebrations for every couple and family.
             </p>
           </div>
 
-          <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-10 sm:mt-14 grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {experiencePillars.map((pillar: any, pIdx: number) => {
               const IconComp =
                 pillar.icon === "Users"
@@ -700,21 +700,21 @@ export default function TestimonialsPage() {
               return (
                 <div
                   key={pillar.id || pIdx}
-                  className="rounded-3xl bg-white/5 border border-white/10 p-6 flex flex-col justify-between hover:border-secondary/50 transition-all duration-300 backdrop-blur-sm"
+                  className="rounded-2xl sm:rounded-3xl bg-white/5 border border-white/10 p-5 sm:p-6 flex flex-col justify-between hover:border-secondary/50 transition-all duration-300 backdrop-blur-sm"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <div className="h-10 w-10 rounded-2xl bg-secondary/20 flex items-center justify-center text-secondary">
-                        <IconComp className="h-5 w-5" />
+                      <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl sm:rounded-2xl bg-secondary/20 flex items-center justify-center text-secondary">
+                        <IconComp className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
                       </div>
-                      <span className="text-[0.65rem] text-secondary font-mono uppercase tracking-wider bg-white/10 px-2.5 py-0.5 rounded-full border border-white/15">
+                      <span className="text-[0.62rem] sm:text-[0.65rem] text-secondary font-mono uppercase tracking-wider bg-white/10 px-2.5 py-0.5 rounded-full border border-white/15">
                         {pillar.badge || "Core Standard"}
                       </span>
                     </div>
-                    <h3 className="font-display text-lg font-bold text-white pt-1">
+                    <h3 className="font-display text-base sm:text-lg font-bold text-white pt-1">
                       {pillar.title}
                     </h3>
-                    <p className="text-[0.72rem] text-secondary/90 font-medium">
+                    <p className="text-[0.68rem] sm:text-[0.72rem] text-secondary/90 font-medium">
                       {pillar.subtitle}
                     </p>
                     <p className="text-xs text-background/75 leading-relaxed font-light">
@@ -733,28 +733,28 @@ export default function TestimonialsPage() {
 
       {/* 6. Review Submission FAQ Accordion */}
       <section className="section-pad bg-background">
-        <div className="mx-auto max-w-4xl px-5 sm:px-8 lg:px-10">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-10">
           <SectionHeading
             eyebrow="Review Guidelines"
             title="Frequently Asked Questions"
             subtitle="Everything you need to know about sharing your love story, wedding teaser video, and memories."
           />
 
-          <div className="mt-12 space-y-4">
+          <div className="mt-8 sm:mt-12 space-y-3 sm:space-y-4">
             {faqs.map((faq: any, fIdx: number) => {
               const isOpen = activeFaq === fIdx;
 
               return (
                 <div
                   key={fIdx}
-                  className="rounded-2xl border border-border bg-card overflow-hidden transition"
+                  className="rounded-xl sm:rounded-2xl border border-border bg-card overflow-hidden transition"
                 >
                   <button
                     type="button"
                     onClick={() => setActiveFaq(isOpen ? null : fIdx)}
-                    className="w-full p-5 text-left flex items-center justify-between gap-4 cursor-pointer"
+                    className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-3 sm:gap-4 cursor-pointer"
                   >
-                    <span className="font-display text-base font-semibold text-ink">
+                    <span className="font-display text-sm sm:text-base font-semibold text-ink leading-snug">
                       {faq.question}
                     </span>
                     <ChevronDown
@@ -765,7 +765,7 @@ export default function TestimonialsPage() {
                   </button>
 
                   {isOpen && (
-                    <div className="px-5 pb-5 pt-1 text-xs sm:text-sm text-muted-foreground leading-relaxed border-t border-border/40">
+                    <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-1 text-xs sm:text-sm text-muted-foreground leading-relaxed border-t border-border/40">
                       {faq.answer}
                     </div>
                   )}
@@ -777,55 +777,55 @@ export default function TestimonialsPage() {
       </section>
 
       {/* 7. Bottom Consultation & Submission CTA */}
-      <section className="bg-ink py-20 text-center text-background relative overflow-hidden border-t border-white/10">
+      <section className="bg-ink py-14 sm:py-20 text-center text-background relative overflow-hidden border-t border-white/10">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,_var(--tw-gradient-stops))] from-primary/30 via-ink to-ink pointer-events-none" />
-        <div className="relative z-10 mx-auto max-w-3xl px-5 space-y-5">
-          <span className="text-[0.68rem] uppercase tracking-[0.3em] text-secondary font-bold">
+        <div className="relative z-10 mx-auto max-w-3xl px-4 sm:px-6 space-y-4 sm:space-y-5">
+          <span className="text-[0.65rem] sm:text-[0.68rem] uppercase tracking-[0.25em] sm:tracking-[0.3em] text-secondary font-bold">
             {cta.badge || "Share Your Love Story"}
           </span>
-          <h2 className="font-display text-3xl sm:text-4xl text-background font-normal">
+          <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl text-background font-normal leading-tight">
             {cta.headline || "Were You A Confianza Couple or Guest?"}
           </h2>
           <div className="rule-gold mx-auto my-3" />
-          <p className="text-sm text-background/80 font-light leading-relaxed max-w-xl mx-auto">
+          <p className="text-xs sm:text-sm text-background/80 font-light leading-relaxed max-w-xl mx-auto px-2">
             {cta.subtitle ||
               "We would love to hear your memories, candid moments, and reflections of your celebration."}
           </p>
 
-          <div className="pt-4 flex flex-wrap items-center justify-center gap-4">
+          <div className="pt-2 sm:pt-4 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto">
             <button
               type="button"
               onClick={openSubmissionModal}
-              className="btn-luxe gradient-gold text-ink font-bold shadow-luxe py-3 px-8 text-xs tracking-wider uppercase flex items-center gap-2 cursor-pointer transition hover:scale-105"
+              className="btn-luxe gradient-gold text-ink font-bold shadow-luxe py-2.5 sm:py-3 px-6 sm:px-8 text-xs tracking-wider uppercase flex items-center justify-center gap-2 cursor-pointer transition hover:scale-105 w-full sm:w-auto"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4 shrink-0" />
               <span>{cta.buttonText || "Submit Your Love Story"}</span>
             </button>
 
             <Link
               href="/contact"
-              className="btn-luxe bg-white/10 text-white border border-white/25 hover:bg-white/20 text-xs py-3 px-8 uppercase tracking-wider font-semibold"
+              className="btn-luxe bg-white/10 text-white border border-white/25 hover:bg-white/20 text-xs py-2.5 sm:py-3 px-6 sm:px-8 uppercase tracking-wider font-semibold flex items-center justify-center gap-2 w-full sm:w-auto"
             >
               <span>{cta.secondaryButtonText || "Book A Consultation"}</span>
             </Link>
           </div>
 
           {/* Direct Founders Contact Strip */}
-          <div className="pt-6 border-t border-white/10 flex flex-wrap items-center justify-center gap-6 text-xs text-champagne/80 font-light">
+          <div className="pt-5 sm:pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-xs text-champagne/80 font-light text-center">
             <a
               href="tel:7057357240"
-              className="flex items-center gap-1.5 hover:text-secondary transition"
+              className="flex items-center justify-center gap-1.5 hover:text-secondary transition"
             >
-              <Phone className="h-3.5 w-3.5 text-secondary" />
+              <Phone className="h-3.5 w-3.5 text-secondary shrink-0" />
               <span>Ashish Wankhede: +91 7057357240</span>
             </a>
             <a
               href="https://wa.me/917057357240"
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-1.5 hover:text-secondary transition text-[#25D366]"
+              className="flex items-center justify-center gap-1.5 hover:text-secondary transition text-[#25D366]"
             >
-              <MessageCircle className="h-3.5 w-3.5" />
+              <MessageCircle className="h-3.5 w-3.5 shrink-0" />
               <span>WhatsApp Us Directly</span>
             </a>
           </div>
@@ -836,14 +836,14 @@ export default function TestimonialsPage() {
       {/* 8. INTERACTIVE REVIEW SUBMISSION MODAL */}
       {/* ============================================================= */}
       {isSubmitModalOpen && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/85 backdrop-blur-md p-4 animate-fade-in">
-          <div className="glass-card max-w-xl w-full max-h-[92vh] overflow-y-auto rounded-3xl p-6 sm:p-8 border border-border shadow-2xl space-y-5 bg-card">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/85 backdrop-blur-md p-3 sm:p-4 animate-fade-in">
+          <div className="glass-card max-w-xl w-full max-h-[90vh] overflow-y-auto rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 border border-border shadow-2xl space-y-4 bg-card">
             <div className="flex justify-between items-center border-b pb-3">
               <div>
-                <span className="text-[0.65rem] uppercase tracking-[0.25em] text-secondary font-bold flex items-center gap-1">
-                  <Sparkles className="h-3 w-3 text-secondary" /> Confianza Couple Community
+                <span className="text-[0.62rem] sm:text-[0.65rem] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-secondary font-bold flex items-center gap-1">
+                  <Sparkles className="h-3 w-3 text-secondary shrink-0" /> Confianza Couple Community
                 </span>
-                <h3 className="font-display text-xl text-ink font-bold mt-0.5">
+                <h3 className="font-display text-lg sm:text-xl text-ink font-bold mt-0.5">
                   Share Your Wedding Story
                 </h3>
               </div>
@@ -857,11 +857,11 @@ export default function TestimonialsPage() {
             </div>
 
             {submitSuccess ? (
-              <div className="py-8 text-center space-y-4">
-                <div className="h-16 w-16 rounded-full gradient-royal mx-auto flex items-center justify-center shadow-luxe">
-                  <CheckCircle2 className="h-8 w-8 text-secondary" />
+              <div className="py-6 sm:py-8 text-center space-y-3 sm:space-y-4">
+                <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-full gradient-royal mx-auto flex items-center justify-center shadow-luxe">
+                  <CheckCircle2 className="h-7 w-7 sm:h-8 sm:w-8 text-secondary" />
                 </div>
-                <h4 className="font-display text-2xl text-ink font-bold">
+                <h4 className="font-display text-xl sm:text-2xl text-ink font-bold">
                   Thank You for Sharing Your Story!
                 </h4>
                 <p className="text-xs sm:text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
@@ -876,7 +876,7 @@ export default function TestimonialsPage() {
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmitReview} className="space-y-4">
+              <form onSubmit={handleSubmitReview} className="space-y-3.5 sm:space-y-4">
                 {submitError && (
                   <div className="p-3 rounded-xl bg-destructive/15 border border-destructive/30 text-xs text-destructive text-center font-medium">
                     {submitError}
@@ -884,12 +884,12 @@ export default function TestimonialsPage() {
                 )}
 
                 {/* Interactive Star Rating Selector with Effects */}
-                <div className="rounded-2xl bg-muted/40 p-4 border border-border text-center space-y-2">
+                <div className="rounded-2xl bg-muted/40 p-3.5 sm:p-4 border border-border text-center space-y-1.5 sm:space-y-2">
                   <label className="text-xs font-semibold text-foreground block">
                     Your Overall Experience Rating (0 to 5 Stars)
                   </label>
 
-                  <div className="flex items-center justify-center gap-2 py-1">
+                  <div className="flex items-center justify-center gap-1.5 sm:gap-2 py-1">
                     {[1, 2, 3, 4, 5].map((star) => {
                       const activeVal = hoverRating !== null ? hoverRating : submitForm.rating;
                       const isFilled = star <= activeVal;
@@ -904,7 +904,7 @@ export default function TestimonialsPage() {
                           className="p-1 cursor-pointer transition-all duration-200 transform hover:scale-125 focus:outline-none"
                         >
                           <Star
-                            className={`h-8 w-8 transition-colors ${
+                            className={`h-6 w-6 sm:h-8 sm:w-8 transition-colors ${
                               isFilled
                                 ? "fill-secondary text-secondary drop-shadow-[0_0_8px_rgba(201,162,39,0.5)]"
                                 : "text-muted-foreground/40"
@@ -915,7 +915,7 @@ export default function TestimonialsPage() {
                     })}
                   </div>
 
-                  <p className="text-xs font-semibold text-primary transition-all">
+                  <p className="text-[0.7rem] sm:text-xs font-semibold text-primary transition-all">
                     {getRatingSentiment(hoverRating !== null ? hoverRating : submitForm.rating)}
                   </p>
                 </div>
@@ -1009,7 +1009,7 @@ export default function TestimonialsPage() {
                     Your Love Story &amp; Confianza Experience *
                   </label>
                   <textarea
-                    rows={4}
+                    rows={3}
                     required
                     value={submitForm.text}
                     onChange={(e) => setSubmitForm({ ...submitForm, text: e.target.value })}
@@ -1038,23 +1038,23 @@ export default function TestimonialsPage() {
                     placeholder="e.g. https://www.youtube.com/watch?v=... or Vimeo/Reel link"
                     className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-mono"
                   />
-                  <span className="text-[0.65rem] text-muted-foreground mt-0.5 block">
+                  <span className="text-[0.62rem] sm:text-[0.65rem] text-muted-foreground mt-0.5 block">
                     Supported: YouTube, Vimeo, Instagram Reels, Google Drive video.
                   </span>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-3 border-t">
+                <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-3 border-t">
                   <button
                     type="button"
                     onClick={() => setIsSubmitModalOpen(false)}
-                    className="px-4 py-2 rounded-full border text-xs cursor-pointer hover:bg-muted"
+                    className="px-4 py-2 rounded-full border text-xs cursor-pointer hover:bg-muted text-center"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-6 rounded-full cursor-pointer shadow-md flex items-center gap-2 disabled:opacity-60"
+                    className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-6 rounded-full cursor-pointer shadow-md flex items-center justify-center gap-2 disabled:opacity-60"
                   >
                     {isSubmitting ? (
                       <>
@@ -1079,14 +1079,14 @@ export default function TestimonialsPage() {
       {/* 9. VIDEO LIGHTBOX MODAL */}
       {/* ============================================================= */}
       {activeVideoUrl && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/90 p-4 animate-fade-in">
-          <div className="relative max-w-3xl w-full aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl border border-white/20">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/90 p-3 sm:p-4 animate-fade-in">
+          <div className="relative max-w-3xl w-full aspect-video bg-black rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-white/20">
             <button
               type="button"
               onClick={() => setActiveVideoUrl(null)}
-              className="absolute top-4 right-4 z-20 h-9 w-9 rounded-full bg-ink/80 text-white flex items-center justify-center hover:bg-ink transition cursor-pointer"
+              className="absolute top-2.5 right-2.5 sm:top-4 sm:right-4 z-20 h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-ink/80 text-white flex items-center justify-center hover:bg-ink transition cursor-pointer"
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
 
             {activeVideoUrl.includes("youtube.com") ||

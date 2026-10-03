@@ -102,20 +102,20 @@ export default function PortfolioSection({ isStandalone = false }) {
         ) : (
           <>
             {/* Search Bar & Category Filter Bar */}
-            <div className="reveal mt-10 space-y-5">
-              <div className="mx-auto max-w-md relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <div className="reveal mt-8 sm:mt-10 space-y-4 sm:space-y-5">
+              <div className="mx-auto max-w-md relative w-full">
+                <Search className="absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 h-3.5 sm:h-4 w-3.5 sm:w-4 text-muted-foreground" />
                 <input
                   type="text"
                   placeholder="Search by city, theme or ceremony (e.g. Udaipur, Goa, Haldi)..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-full border border-border bg-card/60 pl-11 pr-5 py-2.5 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 backdrop-blur-md"
+                  className="w-full rounded-full border border-border bg-card/60 pl-9 sm:pl-11 pr-4 sm:pr-5 py-2 sm:py-2.5 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 backdrop-blur-md"
                 />
               </div>
 
               {/* Category Filter Pills with Item Counts */}
-              <div className="flex flex-wrap items-center justify-center gap-2">
+              <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
                 {categories.map((cat) => {
                   const isAllPill = isAllCategory(cat);
                   const count = isAllPill
@@ -133,7 +133,7 @@ export default function PortfolioSection({ isStandalone = false }) {
                         setSelectedCategory(cat);
                         setVisibleCount(isStandalone ? 12 : 8);
                       }}
-                      className={`rounded-full px-4 py-1.5 text-xs font-medium uppercase tracking-wider transition-all duration-300 flex items-center gap-1.5 cursor-pointer shadow-xs ${
+                      className={`rounded-full px-3 sm:px-4 py-1.5 sm:py-2 text-[0.68rem] sm:text-xs font-semibold uppercase tracking-[0.1em] sm:tracking-wider transition-all duration-300 flex items-center gap-1.5 cursor-pointer shadow-xs ${
                         isSelected
                           ? "gradient-royal text-primary-foreground shadow-luxe scale-105"
                           : "glass-card text-foreground/75 hover:border-primary/40 hover:text-primary"
@@ -141,7 +141,7 @@ export default function PortfolioSection({ isStandalone = false }) {
                     >
                       <span>{cat}</span>
                       <span
-                        className={`text-[0.62rem] px-1.5 py-0.2 rounded-full font-bold font-mono ${
+                        className={`text-[0.58rem] sm:text-[0.62rem] px-1.5 py-0.5 rounded-full font-bold font-mono ${
                           isSelected
                             ? "bg-secondary text-ink"
                             : "bg-muted text-muted-foreground"
@@ -156,14 +156,14 @@ export default function PortfolioSection({ isStandalone = false }) {
             </div>
 
             {/* Portfolio Masonry / Responsive Grid */}
-            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 transition-all duration-300">
+            <div className="mt-8 sm:mt-12 grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 transition-all duration-300">
               {displayedItems.map((item, idx) => (
                 <div
                   key={item.id || idx}
                   onClick={() => setLightboxIndex(idx)}
-                  className="group relative cursor-pointer overflow-hidden rounded-3xl border border-border/80 bg-card shadow-soft transition-all duration-500 hover:-translate-y-2 hover:shadow-luxe flex flex-col"
+                  className="group relative cursor-pointer overflow-hidden rounded-2xl sm:rounded-3xl border border-border/80 bg-card shadow-soft transition-all duration-500 hover:-translate-y-2 hover:shadow-luxe flex flex-col"
                 >
-                  <div className="relative h-72 sm:h-80 w-full overflow-hidden bg-ink/5">
+                  <div className="relative h-64 sm:h-72 lg:h-80 w-full overflow-hidden bg-ink/5">
                     <img
                       src={item.image || "/images/hero-1.jpg"}
                       alt={item.title}
@@ -177,31 +177,31 @@ export default function PortfolioSection({ isStandalone = false }) {
                     <div className="absolute inset-0 bg-gradient-to-t from-ink/95 via-ink/40 to-transparent opacity-80 transition-opacity duration-300 group-hover:opacity-95" />
 
                     {/* Category badge */}
-                    <div className="absolute top-4 left-4">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-ink/60 px-3 py-1 text-[0.65rem] uppercase tracking-wider text-secondary backdrop-blur-md border border-white/10">
+                    <div className="absolute top-3.5 left-3.5 sm:top-4 sm:left-4">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-ink/60 px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.65rem] uppercase tracking-wider text-secondary backdrop-blur-md border border-white/10">
                         <Sparkles className="h-2.5 w-2.5 text-secondary" />
                         <span>{item.category}</span>
                       </span>
                     </div>
 
                     {/* Zoom Icon Button */}
-                    <div className="absolute top-4 right-4 grid h-9 w-9 place-items-center rounded-full bg-white/20 text-white backdrop-blur-md opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                    <div className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 grid h-8 w-8 sm:h-9 sm:w-9 place-items-center rounded-full bg-white/20 text-white backdrop-blur-md opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                       <Eye className="h-4 w-4" />
                     </div>
 
                     {/* Bottom info */}
-                    <div className="absolute bottom-0 inset-x-0 p-5 text-background">
-                      <h3 className="font-display text-lg leading-snug text-background transition-colors group-hover:text-gold-gradient">
+                    <div className="absolute bottom-0 inset-x-0 p-4 sm:p-5 text-background">
+                      <h3 className="font-display text-base sm:text-lg leading-snug text-background transition-colors group-hover:text-gold-gradient">
                         {item.title}
                       </h3>
                       {item.location && (
-                        <div className="mt-1.5 flex items-center gap-1.5 text-xs text-champagne/80 font-light">
-                          <MapPin className="h-3.5 w-3.5 text-secondary" />
-                          <span>{item.location}</span>
+                        <div className="mt-1 flex items-center gap-1.5 text-xs text-champagne/80 font-light">
+                          <MapPin className="h-3 w-3 text-secondary shrink-0" />
+                          <span className="truncate">{item.location}</span>
                         </div>
                       )}
                       {item.description && (
-                        <p className="mt-1.5 text-[0.72rem] text-background/70 font-light line-clamp-2">
+                        <p className="mt-1 text-[0.7rem] sm:text-[0.72rem] text-background/70 font-light line-clamp-2">
                           {item.description}
                         </p>
                       )}
@@ -213,11 +213,11 @@ export default function PortfolioSection({ isStandalone = false }) {
 
             {/* Empty state when filtering or searching */}
             {displayedItems.length === 0 && (
-              <div className="mt-12 glass-card rounded-3xl p-12 text-center text-muted-foreground border border-border/80 max-w-xl mx-auto shadow-soft transition-all duration-300 animate-in fade-in">
-                <div className="h-14 w-14 rounded-full bg-secondary/15 ring-2 ring-secondary/40 flex items-center justify-center mx-auto mb-4 text-secondary">
-                  <Eye className="h-7 w-7" />
+              <div className="mt-8 sm:mt-12 glass-card rounded-2xl sm:rounded-3xl p-8 sm:p-12 text-center text-muted-foreground border border-border/80 max-w-xl mx-auto shadow-soft transition-all duration-300 animate-in fade-in">
+                <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-secondary/15 ring-2 ring-secondary/40 flex items-center justify-center mx-auto mb-4 text-secondary">
+                  <Eye className="h-6 w-6 sm:h-7 sm:w-7" />
                 </div>
-                <h3 className="font-display text-xl text-ink font-semibold">
+                <h3 className="font-display text-lg sm:text-xl text-ink font-semibold">
                   {allItems.length === 0
                     ? "No Portfolio Works Added Yet"
                     : `No Celebrations Found`}
@@ -243,12 +243,12 @@ export default function PortfolioSection({ isStandalone = false }) {
             )}
 
             {/* Load More on Standalone & Explore All on Homepage */}
-            <div className="reveal mt-14 flex flex-wrap items-center justify-center gap-4">
+            <div className="reveal mt-10 sm:mt-14 flex flex-wrap items-center justify-center gap-4">
               {isStandalone && visibleCount < filteredItems.length && (
                 <button
                   type="button"
                   onClick={() => setVisibleCount((prev) => prev + 8)}
-                  className="btn-luxe gradient-gold text-ink font-semibold"
+                  className="btn-luxe gradient-gold text-ink font-semibold w-full sm:w-auto py-3 px-6"
                 >
                   Load More Celebrations ({filteredItems.length - visibleCount} remaining)
                 </button>
@@ -257,10 +257,10 @@ export default function PortfolioSection({ isStandalone = false }) {
               {!isStandalone && (
                 <Link
                   href="/portfolio"
-                  className="btn-luxe gradient-royal text-primary-foreground shadow-luxe font-semibold py-3.5 px-8 text-xs uppercase tracking-wider inline-flex items-center gap-2 hover:scale-105 transition"
+                  className="btn-luxe gradient-royal text-primary-foreground shadow-luxe font-semibold py-3 px-6 sm:py-3.5 sm:px-8 text-xs uppercase tracking-wider inline-flex items-center justify-center gap-2 hover:scale-105 transition w-full sm:w-auto"
                 >
                   <span>Explore All Signature Works</span>
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-4 w-4 shrink-0" />
                 </Link>
               )}
             </div>

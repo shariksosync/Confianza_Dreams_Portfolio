@@ -85,7 +85,7 @@ export default function ServicesPage() {
   return (
     <SiteLayout revealKey="services-page">
       {/* 1. Hero Banner */}
-      <section className="relative bg-ink pt-36 pb-20 sm:pt-40 lg:pt-44 sm:pb-24 text-background overflow-hidden">
+      <section className="relative bg-ink pt-28 pb-14 sm:pt-36 sm:pb-20 lg:pt-44 lg:pb-24 text-background overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-25">
           <img
             src="/images/hero-1.jpg"
@@ -95,15 +95,15 @@ export default function ServicesPage() {
           <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/80 to-ink/40" />
         </div>
 
-        <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8 lg:px-10 text-center">
-          <span className="text-[0.68rem] uppercase tracking-[0.34em] text-secondary font-medium">
+        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 text-center">
+          <span className="text-[0.65rem] sm:text-[0.68rem] uppercase tracking-[0.25em] sm:tracking-[0.34em] text-secondary font-semibold">
             Full-Spectrum Event Architecture
           </span>
-          <h1 className="mt-3 font-display text-4xl sm:text-5xl lg:text-6xl text-background font-normal">
+          <h1 className="mt-2.5 sm:mt-3 font-display text-3xl sm:text-5xl lg:text-6xl text-background font-normal leading-tight">
             Bespoke Services &amp; Event Mastery
           </h1>
-          <div className="rule-gold mx-auto my-5" />
-          <p className="mx-auto max-w-2xl text-sm sm:text-base text-background/80 font-light leading-relaxed">
+          <div className="rule-gold mx-auto my-4 sm:my-5" />
+          <p className="mx-auto max-w-2xl text-xs sm:text-sm lg:text-base text-background/80 font-light leading-relaxed px-2">
             From initial concept sketches to minute-by-minute execution on the ground, every service is delivered with royal refinement and unwavering precision.
           </p>
         </div>
@@ -111,7 +111,7 @@ export default function ServicesPage() {
 
       {/* 2. Detailed Services Catalog with Dynamic Category Filters */}
       <section className="section-pad relative bg-background">
-        <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
           <SectionHeading
             eyebrow="Our Complete Portfolio of Services"
             title="Designed for Every Step of the Journey"
@@ -119,18 +119,18 @@ export default function ServicesPage() {
           />
 
           {/* Dynamic Category Filter Pills */}
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+          <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
             <button
               type="button"
               onClick={() => setSelectedCategory("all")}
-              className={`rounded-full px-4 sm:px-5 py-2 text-xs font-semibold uppercase tracking-[0.14em] transition-all duration-300 flex items-center gap-2 cursor-pointer ${
+              className={`rounded-full px-3.5 sm:px-5 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-semibold uppercase tracking-[0.1em] sm:tracking-[0.14em] transition-all duration-300 flex items-center gap-1.5 sm:gap-2 cursor-pointer ${
                 isAllCategory(selectedCategory)
                   ? "gradient-royal text-primary-foreground shadow-luxe scale-105"
                   : "glass-card text-foreground/80 hover:border-primary/40 hover:text-primary"
               }`}
             >
               <span>All Disciplines</span>
-              <span className={`text-[0.65rem] px-1.5 py-0.5 rounded-full font-mono font-bold ${isAllCategory(selectedCategory) ? "bg-secondary text-ink" : "bg-muted text-muted-foreground"}`}>
+              <span className={`text-[0.62rem] sm:text-[0.65rem] px-1.5 py-0.5 rounded-full font-mono font-bold ${isAllCategory(selectedCategory) ? "bg-secondary text-ink" : "bg-muted text-muted-foreground"}`}>
                 {serviceList.length}
               </span>
             </button>
@@ -147,14 +147,14 @@ export default function ServicesPage() {
                   key={cat.id || catName}
                   type="button"
                   onClick={() => setSelectedCategory(catName)}
-                  className={`rounded-full px-4 sm:px-5 py-2 text-xs font-semibold uppercase tracking-[0.14em] transition-all duration-300 flex items-center gap-2 cursor-pointer ${
+                  className={`rounded-full px-3.5 sm:px-5 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-semibold uppercase tracking-[0.1em] sm:tracking-[0.14em] transition-all duration-300 flex items-center gap-1.5 sm:gap-2 cursor-pointer ${
                     isSelected
                       ? "gradient-royal text-primary-foreground shadow-luxe scale-105"
                       : "glass-card text-foreground/80 hover:border-primary/40 hover:text-primary"
                   }`}
                 >
                   <span>{catName}</span>
-                  <span className={`text-[0.65rem] px-1.5 py-0.5 rounded-full font-mono font-bold ${isSelected ? "bg-secondary text-ink" : "bg-muted text-muted-foreground"}`}>
+                  <span className={`text-[0.62rem] sm:text-[0.65rem] px-1.5 py-0.5 rounded-full font-mono font-bold ${isSelected ? "bg-secondary text-ink" : "bg-muted text-muted-foreground"}`}>
                     {count}
                   </span>
                 </button>
@@ -163,11 +163,11 @@ export default function ServicesPage() {
           </div>
 
           {loading && !ready ? (
-            <div className="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-10 sm:mt-14 grid gap-6 sm:gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="glass-card rounded-3xl overflow-hidden border border-border/80">
-                  <div className="h-60 w-full skeleton" />
-                  <div className="p-6 space-y-3">
+                <div key={i} className="glass-card rounded-2xl sm:rounded-3xl overflow-hidden border border-border/80">
+                  <div className="h-48 sm:h-60 w-full skeleton" />
+                  <div className="p-5 sm:p-6 space-y-3">
                     <div className="h-4 w-1/3 skeleton rounded" />
                     <div className="h-6 w-3/4 skeleton rounded" />
                     <div className="h-4 w-full skeleton rounded" />
@@ -177,12 +177,12 @@ export default function ServicesPage() {
               ))}
             </div>
           ) : filteredServices.length === 0 ? (
-            <div className="mt-14 glass-card rounded-3xl p-12 text-center text-muted-foreground border border-border max-w-2xl mx-auto transition-all duration-300 animate-in fade-in">
-              <Sparkles className="h-12 w-12 mx-auto text-secondary/50 mb-3" />
-              <h3 className="font-display text-xl text-ink font-semibold">
+            <div className="mt-10 sm:mt-14 glass-card rounded-2xl sm:rounded-3xl p-8 sm:p-12 text-center text-muted-foreground border border-border max-w-2xl mx-auto transition-all duration-300 animate-in fade-in">
+              <Sparkles className="h-10 w-10 sm:h-12 sm:w-12 mx-auto text-secondary/50 mb-3" />
+              <h3 className="font-display text-lg sm:text-xl text-ink font-semibold">
                 {serviceList.length === 0 ? "0 Services Listed" : `No Services in "${selectedCategory}"`}
               </h3>
-              <p className="text-xs text-muted-foreground mt-1.5">
+              <p className="text-xs text-muted-foreground mt-1.5 max-w-md mx-auto">
                 {serviceList.length === 0
                   ? "No services have been added in the Admin Panel yet."
                   : "No services are currently assigned to this discipline. Select another category or click below to view all disciplines."}
@@ -198,14 +198,14 @@ export default function ServicesPage() {
               )}
             </div>
           ) : (
-            <div className="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-3 transition-all duration-300">
+            <div className="mt-10 sm:mt-14 grid gap-6 sm:gap-8 sm:grid-cols-2 lg:grid-cols-3 transition-all duration-300">
               {filteredServices.map((service: any, idx: number) => (
                 <div
                   key={service.id || service._id || idx}
-                  className="group glass-card rounded-3xl overflow-hidden border border-border/80 transition-all duration-500 hover:-translate-y-2 hover:shadow-luxe flex flex-col justify-between"
+                  className="group glass-card rounded-2xl sm:rounded-3xl overflow-hidden border border-border/80 transition-all duration-500 hover:-translate-y-2 hover:shadow-luxe flex flex-col justify-between"
                 >
                   <div>
-                    <div className="relative h-60 w-full overflow-hidden bg-ink">
+                    <div className="relative h-48 sm:h-60 w-full overflow-hidden bg-ink">
                       {service.image ? (
                         <img
                           src={service.image}
@@ -215,24 +215,24 @@ export default function ServicesPage() {
                         />
                       ) : (
                         <div className="h-full w-full flex items-center justify-center gradient-royal text-primary-foreground">
-                          <Sparkles className="h-12 w-12 text-secondary/60" />
+                          <Sparkles className="h-10 w-10 sm:h-12 sm:w-12 text-secondary/60" />
                         </div>
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-transparent to-transparent" />
-                      <span className="absolute bottom-4 left-4 inline-flex items-center gap-1.5 rounded-full gradient-gold px-3.5 py-1 text-[0.65rem] font-bold uppercase tracking-wider text-ink shadow-md">
-                        <Sparkles className="h-3 w-3" />
+                      <span className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 inline-flex items-center gap-1.5 rounded-full gradient-gold px-3 py-0.5 sm:px-3.5 sm:py-1 text-[0.62rem] sm:text-[0.65rem] font-bold uppercase tracking-wider text-ink shadow-md">
+                        <Sparkles className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                         <span>{service.badge || "Specialized Craft"}</span>
                       </span>
                     </div>
 
-                    <div className="p-6">
-                      <span className="text-[0.68rem] text-primary font-semibold uppercase tracking-widest block mb-1">
+                    <div className="p-5 sm:p-6">
+                      <span className="text-[0.65rem] sm:text-[0.68rem] text-primary font-semibold uppercase tracking-widest block mb-1">
                         Service 0{idx + 1}
                       </span>
-                      <h3 className="font-display text-2xl text-ink group-hover:text-primary transition-colors">
+                      <h3 className="font-display text-xl sm:text-2xl text-ink group-hover:text-primary transition-colors leading-snug">
                         {service.title}
                       </h3>
-                      <p className="mt-3 text-xs sm:text-sm leading-relaxed text-muted-foreground">
+                      <p className="mt-2.5 sm:mt-3 text-xs sm:text-sm leading-relaxed text-muted-foreground">
                         {service.description}
                       </p>
 
@@ -249,13 +249,13 @@ export default function ServicesPage() {
                     </div>
                   </div>
 
-                  <div className="p-6 pt-0">
+                  <div className="p-4 sm:p-6 pt-0">
                     <Link
                       href={`/contact?service=${encodeURIComponent(service.title)}`}
-                      className="btn-luxe gradient-royal w-full text-primary-foreground text-xs font-semibold shadow-sm flex items-center justify-center gap-2"
+                      className="btn-luxe gradient-royal w-full text-primary-foreground text-[0.72rem] sm:text-xs font-semibold shadow-sm flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-3 sm:px-4 text-center whitespace-normal leading-snug"
                     >
-                      <span>Inquire About {service.title}</span>
-                      <ArrowRight className="h-3.5 w-3.5" />
+                      <span>Inquire About This Service</span>
+                      <ArrowRight className="h-3.5 w-3.5 shrink-0" />
                     </Link>
                   </div>
                 </div>
@@ -268,21 +268,21 @@ export default function ServicesPage() {
       {/* 3. Ceremony-by-Ceremony Management Matrix */}
       {ceremonyList.length > 0 && (
         <section className="section-pad relative bg-accent/30 border-t border-b border-border/50">
-          <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
             <SectionHeading
               eyebrow="Curated Functions &amp; Ritual Mastery"
               title="From Sacred Pheras to Electrifying Sangeets"
               subtitle="Every Indian wedding milestone demands its own distinct atmosphere, spatial architecture, and minute-by-minute ground direction."
             />
 
-            <div className="reveal mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="reveal mt-8 sm:mt-14 grid gap-5 sm:gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {ceremonyList.map((ceremony: any, idx: number) => (
                 <div
                   key={ceremony.id || ceremony._id || idx}
-                  className="group glass-card rounded-3xl overflow-hidden border border-border/80 transition-all duration-500 hover:-translate-y-2 hover:shadow-luxe flex flex-col justify-between"
+                  className="group glass-card rounded-2xl sm:rounded-3xl overflow-hidden border border-border/80 transition-all duration-500 hover:-translate-y-2 hover:shadow-luxe flex flex-col justify-between"
                 >
                   <div>
-                    <div className="relative h-56 w-full overflow-hidden bg-ink">
+                    <div className="relative h-48 sm:h-56 w-full overflow-hidden bg-ink">
                       {ceremony.image ? (
                         <img
                           src={ceremony.image}
@@ -296,18 +296,18 @@ export default function ServicesPage() {
                         </div>
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-transparent to-transparent" />
-                      <span className="absolute bottom-3 left-4 inline-flex items-center gap-1.5 rounded-full bg-ink/75 px-3 py-1 text-[0.65rem] font-bold uppercase tracking-wider text-champagne backdrop-blur-md border border-white/10">
+                      <span className="absolute bottom-3 left-3 sm:left-4 inline-flex items-center gap-1.5 rounded-full bg-ink/75 px-3 py-1 text-[0.62rem] sm:text-[0.65rem] font-bold uppercase tracking-wider text-champagne backdrop-blur-md border border-white/10">
                         <Sparkles className="h-2.5 w-2.5 text-secondary" />
                         <span>{ceremony.theme || "Ceremony Milestone"}</span>
                       </span>
                     </div>
 
-                    <div className="p-6">
-                      <h3 className="font-display text-2xl text-ink group-hover:text-primary transition-colors">
+                    <div className="p-4 sm:p-6">
+                      <h3 className="font-display text-lg sm:text-2xl text-ink group-hover:text-primary transition-colors leading-snug">
                         {ceremony.name}
                       </h3>
                       {ceremony.subtitle && (
-                        <span className="text-[0.7rem] uppercase tracking-wider text-primary font-semibold block mt-0.5 mb-2">
+                        <span className="text-[0.62rem] sm:text-[0.7rem] uppercase tracking-wider text-primary font-semibold block mt-0.5 mb-2">
                           {ceremony.subtitle}
                         </span>
                       )}
@@ -317,13 +317,13 @@ export default function ServicesPage() {
 
                       {Array.isArray(ceremony.highlights) && ceremony.highlights.length > 0 && (
                         <div className="mt-4 pt-3 border-t border-border/50 space-y-1.5">
-                          <span className="text-[0.65rem] font-bold uppercase tracking-wider text-muted-foreground block">
+                          <span className="text-[0.62rem] sm:text-[0.65rem] font-bold uppercase tracking-wider text-muted-foreground block">
                             Milestone Deliverables:
                           </span>
                           {ceremony.highlights.map((h: string, hIdx: number) => (
                             <div key={hIdx} className="flex items-center gap-2 text-xs text-foreground/85">
                               <CheckCircle2 className="h-3.5 w-3.5 text-secondary shrink-0" />
-                              <span>{h}</span>
+                              <span className="break-words leading-snug">{h}</span>
                             </div>
                           ))}
                         </div>
@@ -331,13 +331,13 @@ export default function ServicesPage() {
                     </div>
                   </div>
 
-                  <div className="p-6 pt-0">
+                  <div className="p-4 sm:p-6 pt-0">
                     <Link
                       href={`/contact?service=${encodeURIComponent(ceremony.name)}`}
-                      className="btn-luxe gradient-royal w-full text-primary-foreground text-xs font-semibold shadow-sm flex items-center justify-center gap-2"
+                      className="btn-luxe gradient-royal w-full text-primary-foreground text-[0.72rem] sm:text-xs font-semibold shadow-sm flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-3 sm:px-4 text-center whitespace-normal leading-snug"
                     >
                       <span>Plan Your {ceremony.name}</span>
-                      <ArrowRight className="h-3.5 w-3.5" />
+                      <ArrowRight className="h-3.5 w-3.5 shrink-0" />
                     </Link>
                   </div>
                 </div>
@@ -350,21 +350,21 @@ export default function ServicesPage() {
       {/* 4. Event Stationery & Hospitality Suite */}
       {stationeryList.length > 0 && (
         <section className="section-pad relative bg-background">
-          <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
             <SectionHeading
               eyebrow="Bespoke Guest Collateral"
               title="Event Stationery &amp; Hospitality Touchpoints"
               subtitle="The finest luxury lies in the smallest personal details. We design and deliver custom collateral that sets an unforgettable tone for your celebration."
             />
 
-            <div className="reveal mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="reveal mt-10 sm:mt-14 grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {stationeryList.map((item: any, idx: number) => (
                 <div
                   key={item.id || item._id || idx}
-                  className="group glass-card rounded-3xl overflow-hidden border border-border/80 transition-all duration-500 hover:-translate-y-2 hover:shadow-luxe flex flex-col justify-between"
+                  className="group glass-card rounded-2xl sm:rounded-3xl overflow-hidden border border-border/80 transition-all duration-500 hover:-translate-y-2 hover:shadow-luxe flex flex-col justify-between"
                 >
                   <div>
-                    <div className="relative h-44 w-full overflow-hidden bg-ink">
+                    <div className="relative h-40 sm:h-44 w-full overflow-hidden bg-ink">
                       {item.image ? (
                         <img
                           src={item.image}
@@ -383,12 +383,12 @@ export default function ServicesPage() {
                       </span>
                     </div>
 
-                    <div className="p-5">
-                      <h4 className="font-display text-lg font-semibold text-ink group-hover:text-primary transition-colors">
+                    <div className="p-4 sm:p-5">
+                      <h4 className="font-display text-base sm:text-lg font-semibold text-ink group-hover:text-primary transition-colors">
                         {item.title}
                       </h4>
                       {item.subtitle && (
-                        <span className="text-[0.68rem] text-primary font-medium block mt-0.5">
+                        <span className="text-[0.65rem] sm:text-[0.68rem] text-primary font-medium block mt-0.5">
                           {item.subtitle}
                         </span>
                       )}
@@ -411,7 +411,7 @@ export default function ServicesPage() {
       <ProcessSection />
 
       {/* 7. Dynamic Private Consultation VIP CTA Banner */}
-      <section className="bg-ink py-20 text-center text-background relative overflow-hidden">
+      <section className="bg-ink py-14 sm:py-20 text-center text-background relative overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-15">
           <img
             src="/images/hero-1.jpg"
@@ -421,28 +421,28 @@ export default function ServicesPage() {
           <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/90 to-ink/60" />
         </div>
 
-        <div className="relative z-10 mx-auto max-w-5xl px-5 sm:px-8">
-          <span className="text-[0.68rem] uppercase tracking-[0.35em] text-secondary font-bold block mb-2">
+        <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+          <span className="text-[0.65rem] sm:text-[0.68rem] uppercase tracking-[0.25em] sm:tracking-[0.35em] text-secondary font-bold block mb-2">
             {cta.eyebrow || "WHERE WEDDINGS BECOME STORIES"}
           </span>
 
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl text-background font-normal max-w-3xl mx-auto">
+          <h2 className="font-display text-2xl sm:text-4xl lg:text-5xl text-background font-normal max-w-3xl mx-auto leading-tight">
             {cta.headline || "Ready to Begin Curating Your Wedding?"}
           </h2>
 
-          <div className="rule-gold mx-auto my-5" />
+          <div className="rule-gold mx-auto my-4 sm:my-5" />
 
-          <p className="text-sm sm:text-base text-background/85 font-light mb-8 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xs sm:text-sm lg:text-base text-background/85 font-light mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed px-2">
             {cta.subtitle || "Book a private 60–90 minute consultation with Ashish Wankhede in Warje, Pune, or via virtual video call."}
           </p>
 
           {/* Consultation Perks Pills */}
           {Array.isArray(cta.perks) && cta.perks.length > 0 && (
-            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-10 max-w-3xl mx-auto">
+            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-8 sm:mb-10 max-w-3xl mx-auto">
               {cta.perks.map((perk: string, pIdx: number) => (
                 <span
                   key={pIdx}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-4 py-1.5 text-xs text-champagne backdrop-blur-md border border-white/15"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 sm:px-4 py-1 sm:py-1.5 text-[0.7rem] sm:text-xs text-champagne backdrop-blur-md border border-white/15"
                 >
                   <CheckCircle2 className="h-3.5 w-3.5 text-secondary shrink-0" />
                   <span>{perk}</span>
@@ -452,28 +452,28 @@ export default function ServicesPage() {
           )}
 
           {/* Action Buttons */}
-          <div className="flex flex-wrap items-center justify-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 max-w-md sm:max-w-none mx-auto">
             <Link
               href={cta.buttonLink || "/contact"}
-              className="btn-luxe gradient-gold text-ink font-bold shadow-luxe py-3 px-8 text-xs tracking-wider uppercase"
+              className="btn-luxe gradient-gold text-ink font-bold shadow-luxe py-3 px-6 sm:px-8 text-xs tracking-wider uppercase w-full sm:w-auto flex items-center justify-center gap-2"
             >
               <span>{cta.buttonText || "Book Your Free Consultation"}</span>
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4 shrink-0" />
             </Link>
 
             {contact?.phone && (
               <a
                 href={`tel:${contact.phone}`}
-                className="btn-luxe bg-white/10 hover:bg-white/20 text-white border border-white/25 hover:border-secondary hover:text-secondary transition-all py-3 px-6 text-xs font-semibold flex items-center gap-2.5 backdrop-blur-md shadow-md group"
+                className="btn-luxe bg-white/10 hover:bg-white/20 text-white border border-white/25 hover:border-secondary hover:text-secondary transition-all py-3 px-6 text-xs font-semibold flex items-center justify-center gap-2.5 backdrop-blur-md shadow-md group w-full sm:w-auto"
               >
-                <Phone className="h-4 w-4 text-secondary group-hover:scale-110 transition-transform" />
+                <Phone className="h-4 w-4 text-secondary group-hover:scale-110 transition-transform shrink-0" />
                 <span className="tracking-wide">Call +91 {contact.phone}</span>
               </a>
             )}
           </div>
 
           {cta.notice && (
-            <span className="text-[0.7rem] text-background/60 block mt-6 font-light">
+            <span className="text-[0.65rem] sm:text-[0.7rem] text-background/60 block mt-5 sm:mt-6 font-light">
               {cta.notice}
             </span>
           )}

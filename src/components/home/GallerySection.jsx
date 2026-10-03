@@ -64,8 +64,8 @@ export default function GallerySection({ isStandalone = false }) {
   const displayedItems = isStandalone ? filteredItems : items.slice(0, 8);
 
   return (
-    <section id="gallery" className="section-pad relative bg-background overflow-hidden">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section id="gallery" className="py-10 sm:py-16 lg:py-24 relative bg-background overflow-hidden">
+      <div className="mx-auto max-w-7xl px-3.5 sm:px-6 lg:px-8">
         <SectionHeading
           eyebrow="Visual Chronicles"
           title="A Tapestry of Sacred Vows & Spatial Splendor"
@@ -74,7 +74,7 @@ export default function GallerySection({ isStandalone = false }) {
 
         {/* Dynamic Category Filter Pills */}
         {isStandalone && items.length > 0 && (
-          <div className="reveal mt-10 flex flex-wrap items-center justify-center gap-2 sm:gap-2.5">
+          <div className="reveal mt-6 sm:mt-10 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2.5">
             {categories.map((cat) => {
               const isAllPill = isAllCategory(cat);
 
@@ -96,7 +96,7 @@ export default function GallerySection({ isStandalone = false }) {
                   key={cat.id || cat.slug || cat.name}
                   type="button"
                   onClick={() => setActiveCategory(isAllPill ? "all" : cat.name)}
-                  className={`px-4 py-2 rounded-full text-xs font-semibold tracking-wide transition-all duration-300 flex items-center gap-2 cursor-pointer shadow-xs ${
+                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[0.7rem] sm:text-xs font-semibold tracking-wide transition-all duration-300 flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-xs ${
                     isSelected
                       ? "gradient-royal text-primary-foreground shadow-[0_4px_18px_rgba(109,76,155,0.4)] scale-105 ring-1 ring-white/30"
                       : "bg-card border border-border text-foreground/80 hover:text-secondary hover:border-secondary/60 hover:bg-card/90"
@@ -104,7 +104,7 @@ export default function GallerySection({ isStandalone = false }) {
                 >
                   <span>{cat.name}</span>
                   <span
-                    className={`text-[0.68rem] px-1.5 py-0.5 rounded-full font-mono font-bold ${
+                    className={`text-[0.62rem] sm:text-[0.68rem] px-1.5 py-0.2 sm:py-0.5 rounded-full font-mono font-bold ${
                       isSelected
                         ? "bg-secondary text-ink"
                         : "bg-muted text-muted-foreground"
@@ -120,11 +120,11 @@ export default function GallerySection({ isStandalone = false }) {
 
         {/* Photo Gallery Masonry Grid */}
         {displayedItems.length === 0 ? (
-          <div className="mt-12 glass-card rounded-3xl p-12 text-center text-muted-foreground border border-border/80 max-w-xl mx-auto shadow-soft transition-all duration-300 animate-in fade-in">
-            <div className="h-14 w-14 rounded-full bg-secondary/15 ring-2 ring-secondary/40 flex items-center justify-center mx-auto mb-4 text-secondary">
-              <Eye className="h-7 w-7" />
+          <div className="mt-8 sm:mt-12 glass-card rounded-2xl sm:rounded-3xl p-6 sm:p-12 text-center text-muted-foreground border border-border/80 max-w-xl mx-auto shadow-soft transition-all duration-300">
+            <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-secondary/15 ring-2 ring-secondary/40 flex items-center justify-center mx-auto mb-3 sm:mb-4 text-secondary">
+              <Eye className="h-6 w-6 sm:h-7 sm:w-7" />
             </div>
-            <h3 className="font-display text-xl text-ink font-semibold">
+            <h3 className="font-display text-lg sm:text-xl text-ink font-semibold">
               {items.length === 0
                 ? "No Gallery Photos Uploaded"
                 : activeCategory && activeCategory !== "all"
@@ -142,19 +142,19 @@ export default function GallerySection({ isStandalone = false }) {
               <button
                 type="button"
                 onClick={() => setActiveCategory("all")}
-                className="mt-5 btn-luxe gradient-gold text-ink text-xs py-2 px-5 font-bold shadow-xs cursor-pointer"
+                className="mt-4 sm:mt-5 btn-luxe gradient-gold text-ink text-xs py-2 px-5 font-bold shadow-xs cursor-pointer"
               >
                 View All Archives ({items.length})
               </button>
             )}
           </div>
         ) : (
-          <div className="mt-12 columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-5 space-y-5 transition-all duration-300">
+          <div className="mt-8 sm:mt-12 columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-3.5 sm:gap-5 space-y-3.5 sm:space-y-5 transition-all duration-300">
             {displayedItems.map((item, idx) => (
               <div
                 key={item.id || idx}
                 onClick={() => setLightboxIndex(idx)}
-                className="group relative cursor-pointer break-inside-avoid overflow-hidden rounded-3xl border border-border/70 bg-card shadow-soft transition-all duration-500 hover:-translate-y-1.5 hover:shadow-luxe"
+                className="group relative cursor-pointer break-inside-avoid overflow-hidden rounded-2xl sm:rounded-3xl border border-border/70 bg-card shadow-soft transition-all duration-500 hover:-translate-y-1 hover:shadow-luxe"
               >
                 <div className="relative overflow-hidden bg-muted/40">
                   <img
@@ -166,26 +166,26 @@ export default function GallerySection({ isStandalone = false }) {
 
                   {/* Top Category Tag Badge */}
                   {item.category && (
-                    <div className="absolute top-3 left-3 z-10">
-                      <span className="px-2.5 py-1 rounded-full bg-ink/75 backdrop-blur-md text-[0.62rem] uppercase tracking-wider font-semibold text-champagne border border-white/15 shadow-sm">
+                    <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-10">
+                      <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-ink/75 backdrop-blur-md text-[0.58rem] sm:text-[0.62rem] uppercase tracking-wider font-semibold text-champagne border border-white/15 shadow-xs">
                         {item.category}
                       </span>
                     </div>
                   )}
 
                   {/* Bottom Hover Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-ink/95 via-ink/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex flex-col justify-end p-5">
+                  <div className="absolute inset-0 bg-gradient-to-t from-ink/95 via-ink/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex flex-col justify-end p-3.5 sm:p-5">
                     {item.location && (
-                      <div className="flex items-center gap-1.5 text-[0.68rem] text-secondary font-medium tracking-wide">
+                      <div className="flex items-center gap-1 text-[0.62rem] sm:text-[0.68rem] text-secondary font-medium tracking-wide">
                         <MapPin className="h-3 w-3 text-secondary" />
                         <span>{item.location}</span>
                       </div>
                     )}
-                    <h4 className="mt-1 font-display text-sm sm:text-base text-background font-normal leading-snug">
+                    <h4 className="mt-0.5 font-display text-xs sm:text-base text-background font-normal leading-snug">
                       {item.caption}
                     </h4>
-                    <div className="mt-3 flex items-center gap-1.5 text-xs text-champagne font-medium">
-                      <Eye className="h-3.5 w-3.5" />
+                    <div className="mt-2 sm:mt-3 flex items-center gap-1.5 text-[0.68rem] sm:text-xs text-champagne font-medium">
+                      <Eye className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                       <span>Click to expand view</span>
                     </div>
                   </div>
@@ -197,7 +197,7 @@ export default function GallerySection({ isStandalone = false }) {
 
         {/* View Full Gallery CTA for Homepage */}
         {!isStandalone && displayedItems.length > 0 && (
-          <div className="reveal mt-12 text-center">
+          <div className="reveal mt-8 sm:mt-12 text-center">
             <Link
               href="/gallery"
               className="btn-luxe gradient-royal text-primary-foreground text-xs shadow-luxe inline-flex items-center gap-2"
