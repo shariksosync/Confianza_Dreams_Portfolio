@@ -19,37 +19,37 @@ export default function CoreValuesSection() {
   const defaultValues = [
     {
       icon: "ShieldCheck",
-      title: "Uncompromised Trust (Confianza)",
-      subtitle: "Absolute Honesty in Costing",
-      text: "True to our name, we believe trust is the cornerstone of luxury. We provide completely transparent itemized sheets with zero hidden commissions or eleventh-hour markups.",
+      title: "Complete Trust (Confianza)",
+      subtitle: "Clear & Honest Pricing",
+      text: "True to our name, we believe trust is everything. We provide clear, itemized price sheets with zero hidden charges or last-minute surprises.",
       gradient: "from-secondary to-amber-500",
     },
     {
       icon: "Palette",
-      title: "Artistic Distinction",
-      subtitle: "Tailored, Never Templated",
-      text: "Every couple has a unique rhythm. We craft custom mood boards, bespoke drape geometries, and original floral installations designed specifically for your aesthetic.",
+      title: "Unique Creative Designs",
+      subtitle: "Customized For You",
+      text: "Every couple has a unique style. We create custom mood boards, beautiful fabric draping, and fresh floral setups designed specifically for your taste.",
       gradient: "from-primary to-purple-600",
     },
     {
       icon: "Clock",
-      title: "Operational Precision",
-      subtitle: "Time-Tested Execution",
-      text: "Our production crews start before sunrise with minute-by-minute run sheets, dual generator backups, and proactive weather contingencies to ensure zero delays.",
+      title: "Timely Execution",
+      subtitle: "On-Time Every Time",
+      text: "Our setup teams start early with clear timelines, backup power, and weather plans to make sure every ceremony starts right on time.",
       gradient: "from-blue-600 to-indigo-600",
     },
     {
       icon: "HeartHandshake",
-      title: "Empathetic Hospitality",
+      title: "Warm Hospitality",
       subtitle: "Caring for Your Family",
-      text: "Weddings are emotional milestones. We coordinate with elders, prioritize guest comfort, and manage vendor interactions so you stay relaxed throughout.",
+      text: "Weddings are emotional family moments. We coordinate with elders, prioritize guest comfort, and manage vendors so you stay relaxed throughout.",
       gradient: "from-rose-500 to-primary",
     },
     {
       icon: "Leaf",
-      title: "Sustainable Elegance",
-      subtitle: "Conscious Celebrations",
-      text: "We partner with local floral cultivators, utilize low-emission LED lighting designs, and recycle organic decor waste responsibly after grand events.",
+      title: "Eco-Friendly Practices",
+      subtitle: "Mindful Celebrations",
+      text: "We source fresh flowers from local farms, use energy-saving LED lights, and clean up responsibly after every event.",
       gradient: "from-emerald-600 to-teal-600",
     },
   ];
@@ -62,9 +62,9 @@ export default function CoreValuesSection() {
     <section className="section-pad relative bg-accent/25 overflow-hidden border-b border-border/60">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
         <SectionHeading
-          eyebrow="Our Non-Negotiable Pillars"
+          eyebrow="What We Stand For"
           title="Our Core Values"
-          subtitle="The five foundational principles that define our craft, our ethics, and the way we treat every celebration."
+          subtitle="The 5 core values that guide our work and how we treat every family."
         />
 
         <div className="reveal mt-10 sm:mt-16 grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">

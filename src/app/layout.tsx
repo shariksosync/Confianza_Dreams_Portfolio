@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Confianza Event's and Entertainment — Where Weddings Become Stories",
     description:
-      "Luxury wedding planning, bespoke decor, and flawless execution for weddings that become timeless stories.",
+      "Complete wedding planning, custom decor, and smooth on-ground management for weddings that become cherished memories.",
     type: "website",
     images: ["/logo.png"],
   },

@@ -7,12 +7,12 @@ import { validatePhoneNumber } from "../lib/validation";
 
 const SERVICES_LIST = [
   "Full Wedding Planning",
-  "Wedding Decor & Floral Styling",
-  "Destination Wedding Coordination",
-  "On-Day Wedding Execution",
-  "Haldi & Mehendi Rituals",
-  "Grand Reception Production",
-  "Corporate & Entertainment Events",
+  "Mandap & Stage Decor",
+  "Destination Wedding Planning",
+  "Wedding Day Coordination",
+  "Haldi & Mehendi Decor",
+  "Grand Reception Stage",
+  "Corporate & Family Events",
 ];
 
 export default function EnquiryModal({ isOpen, open, onClose }) {
@@ -131,7 +131,7 @@ export default function EnquiryModal({ isOpen, open, onClose }) {
               Thank You for Reaching Out!
             </h3>
             <p className="mt-2 text-xs sm:text-sm text-[#7E7688] leading-relaxed max-w-sm mx-auto">
-              We have received your celebration details. A confirmation email has been dispatched to <strong className="text-[#2B2138]">{formData.email}</strong>. Founders Ashish &amp; Rutik will connect with you shortly over phone/WhatsApp.
+              We have received your wedding details. A confirmation email has been sent to <strong className="text-[#2B2138]">{formData.email}</strong>. Founders Ashish &amp; Rutik will contact you shortly via phone/WhatsApp.
             </p>
             <div className="mt-6 flex justify-center">
               <button
@@ -148,7 +148,7 @@ export default function EnquiryModal({ isOpen, open, onClose }) {
             <div className="text-center pb-4 border-b border-[#E8E2EE]">
               <span className="inline-flex items-center gap-1.5 text-[0.68rem] uppercase tracking-[0.25em] text-[#C2A438] font-bold">
                 <Sparkles className="h-3.5 w-3.5 text-[#C2A438]" />
-                <span>Confianza Concierge</span>
+                <span>Confianza Wedding Help</span>
               </span>
               <h2
                 id="enquiry-modal-title"
@@ -157,7 +157,7 @@ export default function EnquiryModal({ isOpen, open, onClose }) {
                 Quick Wedding Enquiry
               </h2>
               <p className="mt-1 text-xs text-[#7E7688]">
-                Share your dates and vision. We will prepare custom mood boards and pricing for your event.
+                Share your dates and event details. We will share custom decor designs and honest pricing for your wedding.
               </p>
             </div>
 
@@ -279,11 +279,11 @@ export default function EnquiryModal({ isOpen, open, onClose }) {
 
               <div>
                 <label className="text-xs font-semibold text-[#2B2138] block mb-1">
-                  Message / Special Wishes
+                  Message / Event Details
                 </label>
                 <textarea
                   rows={2}
-                  placeholder="Tell us about your estimated guest count, preferred venue, or any specific theme ideas..."
+                  placeholder="Tell us your approximate guest count, venue ideas, or any specific requirements..."
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                   className="w-full rounded-xl border border-[#E8E2EE] bg-white px-4 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:border-[#6A439E] focus:outline-none focus:ring-2 focus:ring-[#6A439E]/15 transition resize-none"

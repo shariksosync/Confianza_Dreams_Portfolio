@@ -20,39 +20,39 @@ export default function GalleryHighlightsSection() {
       : [
           {
             id: "mandap-sanctum",
-            title: "Mandap Architecture & Vedic Sanctums",
-            subtitle: "Auspicious Engineering & Floral Art",
+            title: "Mandap & Traditional Ritual Setups",
+            subtitle: "Sacred Setups & Floral Art",
             description:
-              "From custom temple pillars to floating lotus pools, our mandaps blend sacred Vedic geometry with opulent seasonal florals.",
+              "From temple pillars to lotus pools, our mandaps blend traditional Vedic rituals with fresh seasonal flowers.",
             icon: "Sparkles",
-            badge: "Vedic Precision",
+            badge: "Traditional Mandap",
           },
           {
             id: "stage-production",
-            title: "Stage, Lighting & SFX Production",
-            subtitle: "3D CAD-to-Reality Fidelity",
+            title: "Stage, Lighting & Special Effects",
+            subtitle: "3D Design-to-Reality Execution",
             description:
-              "Intelligent moving beam arrays, high-resolution curved LED walls, cold pyrotechnics, and hydraulic stages managed with millisecond cues.",
+              "Moving light setups, LED screens, cold pyro fireworks, and stages managed with precise timing.",
             icon: "Layers",
-            badge: "Show Runner Direct",
+            badge: "Stage & Lights",
           },
           {
             id: "haldi-carnival",
-            title: "Themed Haldi & Mehendi Carnivals",
-            subtitle: "Joyous Yellow Blooms & Folk Artistry",
+            title: "Themed Haldi & Mehendi Setups",
+            subtitle: "Bright Yellow Blooms & Traditional Art",
             description:
-              "Phoolon ki Holi setups, handcrafted marigold canopies, brass urlis, artisanal mehendi cabanas, and energetic dhol tasha troupes.",
+              "Phoolon ki Holi setups, marigold canopies, brass urlis, mehendi cabanas, and energetic dhol tasha groups.",
             icon: "Award",
-            badge: "Cultural Extravaganza",
+            badge: "Haldi & Mehendi",
           },
           {
             id: "luxe-tablescapes",
-            title: "Luxe Tablescapes & Hospitality Styling",
-            subtitle: "Intimate Ambiance & Event Branding",
+            title: "Guest Tables & Welcome Hampers",
+            subtitle: "Warm Hospitality & Personal Touches",
             description:
-              "Crystal chandeliers, candlelit floral centerpieces, customized luggage tags, itinerary jackets, and dedicated guest concierge suites.",
+              "Chandeliers, candlelit centerpieces, personalized luggage tags, itinerary cards, and dedicated guest hospitality.",
             icon: "Users",
-            badge: "Concierge Elegance",
+            badge: "Guest Hospitality",
           },
         ];
 
@@ -62,9 +62,9 @@ export default function GalleryHighlightsSection() {
     <section className="py-10 sm:py-16 lg:py-24 relative bg-card/40 border-y border-border/50 overflow-hidden">
       <div className="mx-auto max-w-7xl px-3.5 sm:px-6 lg:px-8">
         <SectionHeading
-          eyebrow="Architectural Precision & Artistry"
-          title="The Craft Behind Every Visual Chronicle"
-          subtitle="How our production engineers, floral artists, and shadow liaisons translate hand-drawn concepts and 3D CAD renders into flawless physical spaces."
+          eyebrow="Our Decor &amp; Design"
+          title="The Work Behind Every Wedding"
+          subtitle="How our setup team, florists, and coordinators turn 3D designs into beautiful real-life wedding spaces."
         />
 
         <div className="reveal mt-8 sm:mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
@@ -105,7 +105,7 @@ export default function GalleryHighlightsSection() {
                     <CheckCircle2 className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-secondary" />
                   </div>
                   <span className="text-[0.7rem] sm:text-xs font-semibold text-foreground/90 tracking-wide">
-                    Confianza Production Standard
+                    Confianza Quality Setup
                   </span>
                 </div>
               </div>

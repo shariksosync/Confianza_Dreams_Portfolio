@@ -41,14 +41,14 @@ export default function ContactSection({ isStandalone = false }) {
   const [loading, setLoading] = useState(false);
 
   const defaultServicesList = [
-    "Full-Service Luxury Wedding Planning",
-    "Hospitality & Guest Concierge Management",
-    "Bespoke Mandap & Spatial Production",
-    "Ritual & Cultural Ceremony Direction",
-    "Dedicated Shadow Management (Bride & Groom)",
-    "Food & Beverage (F&B) Orchestration",
-    "Artist, Sufi Band & Celebrity Management",
-    "Master Show Running & Ground Direction",
+    "Full Wedding Planning",
+    "Guest Welcome & Room Management",
+    "Custom Mandap & Stage Decor",
+    "Pooja & Traditional Ritual Management",
+    "Personal Helpers for Bride & Groom",
+    "Catering & Food Management",
+    "Live Artists, DJ & Band Management",
+    "On-Ground Event Coordination",
   ];
 
   const availableServices =
@@ -117,8 +117,8 @@ export default function ContactSection({ isStandalone = false }) {
       <div className="mx-auto max-w-7xl px-3.5 sm:px-6 lg:px-8">
         <SectionHeading
           eyebrow="Begin Your Story"
-          title="Reserve a Private Consultation"
-          subtitle="Tell us about your wedding dreams, guest expectations, and vision. We'll meet over coffee in Pune or over a virtual call anywhere in the world."
+          title="Book Your Wedding Consultation"
+          subtitle="Tell us about your wedding date, guest count, and ideas. We can meet in person in Pune or on a video call."
         />
 
         <div className="reveal mt-8 sm:mt-12 lg:mt-14 grid gap-6 sm:gap-8 lg:gap-10 lg:grid-cols-12 items-start">
@@ -240,7 +240,7 @@ export default function ContactSection({ isStandalone = false }) {
                   </h3>
                   <div className="rule-gold mx-auto" />
                   <p className="max-w-md mx-auto text-xs sm:text-sm text-muted-foreground leading-relaxed px-2">
-                    Thank you! We have dispatched a confirmation email to your inbox. Ashish Wankhede, Rutik Pund, and the Confianza planning team will review your celebration vision and contact you shortly.
+                    Thank you! We have sent a confirmation email to your inbox. Ashish Wankhede, Rutik Pund, and our team will review your details and call you shortly.
                   </p>
                   <button
                     type="button"

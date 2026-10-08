@@ -8,6 +8,7 @@ import TeamSection from "@/components/home/TeamSection";
 import ManagementVerticalsSection from "@/components/about/ManagementVerticalsSection";
 import LogoRepresentationSection from "@/components/about/LogoRepresentationSection";
 import VisionMissionSection from "@/components/about/VisionMissionSection";
+import WhyConfianzaSection from "@/components/about/WhyConfianzaSection";
 import CoreValuesSection from "@/components/about/CoreValuesSection";
 import HowWeWorkSection from "@/components/about/HowWeWorkSection";
 import PartnerMarqueeSection from "@/components/home/PartnerMarqueeSection";
@@ -41,7 +42,7 @@ export default function AboutPage() {
           <p className="mx-auto max-w-2xl text-xs sm:text-sm lg:text-base text-background/80 font-light leading-relaxed px-2">
             {about?.headerBanner?.subtitle ||
               about?.story ||
-              "At Confianza, we're the romantic and elegant wedding experts who bring love stories to life with passion and precision. For us, your event is no less than our own."}
+              "At Confianza, we help you create a beautiful and memorable wedding. For us, your wedding is just like our own family event."}
           </p>
         </div>
       </section>
@@ -58,13 +59,16 @@ export default function AboutPage() {
       {/* 5. Our Vision & Our Mission */}
       <VisionMissionSection />
 
-      {/* 6. Our Core Values */}
+      {/* 6. Why Confianza Events & Entertainment */}
+      <WhyConfianzaSection />
+
+      {/* 7. Our Core Values */}
       <CoreValuesSection />
 
-      {/* 7. How Do We Work */}
+      {/* 8. How Do We Work */}
       <HowWeWorkSection />
 
-      {/* 8. Our 10 Core Management Verticals */}
+      {/* 9. Our 10 Core Management Verticals */}
       <ManagementVerticalsSection />
 
       {/* Hospitality Partners Marquee */}
@@ -77,11 +81,11 @@ export default function AboutPage() {
             Begin With A Conversation
           </span>
           <h2 className="mt-2 font-display text-2xl sm:text-3xl lg:text-4xl text-background font-normal leading-tight">
-            Let's Plan Your Wedding Story Together
+            Let's Plan Your Wedding Together
           </h2>
           <div className="rule-gold mx-auto my-3 sm:my-4" />
           <p className="text-xs sm:text-sm text-background/80 font-light leading-relaxed mb-6 sm:mb-8 max-w-xl mx-auto px-2">
-            Schedule an in-person meeting at our Pune studio or connect with us over a call to review your dates and preliminary mood boards.
+            Schedule an in-person meeting at our Pune office or connect with us over a call to discuss your dates and ideas.
           </p>
           <div className="flex justify-center">
             <Link

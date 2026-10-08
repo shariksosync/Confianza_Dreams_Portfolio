@@ -18,7 +18,7 @@ export default function AboutSection() {
         <SectionHeading
           eyebrow="Our Story & Philosophy"
           title={about.homepageHeading || "A Pune Studio Devoted to Weddings That Feel Personal"}
-          subtitle="Where raw emotion meets royal finesse. We shape unforgettable weddings designed uniquely for you."
+          subtitle="Where real emotions meet beautiful design. We create unforgettable weddings made specially for you."
         />
 
         <div className="mt-10 sm:mt-14 lg:mt-20 grid gap-8 sm:gap-12 lg:grid-cols-12 lg:items-center">
@@ -54,7 +54,7 @@ export default function AboutSection() {
                 <HeartHandshake className="h-5 w-5 sm:h-6 sm:w-6 text-secondary mb-2" />
                 <h3 className="font-display text-sm sm:text-base text-ink">Zero Template Policy</h3>
                 <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                  Every palette, floral installation, and run sheet crafted bespoke.
+                  Every color theme, flower setup, and schedule is made specially for you.
                 </p>
               </div>
             </div>
@@ -117,7 +117,7 @@ export default function AboutSection() {
                 href="/about"
                 className="btn-luxe gradient-royal text-primary-foreground text-xs inline-flex items-center justify-center gap-2 w-full sm:w-auto py-3 px-6 sm:py-3.5 sm:px-8 tracking-wider uppercase font-semibold"
               >
-                <span>Discover Our Complete Journey &amp; Team</span>
+                <span>Learn More About Us &amp; Our Team</span>
                 <ArrowRight className="h-3.5 w-3.5 shrink-0" />
               </Link>
             </div>

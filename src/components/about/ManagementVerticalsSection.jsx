@@ -21,91 +21,91 @@ const VERTICALS = [
     num: "01",
     title: "Hospitality Management",
     icon: HeartHandshake,
-    tagline: "Guest Welcome & Concierge",
+    tagline: "Guest Welcome & Care",
     description:
-      "Seamless guest arrival coordination, room allocations, welcome desk, custom welcome hampers, key jackets, luggage tags, and dedicated guest transport support.",
-    highlights: ["Guest Check-in & Desk", "Welcome Kits & Room Keys", "Dedicated Travel Concierge"],
+      "Smooth guest arrivals, hotel room check-in, welcome desk, custom gift hampers, room key cards, luggage tags, and transport help.",
+    highlights: ["Guest Check-in & Help Desk", "Welcome Gifts & Room Keys", "Pick-up & Drop Coordination"],
   },
   {
     num: "02",
     title: "Logistics Management",
     icon: Truck,
-    tagline: "Infrastructure & Flow",
+    tagline: "Setup, Sound & Power",
     description:
-      "Comprehensive vendor transit coordination, staging deliveries, audio-visual schematics, lighting power backups, and punctual ceremony-to-reception transitions.",
-    highlights: ["Vendor Delivery Sync", "AV & Power Infrastructure", "Valet & Convoy Management"],
+      "Coordination of vendor deliveries, stage setups, sound and lighting systems, power backups, and smooth ceremony transitions.",
+    highlights: ["Vendor Delivery Coordination", "Sound, Lights & Backup Power", "Parking & Guest Movement"],
   },
   {
     num: "03",
     title: "Shadow Management",
     icon: UserCheck,
-    tagline: "Dedicated Personal Care",
+    tagline: "Dedicated Personal Helpers",
     description:
-      "Discreet personal coordinators shadowing the Bride, Groom, and VIP parents. Handling schedule tracking, wardrobe steaming, emergency makeup touch-ups, and hydration.",
-    highlights: ["Bride & Groom Shadows", "Wardrobe & Emergency Fixes", "Behind-the-Scenes Calm"],
+      "Dedicated helpers for the bride, groom, and parents. Taking care of timing, dress touch-ups, water, snacks, and emergency items.",
+    highlights: ["Bride & Groom Helpers", "Dress Touch-ups & Essentials", "Relaxed & Stress-Free Support"],
   },
   {
     num: "04",
     title: "Ritual Management",
     icon: Flame,
-    tagline: "Sacred Traditions & Customs",
+    tagline: "Traditional Pooja & Customs",
     description:
-      "Punctual and reverent execution of traditional customs (Baraat, Milni, Varmala, Saptapadi, Pheras, Haldi). Complete pandit coordination, havan kund, and pooja samagri.",
-    highlights: ["Baraat & Varmala Direction", "Pandit & Samagri Readiness", "Customs Timing Adherence"],
+      "Timely and respectful coordination for Baraat, Milni, Varmala, Pheras, and Haldi. Full pandit coordination, havan kund, and pooja items.",
+    highlights: ["Baraat & Varmala Direction", "Pandit & Pooja Samagri Ready", "Right Timing for All Rituals"],
   },
   {
     num: "05",
     title: "Production & Decor",
     icon: Palette,
-    tagline: "Spatial Artistry & Engineering",
+    tagline: "Custom 3D Decor & Stages",
     description:
-      "Bespoke spatial design, mandap architecture, floral conditioning, ambient lighting, 2D/3D CAD layouts, structural safety compliance, and overnight venue build-outs.",
-    highlights: ["3D Decor Visualizations", "Floral & Mandap Architecture", "Acoustic & Lighting Design"],
+      "Custom 3D designs, mandap setups, fresh flower decoration, beautiful lighting, and safe, solid stage building.",
+    highlights: ["3D Decor Previews", "Mandap & Fresh Flowers", "Stage Lighting & Backdrop"],
   },
   {
     num: "06",
     title: "F & B Management",
     icon: Utensils,
-    tagline: "Culinary & Bar Operations",
+    tagline: "Food & Beverage Coordination",
     description:
-      "Master menu coordination, live food counter pacing, signature beverage & bar setup, strict hygiene and food temperature monitoring, and guest dining satisfaction.",
-    highlights: ["Catering Flow Oversight", "Beverage Bar Management", "Guest Dining Excellence"],
+      "Menu planning, live food counter timing, welcome drinks, cleanliness checks, food temperature, and guest dining care.",
+    highlights: ["Food Counter Flow & Timing", "Welcome Drinks & Bar Setup", "Quality & Cleanliness Checks"],
   },
   {
     num: "07",
     title: "Artist Management",
     icon: Music,
-    tagline: "Performers & Celebrity Talents",
+    tagline: "Singers, Bands & Performers",
     description:
-      "Booking and coordinating celebrity singers, Sufi/Bollywood live bands, DJs, emcees, folk dancers, and choreographers. Full rider fulfillment, green rooms, and sound checks.",
-    highlights: ["Live Bands & Celebrity Acts", "Technical Riders & Sound Checks", "Green Room Hospitality"],
+      "Booking and managing singers, Sufi/Bollywood live bands, DJs, anchors, and dancers. Complete sound checks and green room care.",
+    highlights: ["Live Bands & Celebrities", "Sound Checks & Stage Ready", "Artist Green Room Care"],
   },
   {
     num: "08",
     title: "Show Runner & Cueing",
     icon: Radio,
-    tagline: "Master Timeline Direction",
+    tagline: "On-Ground Event Direction",
     description:
-      "A dedicated ground director managing the master minute-by-minute cue sheet. Real-time intercom synchrony across audio, lighting, catering, and entry fireworks.",
-    highlights: ["Minute-by-Minute Master Run Sheet", "Intercom Ground Synchrony", "Instant Trouble-Shooting"],
+      "A dedicated ground director managing event flow, stage entries, fireworks, music cues, and quick on-the-spot support.",
+    highlights: ["Minute-by-Minute Event Schedule", "Walkie-Talkie Ground Team", "Quick On-Ground Support"],
   },
   {
     num: "09",
-    title: "Event Stationery",
+    title: "Wedding Stationery",
     icon: FileText,
-    tagline: "Custom Brand & Paper Suite",
+    tagline: "Custom Cards & Welcome Items",
     description:
-      "Bespoke wedding collateral matching your theme: personalized itinerary cards, luggage tags, room key jackets, menu cards, and luxury welcome signage.",
-    highlights: ["Custom Luggage Tags", "Room Key Jackets & Itineraries", "Thematic Welcome Signage"],
+      "Custom wedding stationery matching your theme: personalized schedule cards, luggage tags, key jackets, menu cards, and welcome signboards.",
+    highlights: ["Custom Luggage Tags", "Room Key Cards & Schedules", "Welcome Signs & Menu Cards"],
   },
   {
     num: "10",
     title: "Welcome Hostesses",
     icon: Crown,
-    tagline: "Royal Greeting Entourage",
+    tagline: "Traditional Welcome Team",
     description:
-      "Professional hostesses in traditional Indian attire welcoming guests with royal aarti, rose petal showers, fragrance mists, and personalized venue ushering.",
-    highlights: ["Traditional Attire Hostesses", "Royal Aarti & Petal Showers", "VIP Guest Ushering"],
+      "Well-dressed hostesses in traditional Indian attire welcoming guests with aarti, flower showers, refreshing welcome drinks, and guidance to rooms.",
+    highlights: ["Traditional Attire Hostesses", "Aarti & Flower Showers", "VIP Guest Welcoming"],
   },
 ];
 
@@ -114,9 +114,9 @@ export default function ManagementVerticalsSection() {
     <section className="section-pad relative bg-accent/25 overflow-hidden border-b border-border/60">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
         <SectionHeading
-          eyebrow="360° Comprehensive Coordination"
-          title="Our 10 Core Management Verticals"
-          subtitle="From royal guest hospitality and ritual timing to dedicated bridal shadows and master show running, here is how we make every wedding effortless."
+          eyebrow="Complete Event Coordination"
+          title="Our 10 Core Services & Teams"
+          subtitle="From warm guest welcome and pooja timing to bride and groom helpers and event management, here is how we make everything easy for you."
         />
 
         <div className="reveal is-visible mt-10 sm:mt-16 grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">

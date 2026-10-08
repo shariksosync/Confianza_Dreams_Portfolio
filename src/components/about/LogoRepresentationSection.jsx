@@ -7,33 +7,33 @@ export default function LogoRepresentationSection() {
     {
       icon: Feather,
       title: "The Soaring Bird",
-      subtitle: "Elevation, Freedom & Grace",
+      subtitle: "Elevation & Peace of Mind",
       description:
-        "The bird taking flight above the monogram embodies the freedom from planning anxiety that we gift to our families. It signifies lofty aspirations, soaring creativity, and romance taking wing into a beautiful lifelong journey.",
+        "The bird taking flight represents freedom from wedding stress. It symbolizes rising creativity, joyful moments, and a beautiful start to your married life.",
       accent: "from-blue-600 to-indigo-600",
     },
     {
       icon: Layers,
       title: "The 'CE' Monogram",
-      subtitle: "Confianza & Events Intertwined",
+      subtitle: "Confianza & Events",
       description:
-        "Derived from 'Confianza' (the Spanish word for Trust, Faith & Confidence) united with 'Events'. The interlocked letters symbolize the sacred bond formed between two souls, as well as the deep trust between our team and the families we serve.",
+        "Confianza is the word for Trust, Faith, and Confidence. The joined letters represent the strong bond between two people, and the trust between our team and your family.",
       accent: "from-primary to-purple-600",
     },
     {
       icon: Palette,
       title: "The Royal & Gold Palette",
-      subtitle: "Regal Dignity & Warmth",
+      subtitle: "Elegance & Warmth",
       description:
-        "Royal Lavender represents grandeur, spiritual tranquility, and bespoke elegance. It is crowned with Luxury Gold accents that reflect prosperity, auspicious Indian rituals, and radiant celebration under twilight chandeliers.",
+        "Royal Lavender represents elegance and peace. Gold accents represent good luck, traditional Indian rituals, and bright celebrations.",
       accent: "from-secondary to-amber-500",
     },
     {
       icon: Flame,
       title: "Art • Skill • Soul",
-      subtitle: "Our Foundational Trinity",
+      subtitle: "Our Core Principles",
       description:
-        "Art represents our original 3D concepts and spatial styling. Skill represents our logistical engineering, vendor management, and minute-by-minute execution. Soul represents the genuine love, empathy, and emotional warmth poured into every moment.",
+        "Art means our creative decor and 3D designs. Skill means our smooth coordination, vendor management, and on-time execution. Soul means the genuine care and love we put into every celebration.",
       accent: "from-primary to-secondary",
     },
   ];
@@ -48,14 +48,14 @@ export default function LogoRepresentationSection() {
         <div className="text-center max-w-3xl mx-auto">
           <span className="text-[0.65rem] sm:text-[0.68rem] uppercase tracking-[0.25em] sm:tracking-[0.3em] text-secondary font-bold inline-flex items-center gap-1.5">
             <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-            <span>Brand Identity &amp; Symbolism</span>
+            <span>Brand Identity &amp; Meaning</span>
           </span>
           <h2 className="mt-2 font-display text-2xl sm:text-4xl lg:text-5xl text-white font-normal leading-tight">
-            The Story Behind Our Emblem
+            The Meaning Behind Our Logo
           </h2>
           <div className="rule-gold mx-auto my-3 sm:my-4" />
           <p className="text-xs sm:text-sm lg:text-base text-champagne/80 font-light leading-relaxed px-2">
-            Every curve, hue, and ligature in the Confianza seal carries deep significance — reflecting our commitment to trust, soaring grandeur, and personal celebrations.
+            Every part of our logo has a special meaning — reflecting our commitment to trust, elegance, and personal celebrations.
           </p>
         </div>
 

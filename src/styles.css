@@ -325,6 +325,21 @@
   }
 }
 
+@keyframes dropdown-fade {
+  from {
+    opacity: 0;
+    transform: translateY(-5px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@utility animate-dropdown-pop {
+  animation: dropdown-fade 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 @utility animate-fade-in {
   animation: fade-in 0.9s ease both;
 }

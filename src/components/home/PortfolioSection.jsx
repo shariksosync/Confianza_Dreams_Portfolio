@@ -6,6 +6,7 @@ import { Search, Sparkles, Eye, ArrowRight, MapPin } from "lucide-react";
 import { useSite } from "../../context/SiteContext";
 import SectionHeading from "../ui/SectionHeading";
 import Lightbox from "../ui/Lightbox";
+import CategoryFilterBar from "../ui/CategoryFilterBar";
 
 const normalizeCategory = (str) =>
   (str || "")
@@ -49,10 +50,10 @@ export default function PortfolioSection({ isStandalone = false }) {
       : [
           "Destination Weddings",
           "Grand Mandaps",
-          "Haldi Carnivals",
-          "Opulent Receptions",
-          "Sangeet & Cocktail",
-          "Floral & Spatial Art",
+          "Haldi & Mehendi",
+          "Grand Receptions",
+          "Sangeet & Stage",
+          "Floral & Stage Decor",
         ];
     return ["All", ...dbCats];
   }, [portfolioCategories]);
@@ -82,11 +83,15 @@ export default function PortfolioSection({ isStandalone = false }) {
     <section id="portfolio" className="section-pad relative bg-background overflow-hidden">
       <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
         <SectionHeading
-          eyebrow={portfolioSection?.eyebrow || "Our Signature Works"}
-          title={portfolioSection?.title || "Moments of Grandeur & Intimacy"}
+          eyebrow={
+            portfolioSection?.eyebrow === "Our Signature Works" || !portfolioSection?.eyebrow
+              ? "Our Work"
+              : portfolioSection.eyebrow
+          }
+          title={portfolioSection?.title || "Our Wedding Celebrations & Decor"}
           subtitle={
             portfolioSection?.subtitle ||
-            "Explore a curated portfolio of mandaps, opulent ballrooms, sunny haldi courtyards, and destination weddings executed across India."
+            "Explore our collection of mandaps, reception stages, colorful haldi setups, and destination weddings across India."
           }
         />
 
@@ -114,45 +119,30 @@ export default function PortfolioSection({ isStandalone = false }) {
                 />
               </div>
 
-              {/* Category Filter Pills with Item Counts */}
-              <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
-                {categories.map((cat) => {
-                  const isAllPill = isAllCategory(cat);
-                  const count = isAllPill
-                    ? allItems.length
-                    : allItems.filter((p) => isCategoryMatch(p.category, cat)).length;
-                  const isSelected = isAllPill
-                    ? isAllCategory(selectedCategory)
-                    : normalizeCategory(selectedCategory) === normalizeCategory(cat);
-
-                  return (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => {
-                        setSelectedCategory(cat);
-                        setVisibleCount(isStandalone ? 12 : 8);
-                      }}
-                      className={`rounded-full px-3 sm:px-4 py-1.5 sm:py-2 text-[0.68rem] sm:text-xs font-semibold uppercase tracking-[0.1em] sm:tracking-wider transition-all duration-300 flex items-center gap-1.5 cursor-pointer shadow-xs ${
-                        isSelected
-                          ? "gradient-royal text-primary-foreground shadow-luxe scale-105"
-                          : "glass-card text-foreground/75 hover:border-primary/40 hover:text-primary"
-                      }`}
-                    >
-                      <span>{cat}</span>
-                      <span
-                        className={`text-[0.58rem] sm:text-[0.62rem] px-1.5 py-0.5 rounded-full font-bold font-mono ${
-                          isSelected
-                            ? "bg-secondary text-ink"
-                            : "bg-muted text-muted-foreground"
-                        }`}
-                      >
-                        {count}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+              {/* 4 Front Category Filter Pills + Luxury Dropdown */}
+              <CategoryFilterBar
+                items={allItems}
+                categories={
+                  Array.isArray(portfolioCategories) && portfolioCategories.length > 0
+                    ? portfolioCategories
+                    : [
+                        { name: "Destination Weddings", showInFront: true },
+                        { name: "Grand Mandaps", showInFront: true },
+                        { name: "Haldi & Mehendi", showInFront: true },
+                        { name: "Grand Receptions" },
+                        { name: "Sangeet & Stage" },
+                        { name: "Floral & Stage Decor" },
+                      ]
+                }
+                selectedCategory={selectedCategory}
+                onSelectCategory={(cat) => {
+                  setSelectedCategory(cat);
+                  setVisibleCount(isStandalone ? 12 : 8);
+                }}
+                allLabel="All Work"
+                maxFrontCategories={3}
+                dropdownLabel="More Categories"
+              />
             </div>
 
             {/* Portfolio Masonry / Responsive Grid */}
@@ -259,7 +249,7 @@ export default function PortfolioSection({ isStandalone = false }) {
                   href="/portfolio"
                   className="btn-luxe gradient-royal text-primary-foreground shadow-luxe font-semibold py-3 px-6 sm:py-3.5 sm:px-8 text-xs uppercase tracking-wider inline-flex items-center justify-center gap-2 hover:scale-105 transition w-full sm:w-auto"
                 >
-                  <span>Explore All Signature Works</span>
+                  <span>See All Our Work</span>
                   <ArrowRight className="h-4 w-4 shrink-0" />
                 </Link>
               )}

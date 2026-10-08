@@ -20,7 +20,7 @@ const LINKS = [
 
 /** Modern luxury navbar styled like reference with prominent large logo, active pill tabs, and glowing Enquire Now button. */
 export default function Navbar() {
-  const { settings } = useSite();
+  const { settings, contact } = useSite();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [enquiryOpen, setEnquiryOpen] = useState(false);
@@ -37,6 +37,10 @@ export default function Navbar() {
   const headerClass = scrolled
     ? "bg-ink/95 backdrop-blur-2xl border-b border-white/15 shadow-2xl py-2 sm:py-2.5"
     : "bg-ink/90 backdrop-blur-xl border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.5)] py-2.5 sm:py-3.5";
+
+  const phoneNumberDisplay = contact?.phone
+    ? (contact.phone.startsWith("+") ? contact.phone : `+91 ${contact.phone}`)
+    : "+91 7057357240";
 
   return (
     <>
@@ -94,16 +98,16 @@ export default function Navbar() {
             })}
           </ul>
 
-          {/* Right Actions: Enquire Now glowing button + Mobile Hamburger */}
+          {/* Right Actions: Phone Number glowing button (Opens Modal) + Mobile Hamburger */}
           <div className="flex items-center gap-3 shrink-0">
-            {/* Glowing • Enquire Now Pill Button (Opens Modal) */}
+            {/* Glowing • Phone Number Pill Button (Opens Modal) */}
             <button
               type="button"
               onClick={() => setEnquiryOpen(true)}
               className="hidden lg:inline-flex items-center gap-2 rounded-full gradient-gold text-ink font-bold text-xs sm:text-[0.82rem] tracking-wider uppercase px-5 sm:px-6 py-2.5 shadow-[0_0_24px_rgba(201,162,39,0.5)] hover:shadow-[0_0_35px_rgba(201,162,39,0.8)] hover:scale-105 active:scale-95 transition-all duration-300 shrink-0 whitespace-nowrap cursor-pointer ring-1 ring-white/40"
             >
               <span className="h-2 w-2 rounded-full bg-ink animate-pulse" />
-              <span>Enquire Now</span>
+              <span>{phoneNumberDisplay}</span>
             </button>
 
             {/* Mobile Menu Hamburger */}
@@ -143,7 +147,7 @@ export default function Navbar() {
               })}
             </ul>
 
-            {/* Mobile Enquire Now Button */}
+            {/* Mobile Phone Number Button (Opens Modal) */}
             <button
               type="button"
               onClick={() => {
@@ -153,7 +157,7 @@ export default function Navbar() {
               className="gradient-gold mt-5 w-full text-ink font-bold text-xs sm:text-sm py-3 px-4 rounded-full shadow-[0_0_20px_rgba(201,162,39,0.4)] flex items-center justify-center gap-2 tracking-wider uppercase cursor-pointer"
             >
               <span className="h-2 w-2 rounded-full bg-ink animate-pulse" />
-              <span>Enquire Now</span>
+              <span>{phoneNumberDisplay}</span>
             </button>
 
             <p className="mt-4 text-center text-xs text-champagne/80 font-light">

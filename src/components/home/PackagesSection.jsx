@@ -14,9 +14,9 @@ export default function PackagesSection() {
     <section className="section-pad relative bg-background overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
         <SectionHeading
-          eyebrow="Transparent Investment"
-          title="Tailored Wedding Planning Packages"
-          subtitle="Whether you envision an intimate family ceremony or a multi-day royal palace affair, our tiers are designed for clarity and absolute excellence."
+          eyebrow="Clear Pricing"
+          title="Wedding Planning Packages"
+          subtitle="Whether you are planning an intimate family wedding or a large celebration, our packages offer clear pricing and complete support."
         />
 
         {loading && !ready ? (
@@ -57,7 +57,7 @@ export default function PackagesSection() {
               {pkg.featured && (
                 <div className="absolute -top-3.5 sm:-top-4 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 rounded-full gradient-gold px-3 sm:px-4 py-0.5 sm:py-1 text-[0.62rem] sm:text-[0.68rem] font-bold uppercase tracking-wider text-ink shadow-md whitespace-nowrap">
                   <Sparkles className="h-3 w-3" />
-                  <span>Most Chosen Experience</span>
+                  <span>Most Popular</span>
                 </div>
               )}
 
@@ -91,7 +91,7 @@ export default function PackagesSection() {
                       pkg.featured ? "text-background/70" : "text-muted-foreground"
                     }`}
                   >
-                    / starting package
+                    / starting price
                   </span>
                 </div>
 

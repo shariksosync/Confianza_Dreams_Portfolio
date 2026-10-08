@@ -25,7 +25,7 @@ export default function PartnerMarqueeSection() {
     <div className="border-y border-border/60 bg-card/40 py-10 overflow-hidden select-none">
       <div className="mx-auto max-w-7xl px-5 text-center mb-6">
         <span className="text-[0.68rem] uppercase tracking-[0.3em] text-muted-foreground font-medium">
-          Trusted by Premier Hospitality Brands &amp; Venues Across India
+          Trusted by Top Hotels &amp; Wedding Venues Across India
         </span>
       </div>
 

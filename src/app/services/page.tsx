@@ -16,6 +16,7 @@ import SiteLayout from "@/layouts/SiteLayout";
 import SectionHeading from "@/components/ui/SectionHeading";
 import PackagesSection from "@/components/home/PackagesSection";
 import ProcessSection from "@/components/home/ProcessSection";
+import CategoryFilterBar from "@/components/ui/CategoryFilterBar";
 import { useSite } from "@/context/SiteContext";
 
 const normalizeCategory = (str: string) =>
@@ -53,27 +54,27 @@ export default function ServicesPage() {
     Array.isArray(serviceCategories) && serviceCategories.length > 0
       ? serviceCategories
       : [
-          { id: "planning", name: "Signature Planning & Direction", label: "Signature Planning & Direction" },
-          { id: "decor", name: "Mandap & Spatial Decor", label: "Mandap & Spatial Decor" },
-          { id: "hospitality", name: "Royal Hospitality & Shadows", label: "Royal Hospitality & Shadows" },
-          { id: "rituals", name: "Rituals, Artists & F&B", label: "Rituals, Artists & F&B" },
+          { id: "planning", name: "Complete Wedding Planning", label: "Complete Wedding Planning" },
+          { id: "decor", name: "Mandap & Stage Decor", label: "Mandap & Stage Decor" },
+          { id: "hospitality", name: "Guest Hospitality & Personal Helpers", label: "Guest Hospitality & Personal Helpers" },
+          { id: "rituals", name: "Rituals, Entertainment & Catering", label: "Rituals, Entertainment & Catering" },
         ];
 
   const ceremonyList = ceremonies || [];
   const stationeryList = stationery || [];
   const cta = servicesCta || {
-    eyebrow: "WHERE WEDDINGS BECOME STORIES",
-    headline: "Ready to Begin Curating Your Wedding?",
+    eyebrow: "LET'S PLAN YOUR SPECIAL DAY",
+    headline: "Ready to Plan Your Wedding?",
     subtitle:
-      "Book a private 60–90 minute consultation with Ashish Wankhede in Warje, Pune, or via virtual video call.",
-    buttonText: "Book Your Free Consultation",
+      "Book a free 60–90 minute consultation with Ashish Wankhede in Warje, Pune, or via video call.",
+    buttonText: "Book Free Consultation",
     buttonLink: "/contact",
     notice: "Free Consultation • No Commitment Required",
     perks: [
-      "60–90 Min Vision Mapping",
-      "In-Person (Pune) or Virtual Call",
-      "Detailed Budget Allocations",
-      "3D Spatial Concept Previews",
+      "60–90 Min Planning Session",
+      "In-Person (Pune) or Video Call",
+      "Clear Budget Planning",
+      "3D Decor Design Previews",
     ],
   };
 
@@ -97,14 +98,14 @@ export default function ServicesPage() {
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 text-center">
           <span className="text-[0.65rem] sm:text-[0.68rem] uppercase tracking-[0.25em] sm:tracking-[0.34em] text-secondary font-semibold">
-            Full-Spectrum Event Architecture
+            Complete Wedding Planning &amp; Decor
           </span>
           <h1 className="mt-2.5 sm:mt-3 font-display text-3xl sm:text-5xl lg:text-6xl text-background font-normal leading-tight">
-            Bespoke Services &amp; Event Mastery
+            Our Wedding Services
           </h1>
           <div className="rule-gold mx-auto my-4 sm:my-5" />
           <p className="mx-auto max-w-2xl text-xs sm:text-sm lg:text-base text-background/80 font-light leading-relaxed px-2">
-            From initial concept sketches to minute-by-minute execution on the ground, every service is delivered with royal refinement and unwavering precision.
+            From first design ideas to smooth execution on your big day, every service is delivered with care and quality.
           </p>
         </div>
       </section>
@@ -113,53 +114,27 @@ export default function ServicesPage() {
       <section className="section-pad relative bg-background">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
           <SectionHeading
-            eyebrow="Our Complete Portfolio of Services"
-            title="Designed for Every Step of the Journey"
-            subtitle="Explore our specialized disciplines across wedding planning, custom fabrication decor, destination logistics, and cultural ceremonies."
+            eyebrow="What We Offer"
+            title="Everything You Need for Your Wedding"
+            subtitle="Explore our complete range of wedding planning services, custom decor, destination management, and rituals."
           />
 
-          {/* Dynamic Category Filter Pills */}
-          <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
-            <button
-              type="button"
-              onClick={() => setSelectedCategory("all")}
-              className={`rounded-full px-3.5 sm:px-5 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-semibold uppercase tracking-[0.1em] sm:tracking-[0.14em] transition-all duration-300 flex items-center gap-1.5 sm:gap-2 cursor-pointer ${
-                isAllCategory(selectedCategory)
-                  ? "gradient-royal text-primary-foreground shadow-luxe scale-105"
-                  : "glass-card text-foreground/80 hover:border-primary/40 hover:text-primary"
-              }`}
-            >
-              <span>All Disciplines</span>
-              <span className={`text-[0.62rem] sm:text-[0.65rem] px-1.5 py-0.5 rounded-full font-mono font-bold ${isAllCategory(selectedCategory) ? "bg-secondary text-ink" : "bg-muted text-muted-foreground"}`}>
-                {serviceList.length}
-              </span>
-            </button>
-
-            {categoriesList.map((cat: any) => {
-              const catName = cat.name || cat.label || cat.id;
-              const count = serviceList.filter((s: any) => isCategoryMatch(s.category, catName)).length;
-              const isSelected = isAllCategory(selectedCategory)
-                ? false
-                : isCategoryMatch(selectedCategory, catName);
-
-              return (
-                <button
-                  key={cat.id || catName}
-                  type="button"
-                  onClick={() => setSelectedCategory(catName)}
-                  className={`rounded-full px-3.5 sm:px-5 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-semibold uppercase tracking-[0.1em] sm:tracking-[0.14em] transition-all duration-300 flex items-center gap-1.5 sm:gap-2 cursor-pointer ${
-                    isSelected
-                      ? "gradient-royal text-primary-foreground shadow-luxe scale-105"
-                      : "glass-card text-foreground/80 hover:border-primary/40 hover:text-primary"
-                  }`}
-                >
-                  <span>{catName}</span>
-                  <span className={`text-[0.62rem] sm:text-[0.65rem] px-1.5 py-0.5 rounded-full font-mono font-bold ${isSelected ? "bg-secondary text-ink" : "bg-muted text-muted-foreground"}`}>
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
+          {/* 4 Front Category Filter Pills + Luxury Dropdown */}
+          <div className="mt-8 sm:mt-10">
+            <CategoryFilterBar
+              items={serviceList}
+              categories={categoriesList}
+              selectedCategory={selectedCategory}
+              onSelectCategory={(cat: string) => setSelectedCategory(cat === "All" ? "all" : cat)}
+              allLabel="All Services"
+              maxFrontCategories={3}
+              dropdownLabel="More Services"
+              getItemCount={(cat: any, itms: any[]) => {
+                if (isAllCategory(cat)) return itms.length;
+                const catName = typeof cat === "string" ? cat : cat.name || cat.label || cat.id || "";
+                return itms.filter((s: any) => isCategoryMatch(s.category, catName)).length;
+              }}
+            />
           </div>
 
           {loading && !ready ? (
@@ -185,7 +160,7 @@ export default function ServicesPage() {
               <p className="text-xs text-muted-foreground mt-1.5 max-w-md mx-auto">
                 {serviceList.length === 0
                   ? "No services have been added in the Admin Panel yet."
-                  : "No services are currently assigned to this discipline. Select another category or click below to view all disciplines."}
+                  : "No services are currently assigned to this category. Select another category or click below to view all services."}
               </p>
               {serviceList.length > 0 && !isAllCategory(selectedCategory) && (
                 <button
@@ -193,7 +168,7 @@ export default function ServicesPage() {
                   onClick={() => setSelectedCategory("all")}
                   className="mt-5 btn-luxe gradient-gold text-ink text-xs py-2 px-5 font-bold shadow-xs cursor-pointer"
                 >
-                  View All Disciplines ({serviceList.length})
+                  View All Services ({serviceList.length})
                 </button>
               )}
             </div>
@@ -221,7 +196,7 @@ export default function ServicesPage() {
                       <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-transparent to-transparent" />
                       <span className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 inline-flex items-center gap-1.5 rounded-full gradient-gold px-3 py-0.5 sm:px-3.5 sm:py-1 text-[0.62rem] sm:text-[0.65rem] font-bold uppercase tracking-wider text-ink shadow-md">
                         <Sparkles className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                        <span>{service.badge || "Specialized Craft"}</span>
+                        <span>{service.badge || "Our Service"}</span>
                       </span>
                     </div>
 
@@ -270,9 +245,9 @@ export default function ServicesPage() {
         <section className="section-pad relative bg-accent/30 border-t border-b border-border/50">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
             <SectionHeading
-              eyebrow="Curated Functions &amp; Ritual Mastery"
-              title="From Sacred Pheras to Electrifying Sangeets"
-              subtitle="Every Indian wedding milestone demands its own distinct atmosphere, spatial architecture, and minute-by-minute ground direction."
+              eyebrow="Wedding Functions &amp; Ceremonies"
+              title="From Sacred Pheras to Sangeet Nights"
+              subtitle="Every Indian wedding function has its own unique style, decor setup, and timing."
             />
 
             <div className="reveal mt-8 sm:mt-14 grid gap-5 sm:gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -318,7 +293,7 @@ export default function ServicesPage() {
                       {Array.isArray(ceremony.highlights) && ceremony.highlights.length > 0 && (
                         <div className="mt-4 pt-3 border-t border-border/50 space-y-1.5">
                           <span className="text-[0.62rem] sm:text-[0.65rem] font-bold uppercase tracking-wider text-muted-foreground block">
-                            Milestone Deliverables:
+                            What's Included:
                           </span>
                           {ceremony.highlights.map((h: string, hIdx: number) => (
                             <div key={hIdx} className="flex items-center gap-2 text-xs text-foreground/85">
@@ -352,9 +327,9 @@ export default function ServicesPage() {
         <section className="section-pad relative bg-background">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
             <SectionHeading
-              eyebrow="Bespoke Guest Collateral"
-              title="Event Stationery &amp; Hospitality Touchpoints"
-              subtitle="The finest luxury lies in the smallest personal details. We design and deliver custom collateral that sets an unforgettable tone for your celebration."
+              eyebrow="Wedding Stationery &amp; Welcome Items"
+              title="Invitation Cards, Luggage Tags &amp; Welcome Kits"
+              subtitle="Personal details make weddings special. We design custom invitation cards, luggage tags, key jackets, and welcome hampers for your guests."
             />
 
             <div className="reveal mt-10 sm:mt-14 grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -379,7 +354,7 @@ export default function ServicesPage() {
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-transparent to-transparent" />
                       <span className="absolute bottom-3 left-3 inline-flex items-center gap-1 rounded-full gradient-gold px-2.5 py-0.5 text-[0.62rem] font-bold uppercase tracking-wider text-ink shadow-sm">
-                        <span>{item.badge || "Collateral"}</span>
+                        <span>{item.badge || "Stationery"}</span>
                       </span>
                     </div>
 
@@ -410,7 +385,7 @@ export default function ServicesPage() {
       {/* 6. 5-Step Process */}
       <ProcessSection />
 
-      {/* 7. Dynamic Private Consultation VIP CTA Banner */}
+      {/* 7. Dynamic Consultation CTA Banner */}
       <section className="bg-ink py-14 sm:py-20 text-center text-background relative overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-15">
           <img
@@ -427,13 +402,13 @@ export default function ServicesPage() {
           </span>
 
           <h2 className="font-display text-2xl sm:text-4xl lg:text-5xl text-background font-normal max-w-3xl mx-auto leading-tight">
-            {cta.headline || "Ready to Begin Curating Your Wedding?"}
+            {cta.headline || "Ready to Begin Planning Your Wedding?"}
           </h2>
 
           <div className="rule-gold mx-auto my-4 sm:my-5" />
 
           <p className="text-xs sm:text-sm lg:text-base text-background/85 font-light mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed px-2">
-            {cta.subtitle || "Book a private 60–90 minute consultation with Ashish Wankhede in Warje, Pune, or via virtual video call."}
+            {cta.subtitle || "Book a free 60–90 minute consultation with Ashish Wankhede in Warje, Pune, or via video call."}
           </p>
 
           {/* Consultation Perks Pills */}

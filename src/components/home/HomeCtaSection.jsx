@@ -42,7 +42,7 @@ export default function HomeCtaSection() {
 
           {/* Headline */}
           <h2 className="mt-4 sm:mt-6 font-display text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-normal leading-[1.2] sm:leading-[1.15] text-background">
-            Ready to Begin Your <span className="text-gold-gradient font-medium">Wedding Story</span>?
+            Ready to Plan Your <span className="text-gold-gradient font-medium">Dream Wedding</span>?
           </h2>
 
           {/* Gold divider */}
@@ -50,26 +50,26 @@ export default function HomeCtaSection() {
 
           {/* Subtitle */}
           <p className="mx-auto max-w-2xl text-xs sm:text-base md:text-lg leading-relaxed text-background/80 font-light">
-            Reserve a complimentary 60–90 minute private vision session with founders Ashish Wankhede &amp; Rutik Pund in Warje, Pune, or via virtual video call anywhere in the world.
+            Book a free 60–90 minute meeting with founders Ashish Wankhede &amp; Rutik Pund at our Pune office or on a video call.
           </p>
 
           {/* Trust Value Badges */}
           <div className="mt-6 sm:mt-8 flex flex-wrap items-center justify-center gap-1.5 sm:gap-3 text-[0.7rem] sm:text-xs md:text-sm text-background/90">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-2.5 sm:px-3.5 py-1 sm:py-1.5 backdrop-blur-sm">
               <CheckCircle2 className="h-3.5 w-3.5 text-secondary shrink-0" />
-              <span>100% Bespoke 3D CAD Decor</span>
+              <span>100% Custom 3D Decor Designs</span>
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-2.5 sm:px-3.5 py-1 sm:py-1.5 backdrop-blur-sm">
               <ShieldCheck className="h-3.5 w-3.5 text-secondary shrink-0" />
-              <span>Direct Founder Oversight</span>
+              <span>Personal Care by Founders</span>
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-2.5 sm:px-3.5 py-1 sm:py-1.5 backdrop-blur-sm">
               <Sparkles className="h-3.5 w-3.5 text-secondary shrink-0" />
-              <span>Zero-Glitch Show Running</span>
+              <span>Smooth On-Time Event Flow</span>
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-2.5 sm:px-3.5 py-1 sm:py-1.5 backdrop-blur-sm">
               <Calendar className="h-3.5 w-3.5 text-secondary shrink-0" />
-              <span>500+ Landmark Celebrations</span>
+              <span>500+ Happy Weddings</span>
             </span>
           </div>
 

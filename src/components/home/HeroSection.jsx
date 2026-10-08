@@ -33,14 +33,16 @@ export default function HeroSection() {
     setCurrentSlide((prev) => (prev - 1 + total) % total);
   }, [total]);
 
+  const slideInterval = typeof hero?.slideInterval === "number" ? hero.slideInterval : 5000;
+
   // Automatic timer with pause on hover
   useEffect(() => {
     if (total <= 1 || isPaused) return;
     const timer = setInterval(() => {
       nextSlide();
-    }, 5000);
+    }, slideInterval);
     return () => clearInterval(timer);
-  }, [total, isPaused, nextSlide]);
+  }, [total, isPaused, nextSlide, slideInterval]);
 
   // Touch swipe support for mobile viewports
   const handleTouchStart = (e) => {

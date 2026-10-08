@@ -19,14 +19,14 @@ export default function BlogPage() {
 
         <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8 lg:px-10 text-center">
           <span className="text-[0.68rem] uppercase tracking-[0.34em] text-secondary font-medium">
-            Confianza Editorial &amp; Insights
+            Confianza Wedding Guides
           </span>
           <h1 className="mt-3 font-display text-4xl sm:text-5xl lg:text-6xl text-background font-normal">
-            The Wedding Journal
+            Wedding Tips &amp; Guides
           </h1>
           <div className="rule-gold mx-auto my-5" />
           <p className="mx-auto max-w-2xl text-sm sm:text-base text-background/80 font-light leading-relaxed">
-            Essential advice on timelines, decor color stories, vendor contracts, and destination venue selection written by our senior planners.
+            Helpful tips on wedding timelines, decor ideas, budget planning, and venue selection from our team.
           </p>
         </div>
       </section>

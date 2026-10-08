@@ -23,9 +23,9 @@ export default function BlogSection({ isStandalone = false }) {
     <section id="blog" className="section-pad relative bg-background overflow-hidden">
       <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
         <SectionHeading
-          eyebrow="The Journal &amp; Guides"
-          title="Inspiration, Decor Trends &amp; Planning Wisdom"
-          subtitle="Expert advice from our seasoned directors on timelines, royal decor color schemes, destination venues, and etiquette."
+          eyebrow="Wedding Guides &amp; Tips"
+          title="Ideas, Decor Trends &amp; Planning Tips"
+          subtitle="Helpful advice from our planners on wedding timelines, decor color ideas, venue selection, and budgets."
         />
 
         {/* Category Pills if on standalone page */}
@@ -115,7 +115,7 @@ export default function BlogSection({ isStandalone = false }) {
               href="/blog"
               className="btn-luxe gradient-royal text-primary-foreground text-xs shadow-luxe"
             >
-              <span>Explore All Planning Articles</span>
+              <span>View All Wedding Articles</span>
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -177,14 +177,14 @@ export default function BlogSection({ isStandalone = false }) {
 
             <div className="mt-8 pt-6 border-t border-[#E8E2EE] flex flex-wrap items-center justify-between gap-4">
               <span className="text-xs text-[#7E7688]">
-                Confianza Event's and Entertainment Editorial
+                Confianza Events and Entertainment
               </span>
               <Link
                 href="/contact"
                 onClick={() => setSelectedArticle(null)}
                 className="btn-modal-primary"
               >
-                Book a Planning Session
+                Book a Consultation
               </Link>
             </div>
           </div>

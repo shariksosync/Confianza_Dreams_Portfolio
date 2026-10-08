@@ -39,7 +39,7 @@ export default function TeamDetailModal({ member, isOpen, onClose }) {
 
   const specialties = Array.isArray(member.specialties) && member.specialties.length > 0
     ? member.specialties
-    : ["Luxury Decor", "Floral Architecture", "Event Production"];
+    : ["Wedding Decor", "Flower Arrangements", "Event Management"];
 
   return (
     <div
@@ -127,7 +127,7 @@ export default function TeamDetailModal({ member, isOpen, onClose }) {
             {/* Specialties Badges */}
             <div>
               <span className="text-[0.62rem] sm:text-[0.65rem] uppercase tracking-wider text-[#7E7688] block mb-1.5 font-semibold">
-                Key Specialties &amp; Domain:
+                Key Specialties:
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {specialties.map((spec, sIdx) => (
@@ -147,7 +147,7 @@ export default function TeamDetailModal({ member, isOpen, onClose }) {
                 About {member.name}:
               </span>
               <p className="text-xs sm:text-sm text-[#4C4555] leading-relaxed font-light">
-                {member.bio || "Dedicated luxury wedding coordinator bringing artistic mastery and calm execution to every couple's milestone celebration."}
+                {member.bio || "Dedicated wedding planner bringing creative design and smooth on-ground management to every celebration."}
               </p>
             </div>
 

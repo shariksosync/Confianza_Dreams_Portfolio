@@ -23,11 +23,11 @@ export default function ContactPage() {
             Let's Shape Your Wedding Story
           </span>
           <h1 className="mt-2.5 sm:mt-3 font-display text-2xl sm:text-4xl md:text-5xl lg:text-6xl text-background font-normal leading-tight">
-            Contact &amp; Private Consultation
+            Contact Us &amp; Consultation
           </h1>
           <div className="rule-gold mx-auto my-3.5 sm:my-5" />
           <p className="mx-auto max-w-2xl text-xs sm:text-sm md:text-base text-background/80 font-light leading-relaxed">
-            Reach out via phone, WhatsApp, or through our private inquiry form. We welcome consultations in person at Warje, Pune, or via virtual video call.
+            Reach out via phone, WhatsApp, or our inquiry form. We welcome consultations in person at Warje, Pune, or via video call.
           </p>
         </div>
       </section>

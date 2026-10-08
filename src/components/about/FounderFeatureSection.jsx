@@ -1,114 +1,147 @@
 "use client";
 
-import { Sparkles, Quote, Feather } from "lucide-react";
+import { Sparkles, Quote } from "lucide-react";
 import { useSite } from "@/context/SiteContext";
+
+const DEFAULT_LEADERSHIP = [
+  {
+    id: "founder",
+    badge: "FOUNDER'S VISION",
+    eyebrow: "FOUNDER'S ADDRESS",
+    quote:
+      "Every love story is special, and that is why we create weddings tailored just for you.",
+    image: "/images/couple.jpg",
+    name: "Mr. Ashish Wankhede",
+    role: "Founder & Managing Director",
+    story:
+      "At Confianza, we love bringing wedding dreams to life with care and attention to detail. Our team is passionate about creating happy moments for couples and their families.\n\nFor us, your wedding is as important as our own family function. From traditional rituals to multi-day destination weddings across India, we take care of all planning, guest hospitality, vendor coordination, and timing so your family can relax and enjoy the celebrations.\n\nOur promise is simple: we manage every detail smoothly so you can make lifelong memories with the people you love.",
+  },
+  {
+    id: "cfo",
+    badge: "CLEAR & HONEST BUDGETING",
+    eyebrow: "CFO'S PERSPECTIVE",
+    quote:
+      "Clear budget planning and honest pricing are the foundation of a stress-free wedding.",
+    image: "/images/hero-2.jpg",
+    name: "Mr. Rutik Pund",
+    role: "CFO & Co-Founder",
+    story:
+      "At Confianza, we handle every family's wedding budget with complete honesty and care. Great weddings are not about high extra costs—they are about smart budget planning, fair vendor rates, and clear spending.\n\nWe give you detailed cost sheets with clear prices for every item. We negotiate directly with hotels and vendors to make sure you get the best quality and value for your money.\n\nWe believe that when you have full peace of mind about your budget, you can celebrate happily with complete confidence.",
+  },
+  {
+    id: "management-head",
+    badge: "ON-GROUND MANAGEMENT",
+    eyebrow: "OPERATIONS & MANAGEMENT",
+    quote:
+      "Smooth weddings do not happen by chance—they happen because of good planning, proper preparation, and calm coordination.",
+    image: "/images/hero-3.jpg",
+    name: "Management Head",
+    role: "Head of Operations & Production",
+    story:
+      "Behind every beautiful bridal entry and grand floral mandap, there is a dedicated ground team working hard. Our team starts early in the morning to set up lighting, sound, stage decor, and guest hospitality on time.\n\nWe stay prepared for every situation and solve any issue quietly behind the scenes so that all ceremonies run smoothly.\n\nOur goal is simple: you enjoy the wedding as happy hosts, while we handle every single detail with care.",
+  },
+];
 
 export default function FounderFeatureSection() {
   const { about } = useSite();
 
-  const founder = about?.founderAddress || {
-    badge: "FOUNDER'S VISION",
-    eyebrow: "FOUNDER'S ADDRESS",
-    quote: "We believe that every couple's love story is unique, and that's what inspires us to create truly personalized weddings.",
-    image: "/images/couple.jpg",
-    name: "Mr. Ashish Wankhede",
-    role: "Founder & Lead Director",
-    story:
-      "At Confianza, we're the romantic and elegant wedding experts who bring love stories to life with passion and precision. We are a dedicated team obsessed with love, laughter, and happily ever afters.\n\nFor us, your event is no less than our own. From sacred heritage rituals to grand multi-day luxury weddings across India, we shoulder all logistics, hospitality, vendor coordination, and minute-by-minute show running so your family can celebrate as honored guests.\n\nWe pledge our continuous devotion to crafting not just flawless weddings, but heartfelt lifelong memories that outlast generations.",
-    signatureName: "Ashish Wankhede",
-    signatureTitle: "Founder & Principal Director, Confianza Events",
-  };
+  // Combine DB leadership array or default 3 cards, ensuring founderAddress override is applied to card 0
+  let leadershipList = Array.isArray(about?.leadership) && about.leadership.length > 0
+    ? about.leadership
+    : DEFAULT_LEADERSHIP;
 
-  const paragraphs = (founder.story || "")
-    .split("\n\n")
-    .filter((p) => p.trim().length > 0);
+  // Fallback / sync from legacy founderAddress if leadership array wasn't customized yet
+  if (!about?.leadership && about?.founderAddress) {
+    leadershipList = [
+      {
+        ...DEFAULT_LEADERSHIP[0],
+        ...about.founderAddress,
+      },
+      DEFAULT_LEADERSHIP[1],
+      DEFAULT_LEADERSHIP[2],
+    ];
+  }
 
   return (
     <section className="section-pad relative bg-background overflow-hidden border-b border-border/60">
-      {/* Ethereal background lighting blurs */}
-      <div className="absolute top-1/3 left-1/4 -translate-y-1/2 w-[32rem] h-[32rem] bg-primary/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-10 right-1/4 w-[32rem] h-[32rem] bg-secondary/15 rounded-full blur-3xl pointer-events-none" />
+      {/* Ambient background lighting blurs */}
+      <div className="absolute top-1/4 left-1/4 -translate-y-1/2 w-[34rem] h-[34rem] bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-[34rem] h-[34rem] bg-secondary/15 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
-        {/* Luminous Smooth Cloud Card */}
-        <div className="reveal bg-gradient-to-br from-white/95 via-card/90 to-accent/20 backdrop-blur-2xl rounded-2xl sm:rounded-[2.5rem] p-4 sm:p-8 lg:p-14 border border-secondary/30 shadow-2xl shadow-primary/5 relative overflow-hidden ring-1 ring-secondary/15">
-          {/* Subtle warm corner glows */}
-          <div className="absolute -top-24 -right-24 w-80 h-80 bg-secondary/15 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 space-y-10 sm:space-y-14 lg:space-y-20">
+        {leadershipList.map((leader, index) => {
+          const paragraphs = (leader.story || "")
+            .split("\n\n")
+            .filter((p) => p.trim().length > 0);
 
-          <div className="relative z-10 grid gap-6 sm:gap-8 lg:grid-cols-12 lg:items-center">
-            {/* Left Column: Founder Photo Card */}
-            <div className="lg:col-span-5 relative">
-              <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden h-[340px] sm:h-[420px] lg:h-[490px] border-2 border-secondary/30 shadow-xl bg-card group ring-2 sm:ring-4 ring-secondary/10">
-                <img
-                  src={founder.image || "/images/couple.jpg"}
-                  alt={founder.name || "Founder"}
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  onError={(e) => {
-                    e.currentTarget.src = "/images/couple.jpg";
-                  }}
-                />
-                {/* Smooth natural bottom gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/20 to-transparent" />
+          return (
+            <div
+              key={leader.id || index}
+              className="reveal bg-gradient-to-br from-white/95 via-card/90 to-accent/20 backdrop-blur-2xl rounded-2xl sm:rounded-[2.5rem] p-5 sm:p-8 lg:p-14 border border-secondary/30 shadow-2xl shadow-primary/5 relative overflow-hidden ring-1 ring-secondary/15"
+            >
+              {/* Subtle warm corner glows */}
+              <div className="absolute -top-24 -right-24 w-80 h-80 bg-secondary/15 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
 
-                {/* Floating Bottom Card Details */}
-                <div className="absolute bottom-3.5 left-3.5 right-3.5 sm:bottom-5 sm:left-5 sm:right-5">
-                  <span className="inline-flex items-center gap-1.5 rounded-full gradient-gold text-ink font-bold text-[0.62rem] sm:text-[0.68rem] tracking-wider uppercase px-3 py-0.5 sm:px-3.5 sm:py-1 shadow-md">
-                    <Sparkles className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                    {founder.badge || "FOUNDER'S VISION"}
-                  </span>
-                  <h4 className="font-display text-lg sm:text-2xl text-white font-bold mt-2 sm:mt-2.5">
-                    {founder.name || "Mr. Ashish Wankhede"}
-                  </h4>
-                  <p className="text-[0.7rem] sm:text-xs text-secondary font-semibold tracking-wide mt-0.5">
-                    {founder.role || "Founder & Managing Director"}
-                  </p>
+              <div className="relative z-10 grid gap-6 sm:gap-8 lg:grid-cols-12 lg:items-start">
+                {/* Left Column: Portrait Card + Details Below Image */}
+                <div className="lg:col-span-5 space-y-3.5 sm:space-y-4">
+                  {/* Clean Photo Container (Without overlay text or dark gradient) */}
+                  <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden h-[300px] sm:h-[380px] lg:h-[440px] border-2 border-secondary/30 shadow-xl bg-card group ring-2 sm:ring-4 ring-secondary/10">
+                    <img
+                      src={leader.image || "/images/couple.jpg"}
+                      alt={leader.name || "Leader"}
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      onError={(e) => {
+                        e.currentTarget.src = "/images/couple.jpg";
+                      }}
+                    />
+                  </div>
+
+                  {/* Details Cleanly Positioned Below The Image */}
+                  <div className="space-y-1.5 pt-1">
+                    <span className="inline-flex items-center gap-1.5 rounded-full gradient-gold text-ink font-bold text-[0.62rem] sm:text-[0.68rem] tracking-wider uppercase px-3 py-1 shadow-sm">
+                      <Sparkles className="h-3 w-3 text-ink shrink-0" />
+                      <span>{leader.badge || "EXECUTIVE LEADERSHIP"}</span>
+                    </span>
+                    <h4 className="font-display text-xl sm:text-2xl lg:text-3xl text-ink font-bold pt-1">
+                      {leader.name || "Executive Leader"}
+                    </h4>
+                    <p className="text-xs sm:text-sm text-secondary font-semibold tracking-wide">
+                      {leader.role || "Executive Leadership"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right Column: Address, Quote & Narrative (No Signature Row) */}
+                <div className="lg:col-span-7 space-y-3.5 sm:space-y-5 lg:pl-4">
+                  {/* Eyebrow Badge */}
+                  <div className="inline-flex items-center gap-1.5 sm:gap-2 text-primary font-bold text-[0.68rem] sm:text-xs uppercase tracking-[0.2em] sm:tracking-[0.25em] bg-primary/10 px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full border border-primary/20">
+                    <Quote className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-secondary rotate-180 shrink-0" />
+                    <span>{leader.eyebrow || "EXECUTIVE ADDRESS"}</span>
+                  </div>
+
+                  {/* Majestic Serif Quote Headline */}
+                  <h3 className="font-display text-lg sm:text-2xl lg:text-3xl text-ink font-normal leading-snug tracking-tight">
+                    "{leader.quote || "Where Weddings Become Stories."}"
+                  </h3>
+
+                  {/* Gold Divider Accent */}
+                  <div className="rule-gold" />
+
+                  {/* Story Narrative in Crisp Legible Typography */}
+                  <div className="space-y-3 text-xs sm:text-sm text-foreground/85 leading-relaxed font-normal">
+                    {paragraphs.length > 0 ? (
+                      paragraphs.map((p, pIdx) => <p key={pIdx}>{p}</p>)
+                    ) : (
+                      <p>{leader.story}</p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
-
-            {/* Right Column: Founder's Address Prose */}
-            <div className="lg:col-span-7 space-y-3.5 sm:space-y-5 lg:pl-4">
-              {/* Eyebrow Badge */}
-              <div className="inline-flex items-center gap-1.5 sm:gap-2 text-primary font-bold text-[0.68rem] sm:text-xs uppercase tracking-[0.2em] sm:tracking-[0.25em] bg-primary/10 px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full border border-primary/20">
-                <Quote className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-secondary rotate-180 shrink-0" />
-                <span>{founder.eyebrow || "FOUNDER'S ADDRESS"}</span>
-              </div>
-
-              {/* Majestic Serif Quote Headline */}
-              <h3 className="font-display text-lg sm:text-2xl lg:text-4xl text-ink font-normal leading-snug tracking-tight">
-                "{founder.quote || "We don't just decorate halls; we architect emotional memories that outlast generations."}"
-              </h3>
-
-              {/* Gold Divider Accent */}
-              <div className="rule-gold" />
-
-              {/* Story Narrative in Crisp Legible Typography */}
-              <div className="space-y-3 text-xs sm:text-sm text-foreground/85 leading-relaxed font-normal">
-                {paragraphs.length > 0 ? (
-                  paragraphs.map((p, idx) => <p key={idx}>{p}</p>)
-                ) : (
-                  <p>{founder.story}</p>
-                )}
-              </div>
-
-              {/* Signature Row */}
-              <div className="pt-4 sm:pt-5 border-t border-border/80 flex items-center gap-3 sm:gap-3.5">
-                <div className="grid h-10 w-10 sm:h-12 sm:w-12 shrink-0 rounded-full gradient-royal text-primary-foreground place-items-center font-display text-sm sm:text-base font-bold shadow-md ring-2 ring-secondary/40">
-                  <Feather className="h-4 w-4 sm:h-5 sm:w-5 text-secondary" />
-                </div>
-                <div>
-                  <h5 className="font-display text-sm sm:text-lg font-bold text-ink">
-                    {founder.signatureName || founder.name || "Mr. Ashish Wankhede"}
-                  </h5>
-                  <p className="text-[0.62rem] sm:text-xs uppercase tracking-wider text-secondary font-semibold">
-                    {founder.signatureTitle || "Founder & Principal Director, Confianza Events"}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+          );
+        })}
       </div>
     </section>
   );

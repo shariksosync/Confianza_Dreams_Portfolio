@@ -20,7 +20,7 @@ export default function FaqSection() {
         <SectionHeading
           eyebrow="Frequently Asked Questions"
           title="Everything You Need to Know"
-          subtitle="Clear answers to common questions about booking timelines, destination coordination, budgets, vendor partnerships, and rainy day contingency."
+          subtitle="Clear answers to common questions about booking timelines, destination weddings, budgets, vendors, and backup plans."
         />
 
         {/* Accordion List */}
@@ -72,10 +72,10 @@ export default function FaqSection() {
         <div className="reveal mt-8 sm:mt-12 glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-7 sm:p-8 border border-primary/20 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 shadow-soft">
           <div className="text-center sm:text-left w-full sm:w-auto">
             <h4 className="font-display text-base sm:text-xl text-ink font-bold">
-              Have a unique question or custom venue requirement?
+              Have a specific question about your wedding?
             </h4>
             <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-              Speak directly with Ashish and our planning directors.
+              Talk directly with Ashish and our wedding team.
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 w-full sm:w-auto shrink-0">

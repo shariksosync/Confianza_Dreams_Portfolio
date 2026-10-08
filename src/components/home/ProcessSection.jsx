@@ -30,8 +30,8 @@ export default function ProcessSection() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
         <SectionHeading
           eyebrow="The Wedding Journey"
-          title="From First Meeting to Forever Memories"
-          subtitle="A transparent, stress-free path crafted so you and your families can cherish every second leading up to the celebration."
+          title="From First Meeting to Last Meeting"
+          subtitle="A clear, stress-free planning process so you and your family can enjoy every moment leading up to the wedding."
         />
 
         {/* Process Timeline Steps */}

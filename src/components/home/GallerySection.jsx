@@ -6,6 +6,7 @@ import { Eye, Sparkles, ArrowRight, MapPin, Filter, Layers } from "lucide-react"
 import { useSite } from "../../context/SiteContext";
 import SectionHeading from "../ui/SectionHeading";
 import Lightbox from "../ui/Lightbox";
+import CategoryFilterBar from "../ui/CategoryFilterBar";
 
 const normalizeCategory = (str) =>
   (str || "")
@@ -42,13 +43,13 @@ export default function GallerySection({ isStandalone = false }) {
       Array.isArray(galleryCategories) && galleryCategories.length > 0
         ? galleryCategories
         : [
-            { id: "all", name: "All Archives", slug: "all" },
-            { id: "mandap", name: "Mandap Architecture", slug: "mandap" },
-            { id: "reception", name: "Opulent Receptions", slug: "reception" },
+            { id: "all", name: "All Photos", slug: "all" },
+            { id: "mandap", name: "Mandap & Decor", slug: "mandap" },
+            { id: "reception", name: "Receptions", slug: "reception" },
             { id: "haldi-sangeet", name: "Haldi & Sangeet", slug: "haldi-sangeet" },
             { id: "bridal-entries", name: "Bridal Entries & Portraits", slug: "bridal-entries" },
-            { id: "destination", name: "Destination Venues", slug: "destination" },
-            { id: "spatial-decor", name: "Spatial Decor & Floral Art", slug: "spatial-decor" },
+            { id: "destination", name: "Destination Weddings", slug: "destination" },
+            { id: "spatial-decor", name: "Mandap & Flower Decor", slug: "spatial-decor" },
           ];
     return list;
   }, [galleryCategories]);
@@ -67,54 +68,41 @@ export default function GallerySection({ isStandalone = false }) {
     <section id="gallery" className="py-10 sm:py-16 lg:py-24 relative bg-background overflow-hidden">
       <div className="mx-auto max-w-7xl px-3.5 sm:px-6 lg:px-8">
         <SectionHeading
-          eyebrow="Visual Chronicles"
-          title="A Tapestry of Sacred Vows & Spatial Splendor"
-          subtitle="Explore our visual archives of bespoke mandap architecture, opulent reception ballroom stages, sun-kissed haldi carnivals, and intimate destination celebrations."
+          eyebrow="Photo Gallery"
+          title="Moments of Grandeur & Celebration"
+          subtitle="Explore photos of our mandap decor, grand reception stages, colorful haldi ceremonies, and destination weddings."
         />
 
-        {/* Dynamic Category Filter Pills */}
+        {/* 4 Front Category Filter Pills + Luxury Dropdown */}
         {isStandalone && items.length > 0 && (
-          <div className="reveal mt-6 sm:mt-10 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2.5">
-            {categories.map((cat) => {
-              const isAllPill = isAllCategory(cat);
-
-              const count = isAllPill
-                ? items.length
-                : items.filter(
-                    (it) =>
-                      isCategoryMatch(it.category, cat.name) ||
-                      isCategoryMatch(it.category, cat.slug)
-                  ).length;
-
-              const isSelected = isAllPill
-                ? isAllCategory(activeCategory)
-                : isCategoryMatch(activeCategory, cat.name) ||
-                  isCategoryMatch(activeCategory, cat.slug);
-
-              return (
-                <button
-                  key={cat.id || cat.slug || cat.name}
-                  type="button"
-                  onClick={() => setActiveCategory(isAllPill ? "all" : cat.name)}
-                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[0.7rem] sm:text-xs font-semibold tracking-wide transition-all duration-300 flex items-center gap-1.5 sm:gap-2 cursor-pointer shadow-xs ${
-                    isSelected
-                      ? "gradient-royal text-primary-foreground shadow-[0_4px_18px_rgba(109,76,155,0.4)] scale-105 ring-1 ring-white/30"
-                      : "bg-card border border-border text-foreground/80 hover:text-secondary hover:border-secondary/60 hover:bg-card/90"
-                  }`}
-                >
-                  <span>{cat.name}</span>
-                  <span
-                    className={`text-[0.62rem] sm:text-[0.68rem] px-1.5 py-0.2 sm:py-0.5 rounded-full font-mono font-bold ${
-                      isSelected
-                        ? "bg-secondary text-ink"
-                        : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
+          <div className="reveal mt-6 sm:mt-10">
+            <CategoryFilterBar
+              items={items}
+              categories={
+                Array.isArray(galleryCategories) && galleryCategories.length > 0
+                  ? galleryCategories
+                  : [
+                      { id: "mandap", name: "Mandap & Decor", slug: "mandap", showInFront: true },
+                      { id: "reception", name: "Receptions", slug: "reception", showInFront: true },
+                      { id: "haldi-sangeet", name: "Haldi & Sangeet", slug: "haldi-sangeet", showInFront: true },
+                      { id: "bridal-entries", name: "Bridal Entries & Portraits", slug: "bridal-entries" },
+                      { id: "destination", name: "Destination Weddings", slug: "destination" },
+                      { id: "spatial-decor", name: "Mandap & Flower Decor", slug: "spatial-decor" },
+                    ]
+              }
+              selectedCategory={activeCategory}
+              onSelectCategory={(cat) => setActiveCategory(cat === "All" ? "all" : cat)}
+              allLabel="All Photos"
+              maxFrontCategories={3}
+              dropdownLabel="More Categories"
+              getItemCount={(cat, itms) => {
+                if (isAllCategory(cat)) return itms.length;
+                const catName = typeof cat === "string" ? cat : cat.name || cat.slug || "";
+                return itms.filter(
+                  (it) => isCategoryMatch(it.category, catName) || (cat.slug && isCategoryMatch(it.category, cat.slug))
+                ).length;
+              }}
+            />
           </div>
         )}
 

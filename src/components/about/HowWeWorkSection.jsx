@@ -12,38 +12,38 @@ export default function HowWeWorkSection() {
   const defaultSteps = [
     {
       num: "01",
-      title: "Personalized Consultation",
-      timeline: "60–90 Min Session • Vision & Budget",
+      title: "First Meeting & Discussion",
+      timeline: "60–90 Min Meeting • Ideas & Budget",
       summary:
-        "A dedicated one-on-one session to explore your love story, wedding vision, aesthetic preferences, guest count, and realistic budget priorities. We outline customized planning tiers (Full Planning, Partial Planning, Day-of Coordination) and present a transparent, tailored wedding proposal.",
+        "A friendly one-on-one session to understand your wedding ideas, style preferences, guest count, and budget. We explain our planning options clearly and share a simple, honest wedding plan.",
       deliverables: [
-        "Vision & Expectations Alignment",
-        "Budget Allocation Framework",
-        "Tailored Planning Proposal & Timeline",
+        "Understanding Your Vision",
+        "Clear Budget Planning",
+        "Custom Wedding Plan & Timeline",
       ],
     },
     {
       num: "02",
-      title: "Strategic Planning & 3D Spatial Design",
-      timeline: "Design & Procurement • Artistry",
+      title: "Detailed Planning & 3D Decor Design",
+      timeline: "Design & Bookings • Creative Concepts",
       summary:
-        "Our design studio creates realistic 3D renderings of the mandap, entrance arches, and stage layouts so you see your celebration before we build it. We curate trusted venues, caterers, sound/lighting engineers, celebrity artists, and custom event stationery with zero hidden markups.",
+        "Our design team creates realistic 3D designs for your mandap, entrance, and stage so you see everything before setup starts. We help book trusted venues, caterers, sound, lights, and artists with honest pricing.",
       deliverables: [
-        "3D CAD Decor & Floral Palettes",
-        "Venue Lock-in & Vendor Contracts",
-        "Event Stationery & Branding Suite",
+        "3D Decor Previews & Flower Colors",
+        "Venue & Vendor Confirmations",
+        "Wedding Cards & Stationery",
       ],
     },
     {
       num: "03",
-      title: "On-Ground Execution & Show Running",
-      timeline: "Event Day • Flawless Delivery",
+      title: "Wedding Day Management & Execution",
+      timeline: "Wedding Day • Smooth Delivery",
       summary:
-        "Our team brings every carefully planned detail to life. Dedicated shadow coordinators support the bride and groom, while our ground directors oversee hospitality check-in, F&B pacing, ritual timings, artist cues, and instant trouble-shooting so families celebrate as honored guests.",
+        "Our team manages everything on the wedding day. Dedicated personal helpers assist the bride and groom, while our on-ground crew handles guest check-ins, food timings, rituals, and music so your family can enjoy freely.",
       deliverables: [
-        "Dedicated Bride & Groom Shadows",
-        "Minute-by-Minute Master Run Sheet",
-        "Royal Hospitality & F&B Supervision",
+        "Personal Helpers for Bride & Groom",
+        "Detailed Event Schedule",
+        "Guest Care & Food Timing Supervision",
       ],
     },
   ];
@@ -56,9 +56,9 @@ export default function HowWeWorkSection() {
     <section className="section-pad relative bg-background overflow-hidden border-t border-border/60">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
         <SectionHeading
-          eyebrow="Our 3-Phase Luxury Roadmap"
-          title="How Do We Work"
-          subtitle="From your initial 60–90 minute vision consultation to flawless on-ground show running, here is our transparent, stress-free execution process."
+          eyebrow="How We Work"
+          title="How We Plan Your Wedding"
+          subtitle="From our first meeting to smooth management on the wedding day, here is our simple, stress-free process."
         />
 
         <div className="reveal mt-10 sm:mt-16 space-y-6 sm:space-y-8">
@@ -99,7 +99,7 @@ export default function HowWeWorkSection() {
                   {Array.isArray(step.deliverables) && step.deliverables.length > 0 && (
                     <div className="lg:col-span-3 rounded-xl sm:rounded-2xl bg-card/80 p-3.5 sm:p-4 border border-border/60 text-xs space-y-2">
                       <span className="text-[0.62rem] sm:text-[0.65rem] uppercase tracking-wider text-secondary font-bold block mb-1">
-                        Key Deliverables:
+                        What You Get:
                       </span>
                       {step.deliverables.map((item, dIdx) => (
                         <div key={dIdx} className="flex items-start gap-2 text-foreground/85">

@@ -20,11 +20,11 @@ export default function TestimonialsSection({ showOnlyPortfolio = true }) {
     <section id="testimonials" className="section-pad relative bg-background overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
         <SectionHeading
-          eyebrow={testimonialsHeader?.eyebrow || "Words of Gratitude"}
-          title={testimonialsHeader?.title || "Stories of Love, Captured Forever"}
+          eyebrow={testimonialsHeader?.eyebrow || "Client Reviews"}
+          title={testimonialsHeader?.title || "Real Reviews from Real Couples"}
           subtitle={
             testimonialsHeader?.subtitle ||
-            "Read how our couples and their families experienced the ease, beauty, and grandeur of a Confianza managed wedding."
+            "Read how couples and their families enjoyed stress-free, beautiful weddings managed by Confianza."
           }
         />
 
@@ -35,7 +35,7 @@ export default function TestimonialsSection({ showOnlyPortfolio = true }) {
               No Featured Testimonials Selected
             </h3>
             <p className="text-xs text-muted-foreground mt-1 max-w-md mx-auto">
-              Select client stories in the Admin Panel by ticking &ldquo;Show on Homepage &amp; Portfolio (Words of Gratitude)&rdquo; to feature them here.
+              Select client stories in the Admin Panel by ticking &ldquo;Show on Homepage &amp; Portfolio (Client Reviews)&rdquo; to feature them here.
             </p>
           </div>
         ) : (
@@ -102,7 +102,7 @@ export default function TestimonialsSection({ showOnlyPortfolio = true }) {
               href="/testimonials"
               className="btn-luxe gradient-royal text-primary-foreground text-xs shadow-luxe py-3 px-6 sm:py-3.5 sm:px-8 inline-flex items-center justify-center gap-2 hover:scale-105 transition font-semibold tracking-wider uppercase w-full sm:w-auto"
             >
-              <span>Explore All Love Stories &amp; Reviews</span>
+              <span>Read All Reviews &amp; Stories</span>
               <ArrowRight className="h-4 w-4 shrink-0" />
             </Link>
           </div>

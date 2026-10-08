@@ -28,6 +28,7 @@ import SiteLayout from "@/layouts/SiteLayout";
 import SectionHeading from "@/components/ui/SectionHeading";
 import PartnerMarqueeSection from "@/components/home/PartnerMarqueeSection";
 import ImageUploadField from "@/components/ImageUploadField";
+import CategoryFilterBar from "@/components/ui/CategoryFilterBar";
 import { useSite } from "@/context/SiteContext";
 
 const normalizeCategory = (str: string) =>
@@ -69,17 +70,17 @@ export default function TestimonialsPage() {
   // Header content
   const header = testimonialsHeader || {
     badge: "Couples & Families",
-    eyebrow: "Words of Gratitude",
-    title: "Testimonials & Love Stories",
+    eyebrow: "Client Reviews",
+    title: "What Couples & Families Say",
     subtitle:
-      "Read first-hand accounts of couples and families who entrusted their most sacred days to Confianza's care and aesthetic vision.",
+      "Read honest feedback and reviews from couples and families whose weddings we planned.",
     image:
       "https://res.cloudinary.com/tridevsosync/image/upload/v1790838224/confianza_portfolio/portfolio_hero_banner.jpg",
     stats: [
       "5.0 Average Couple Rating ★",
-      "500+ Celebrations Across India",
-      "100% On-Time Cue Execution",
-      "0% Day-Of Stress with Shadow Management",
+      "500+ Happy Weddings Across India",
+      "100% On-Time Event Flow",
+      "Zero Day-Of Stress for Families",
     ],
   };
 
@@ -90,7 +91,7 @@ export default function TestimonialsPage() {
         { id: "royal-destination", name: "Royal & Destination Weddings" },
         { id: "mandap-rituals", name: "Mandap & Rituals" },
         { id: "haldi-sangeet", name: "Haldi & Sangeet" },
-        { id: "receptions", name: "Opulent Receptions" },
+        { id: "receptions", name: "Grand Receptions" },
         { id: "video-reviews", name: "Video Reviews & Reels" },
         { id: "corporate-events", name: "Corporate Celebrations" },
       ];
@@ -101,39 +102,39 @@ export default function TestimonialsPage() {
     : [
         {
           id: "shadow-mgmt",
-          title: "Shadow Management",
-          subtitle: "Dedicated Bride & Groom Liaison",
+          title: "Personal Helpers",
+          subtitle: "Dedicated Support for Bride & Groom",
           description:
-            "A personal shadow coordinator attends to every personal need, attire touch-up, refreshment, and family coordination behind the scenes.",
+            "A dedicated helper assists with every personal need, dress touch-ups, snacks, and water behind the scenes.",
           icon: "Users",
-          badge: "Signature Care",
+          badge: "Personal Care",
         },
         {
           id: "ritual-mgmt",
-          title: "Sacred Ritual Coordination",
-          subtitle: "Flawless Pandit & Samagri Prep",
+          title: "Smooth Pooja Coordination",
+          subtitle: "Complete Pandit & Pooja Item Setup",
           description:
-            "Complete management of traditional Vedic rituals (Baraat, Milni, Saptapadi, Havan) ensuring exact customs and priest requirements are honored.",
+            "Complete management of traditional poojas (Baraat, Milni, Pheras, Havan) ensuring all rituals happen at the right time.",
           icon: "Sparkles",
-          badge: "Cultural Precision",
+          badge: "Traditional Rituals",
         },
         {
           id: "production-decor",
-          title: "3D CAD Decor & Production",
-          subtitle: "100% Design-to-Reality Fidelity",
+          title: "3D Decor Design & Setup",
+          subtitle: "Exact Real-Life Match to 3D Previews",
           description:
-            "From custom stage carpentry to imported floral conditioning and ambient warm lighting, every spatial element matches the 3D CAD design.",
+            "From custom stage backdrops to fresh flower arrangements and lighting, everything matches your 3D design preview.",
           icon: "Layers",
-          badge: "Spatial Artistry",
+          badge: "Custom 3D Decor",
         },
         {
           id: "show-runner",
-          title: "Show Runner Timeline Execution",
-          subtitle: "Zero-Glitch Stage Management",
+          title: "On-Ground Event Direction",
+          subtitle: "Smooth On-Time Stage Coordination",
           description:
-            "The Show Runner acts as the single point-of-contact for artists, DJs, sound technicians, and entry pyrotechnics with millisecond timing.",
+            "Our ground team coordinates artists, DJs, sound engineers, and couple entries with clear timing.",
           icon: "Award",
-          badge: "Live Direction",
+          badge: "Event Direction",
         },
       ];
 
@@ -142,33 +143,33 @@ export default function TestimonialsPage() {
     ? testimonialsFaq
     : [
         {
-          question: "How do I submit our wedding review and photographs?",
+          question: "How do I share our wedding review and photos?",
           answer:
-            "Click the 'Share Your Love Story' button on this page. You can share your story, select your star rating, and upload your high-resolution wedding photos directly from your phone or computer.",
+            "Click the 'Share Your Story' button on this page. You can write your review, select your star rating, and upload your wedding photos directly.",
         },
         {
-          question: "Can we include our cinematic wedding teaser or Instagram Reel?",
+          question: "Can we include a video link or Instagram Reel?",
           answer:
-            "Yes! You can paste your YouTube, Vimeo, Google Drive, or Instagram Reel link in the video link field. Our team will feature the interactive video player on your review card.",
+            "Yes! You can paste your YouTube, Vimeo, Google Drive, or Instagram Reel link. Our team will include the video player with your review.",
         },
         {
-          question: "Why does my review say 'Awaiting Admin Moderation'?",
+          question: "Why does my review say 'Waiting for Approval'?",
           answer:
-            "To protect client privacy and ensure genuine testimonials, all public submissions are reviewed and verified by Ashish Wankhede & the Confianza editorial team before going live.",
+            "To ensure all reviews are genuine and appropriate, our team checks all submissions before publishing them on the website.",
         },
         {
           question: "How long does review verification take?",
-          answer: "Our team typically verifies and publishes new couple stories within 12 to 24 hours.",
+          answer: "Our team usually checks and publishes new reviews within 12 to 24 hours.",
         },
       ];
 
   // CTA
   const cta = testimonialsCta || {
-    badge: "Share Your Love Story",
-    headline: "Were You A Confianza Couple or Guest?",
+    badge: "Share Your Review",
+    headline: "Did We Plan Your Wedding?",
     subtitle:
-      "We would love to hear your memories, candid moments, and reflections of your celebration.",
-    buttonText: "Submit Your Love Story",
+      "We would love to hear your feedback, memories, and experience with our team.",
+    buttonText: "Submit Your Review",
     secondaryButtonText: "Book A Consultation",
   };
 
@@ -371,7 +372,7 @@ export default function TestimonialsPage() {
 
           <p className="mx-auto max-w-2xl text-xs sm:text-sm lg:text-base text-background/85 font-light leading-relaxed px-2">
             {header.subtitle ||
-              "Read first-hand accounts of couples and families who entrusted their most sacred wedding milestones to Confianza's aesthetic vision and care."}
+              "Read honest feedback and reviews from couples and families whose weddings we planned."}
           </p>
 
           {/* Dual Action CTA Buttons in Hero */}
@@ -382,7 +383,7 @@ export default function TestimonialsPage() {
               className="btn-luxe gradient-gold text-ink font-bold shadow-luxe py-2.5 sm:py-3 px-6 sm:px-7 text-xs tracking-wider uppercase flex items-center justify-center gap-2 cursor-pointer transition hover:scale-105 w-full sm:w-auto"
             >
               <Plus className="h-4 w-4 shrink-0" />
-              <span>Share Your Love Story</span>
+              <span>Share Your Story</span>
             </button>
 
             <Link
@@ -460,73 +461,64 @@ export default function TestimonialsPage() {
           <SectionHeading
             eyebrow={header.eyebrow || "Heartfelt Reviews"}
             title="Real Weddings. Lasting Memories."
-            subtitle="Discover how Ashish Wankhede, Rutik Pund, and our on-ground crew managed every sacred ritual and opulent celebration."
+            subtitle="Discover how founders Ashish Wankhede, Rutik Pund, and our team managed every ceremony and celebration smoothly."
           />
 
-          {/* Filter Bar & Search */}
-          <div className="mt-8 sm:mt-12 space-y-4">
-            <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 sm:gap-4">
-              {/* Category Pills */}
-              <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-2 scrollbar-none no-scrollbar">
-                <button
-                  type="button"
-                  onClick={() => setSelectedCategory("All")}
-                  className={`px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-[0.7rem] sm:text-xs font-semibold tracking-wide transition shrink-0 cursor-pointer ${
-                    isAllCategory(selectedCategory)
-                      ? "gradient-royal text-primary-foreground shadow-md"
-                      : "bg-card border border-border text-foreground hover:bg-muted"
-                  }`}
-                >
-                  All Stories ({allApproved.length})
-                </button>
-
-                {categories.map((cat: any) => {
-                  const catName = typeof cat === "string" ? cat : cat.name;
-                  const isVideo = catName === "Video Reviews & Reels";
-                  const count = isVideo
-                    ? allApproved.filter((t: any) => t.videoUrl).length
-                    : allApproved.filter((t: any) => isCategoryMatch(t.category, catName)).length;
-                  const isSelected = !isAllCategory(selectedCategory) && isCategoryMatch(selectedCategory, catName);
-
-                  return (
-                    <button
-                      key={catName}
-                      type="button"
-                      onClick={() => setSelectedCategory(catName)}
-                      className={`px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-[0.7rem] sm:text-xs font-medium tracking-wide transition shrink-0 cursor-pointer ${
-                        isSelected
-                          ? "gradient-royal text-primary-foreground shadow-md font-semibold"
-                          : "bg-card border border-border text-foreground hover:bg-muted"
-                      }`}
-                    >
-                      {catName} <span className="opacity-70 ml-1">({count})</span>
-                    </button>
-                  );
-                })}
+          {/* Filter Bar & Search Toolbar */}
+          <div className="mt-8 sm:mt-12 space-y-5 sm:space-y-6">
+            {/* 1. Centered Search & Rating Filter Controls */}
+            <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3.5 max-w-xl mx-auto">
+              <div className="relative flex-1 min-w-[240px] sm:min-w-[280px]">
+                <Search className="absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 h-3.5 sm:h-4 w-3.5 sm:w-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search couples, venues, ceremonies..."
+                  className="w-full rounded-full border border-border bg-card/70 pl-9 sm:pl-11 pr-8 py-2 sm:py-2.5 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 backdrop-blur-md shadow-xs transition"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-0.5 cursor-pointer"
+                    title="Clear search"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
               </div>
 
-              {/* Rating and Search Bar */}
-              <div className="flex items-center gap-2">
-                <div className="relative flex-1 md:w-64">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search couples, venues..."
-                    className="w-full rounded-xl border border-border bg-card pl-9 pr-3 py-1.5 sm:py-2 text-xs focus:border-primary focus:outline-none"
-                  />
-                </div>
+              <select
+                value={selectedRating}
+                onChange={(e) => setSelectedRating(e.target.value)}
+                className="rounded-full border border-border bg-card/70 px-4 py-2 sm:py-2.5 text-xs font-semibold text-foreground focus:outline-none focus:border-primary cursor-pointer backdrop-blur-md shadow-xs transition"
+              >
+                <option value="All">All Ratings (5.0 ★)</option>
+                <option value="5-star">5-Star Reviews Only ★</option>
+              </select>
+            </div>
 
-                <select
-                  value={selectedRating}
-                  onChange={(e) => setSelectedRating(e.target.value)}
-                  className="rounded-xl border border-border bg-card px-3 py-1.5 sm:py-2 text-xs text-foreground focus:outline-none cursor-pointer"
-                >
-                  <option value="All">All Ratings</option>
-                  <option value="5-star">5 Stars Only ★</option>
-                </select>
-              </div>
+            {/* 2. Centered Dynamic Category Filter Bar (4 Front Pills + Luxury Dropdown) */}
+            <div className="w-full">
+              <CategoryFilterBar
+                items={allApproved}
+                categories={categories}
+                selectedCategory={selectedCategory}
+                onSelectCategory={(cat: string) => setSelectedCategory(cat)}
+                allLabel="All Stories"
+                maxFrontCategories={3}
+                dropdownLabel="More Categories"
+                className="justify-center"
+                getItemCount={(cat: any, itms: any[]) => {
+                  if (isAllCategory(cat)) return itms.length;
+                  const catName = typeof cat === "string" ? cat : cat.name || cat.label || cat.id || "";
+                  if (catName === "Video Reviews & Reels") {
+                    return itms.filter((t: any) => t.videoUrl).length;
+                  }
+                  return itms.filter((t: any) => isCategoryMatch(t.category, catName)).length;
+                }}
+              />
             </div>
           </div>
 
@@ -675,14 +667,14 @@ export default function TestimonialsPage() {
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
           <div className="text-center max-w-3xl mx-auto">
             <span className="text-[0.65rem] sm:text-xs uppercase tracking-[0.25em] sm:tracking-[0.3em] text-secondary font-bold">
-              Why Couples Love Confianza
+              Why Couples Choose Confianza
             </span>
             <h2 className="mt-2.5 sm:mt-3 font-display text-2xl sm:text-3xl lg:text-4xl text-background font-normal leading-tight">
-              The Signature Care Experience
+              Our Wedding Day Care
             </h2>
             <div className="rule-gold mx-auto my-3 sm:my-4" />
             <p className="text-xs sm:text-sm text-background/80 font-light leading-relaxed px-2">
-              Extracted from our core wedding management ethos, here is how we ensure zero-stress celebrations for every couple and family.
+              Here is how our team makes sure your celebration is smooth and stress-free for your entire family.
             </p>
           </div>
 

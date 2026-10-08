@@ -10,26 +10,26 @@ export default function VisionMissionSection() {
   const visionPillars = Array.isArray(about?.visionPillars) && about.visionPillars.length > 0
     ? about.visionPillars
     : [
-        "Pioneering royal destination wedding experiences across India & abroad",
-        "Setting the benchmark for bespoke spatial architecture & floral aesthetics",
-        "Preserving authentic cultural rituals while infusing contemporary elegance",
+        "Creating memorable destination wedding experiences across India",
+        "Creating beautiful mandap, stage, and floral decor",
+        "Honoring authentic cultural traditions with modern elegance",
       ];
 
   const missionCommitments = Array.isArray(about?.missionCommitments) && about.missionCommitments.length > 0
     ? about.missionCommitments
     : [
-        "Lifting all logistical burdens so families remain fully present guests",
+        "Handling all the planning and logistics so families can enjoy as guests",
         "Complete budget transparency with zero hidden markups or surprises",
-        "Precision-timed execution delivered by calm, dedicated ground crews",
+        "On-time execution managed by our calm, dedicated team",
       ];
 
   return (
     <section className="section-pad relative bg-background overflow-hidden border-b border-border/60">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
         <SectionHeading
-          eyebrow="Our Guiding North Star"
-          title="Our Vision &amp; Our Mission"
-          subtitle="The enduring purpose that drives our planners, floral artists, and ground directors every single day."
+          eyebrow="Our Purpose"
+          title="Our Vision &amp; Mission"
+          subtitle="The simple purpose that guides our wedding planners and team every single day."
         />
 
         <div className="reveal mt-10 sm:mt-16 grid gap-6 sm:gap-8 lg:grid-cols-2">
@@ -45,7 +45,7 @@ export default function VisionMissionSection() {
                   </div>
                   <div>
                     <span className="text-[0.62rem] sm:text-[0.68rem] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-secondary font-bold block">
-                      The Long-Term Horizon
+                      The Long-Term Goal
                     </span>
                     <h3 className="font-display text-xl sm:text-2xl lg:text-3xl text-ink font-bold">
                       Our Vision
@@ -57,12 +57,12 @@ export default function VisionMissionSection() {
 
               <p className="mt-4 sm:mt-6 font-display text-base sm:text-lg lg:text-xl text-ink leading-relaxed italic">
                 "{about?.vision ||
-                  "To be the most trusted and admired name in personalised luxury weddings across Maharashtra and every landmark destination we travel to."}"
+                  "To be the most trusted wedding planner across Maharashtra and every destination we travel to."}"
               </p>
 
               <div className="mt-6 sm:mt-8 space-y-2.5 sm:space-y-3">
                 <span className="text-[0.62rem] sm:text-[0.68rem] uppercase tracking-wider text-muted-foreground font-semibold block">
-                  Vision Objectives:
+                  Key Goals:
                 </span>
                 {visionPillars.map((pillar, idx) => (
                   <div key={idx} className="flex items-start gap-2.5 sm:gap-3 text-xs sm:text-sm text-foreground/85">
@@ -75,7 +75,7 @@ export default function VisionMissionSection() {
 
             <div className="mt-6 sm:mt-8 pt-3.5 sm:pt-4 border-t border-border/50 text-[0.65rem] sm:text-[0.7rem] text-secondary uppercase tracking-widest font-semibold flex items-center gap-1.5">
               <Sparkles className="h-3.5 w-3.5" />
-              <span>Aiming for Global Distinction</span>
+              <span>Making Every Wedding Special</span>
             </div>
           </div>
 
@@ -91,7 +91,7 @@ export default function VisionMissionSection() {
                   </div>
                   <div>
                     <span className="text-[0.62rem] sm:text-[0.68rem] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-primary font-bold block">
-                      Our Daily Commitment
+                      Our Promise
                     </span>
                     <h3 className="font-display text-xl sm:text-2xl lg:text-3xl text-ink font-bold">
                       Our Mission
@@ -103,12 +103,12 @@ export default function VisionMissionSection() {
 
               <p className="mt-4 sm:mt-6 font-display text-base sm:text-lg lg:text-xl text-ink leading-relaxed italic">
                 "{about?.mission ||
-                  "To take the weight of planning off a family's shoulders and hand back a celebration they can be fully present for."}"
+                  "To take all planning stress away so families can truly enjoy every moment of the wedding."}"
               </p>
 
               <div className="mt-6 sm:mt-8 space-y-2.5 sm:space-y-3">
                 <span className="text-[0.62rem] sm:text-[0.68rem] uppercase tracking-wider text-muted-foreground font-semibold block">
-                  Core Mission Deliverables:
+                  What We Deliver:
                 </span>
                 {missionCommitments.map((commitment, idx) => (
                   <div key={idx} className="flex items-start gap-2.5 sm:gap-3 text-xs sm:text-sm text-foreground/85">
@@ -121,7 +121,7 @@ export default function VisionMissionSection() {
 
             <div className="mt-6 sm:mt-8 pt-3.5 sm:pt-4 border-t border-border/50 text-[0.65rem] sm:text-[0.7rem] text-primary uppercase tracking-widest font-semibold flex items-center gap-1.5">
               <Sparkles className="h-3.5 w-3.5" />
-              <span>Devoted to Flawless Delivery</span>
+              <span>Committed to Perfect Events</span>
             </div>
           </div>
         </div>

@@ -15,9 +15,9 @@ export default function BeforeAfterSection() {
     <section className="section-pad relative bg-background overflow-hidden">
       <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
         <SectionHeading
-          eyebrow="Transformation Spotlight"
-          title="From Blank Canvas to Royal Ballroom"
-          subtitle="Watch how our production and decor team turns bare event spaces into cinematic fairy tales through lighting, florals, and bespoke architecture."
+          eyebrow="Venue Transformations"
+          title="From Empty Hall to Grand Wedding Stage"
+          subtitle="See how our team turns empty venues into beautiful wedding setups with lighting, fresh flowers, and custom decor."
         />
 
         {/* View Mode Controls */}
@@ -53,7 +53,7 @@ export default function BeforeAfterSection() {
                 : "glass-card text-muted-foreground hover:text-foreground"
             }`}
           >
-            After Confianza Magic
+            After Confianza Setup
           </button>
         </div>
 
@@ -65,7 +65,7 @@ export default function BeforeAfterSection() {
                 {/* Background (After) Image */}
                 <img
                   src={afterImage}
-                  alt="After: Luxury Wedding Decor"
+                  alt="After: Wedding Stage Decor"
                   className="absolute inset-0 h-full w-full object-cover"
                 />
                 <div className="absolute top-3 sm:top-5 right-3 sm:right-5 rounded-full bg-ink/75 px-2.5 sm:px-3.5 py-0.5 sm:py-1 text-[0.62rem] sm:text-[0.7rem] uppercase tracking-wider text-secondary font-medium backdrop-blur-md border border-secondary/30 whitespace-nowrap">
@@ -81,11 +81,11 @@ export default function BeforeAfterSection() {
                 >
                   <img
                     src={beforeImage}
-                    alt="Before: Raw Venue Space"
+                    alt="Before: Empty Venue Space"
                     className="absolute inset-0 h-full w-full object-cover filter brightness-90"
                   />
                   <div className="absolute top-3 sm:top-5 left-3 sm:left-5 rounded-full bg-ink/75 px-2.5 sm:px-3.5 py-0.5 sm:py-1 text-[0.62rem] sm:text-[0.7rem] uppercase tracking-wider text-background font-medium backdrop-blur-md border border-white/20 whitespace-nowrap">
-                    Before: Raw Banquet
+                    Before: Empty Banquet Hall
                   </div>
                 </div>
 
@@ -95,8 +95,8 @@ export default function BeforeAfterSection() {
                   style={{ left: `${sliderPosition}%` }}
                 >
                   {/* Draggable Circle Handle */}
-                  <div className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 grid h-8 w-8 sm:h-10 sm:w-10 place-items-center rounded-full gradient-gold text-ink shadow-luxe ring-4 ring-ink/30 cursor-ew-resize">
-                    <ArrowLeftRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <div className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 grid h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 place-items-center rounded-full gradient-gold text-ink shadow-[0_0_25px_rgba(201,162,39,0.7)] ring-4 sm:ring-6 ring-ink/40 cursor-ew-resize transition-transform hover:scale-110 active:scale-95">
+                    <ArrowLeftRight className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 stroke-[2.2]" />
                   </div>
                 </div>
 
@@ -119,18 +119,18 @@ export default function BeforeAfterSection() {
                   className="h-full w-full object-cover"
                 />
                 <div className="absolute top-3 sm:top-5 left-3 sm:left-5 rounded-full bg-ink/75 px-3 sm:px-4 py-1 sm:py-1.5 text-[0.68rem] sm:text-xs uppercase tracking-wider text-background backdrop-blur-md whitespace-nowrap">
-                  Raw Space Before Work
+                  Empty Venue Before Setup
                 </div>
               </div>
             ) : (
               <div className="relative h-full w-full">
                 <img
                   src={afterImage}
-                  alt="After Confianza Luxury Decor"
+                  alt="After Confianza Decor Setup"
                   className="h-full w-full object-cover"
                 />
                 <div className="absolute top-3 sm:top-5 right-3 sm:right-5 rounded-full gradient-gold px-3 sm:px-4 py-1 sm:py-1.5 text-[0.68rem] sm:text-xs uppercase tracking-wider text-ink font-semibold backdrop-blur-md whitespace-nowrap">
-                  Final Masterpiece
+                  Finished Wedding Setup
                 </div>
               </div>
             )}
@@ -141,25 +141,25 @@ export default function BeforeAfterSection() {
             <div className="glass-card rounded-2xl p-3.5 sm:p-4 text-center">
               <span className="font-display text-lg sm:text-xl text-primary font-bold">11 Hours</span>
               <p className="text-[0.62rem] sm:text-[0.7rem] uppercase tracking-wider text-muted-foreground mt-0.5 leading-snug">
-                Overnight Build
+                Overnight Setup
               </p>
             </div>
             <div className="glass-card rounded-2xl p-3.5 sm:p-4 text-center">
               <span className="font-display text-lg sm:text-xl text-secondary font-bold">4,000+</span>
               <p className="text-[0.62rem] sm:text-[0.7rem] uppercase tracking-wider text-muted-foreground mt-0.5 leading-snug">
-                Fresh Exotic Stems
+                Fresh Flowers
               </p>
             </div>
             <div className="glass-card rounded-2xl p-3.5 sm:p-4 text-center">
               <span className="font-display text-lg sm:text-xl text-primary font-bold">100% Custom</span>
               <p className="text-[0.62rem] sm:text-[0.7rem] uppercase tracking-wider text-muted-foreground mt-0.5 leading-snug">
-                Fabricated Stage &amp; Drapes
+                Stage &amp; Drapery
               </p>
             </div>
             <div className="glass-card rounded-2xl p-3.5 sm:p-4 text-center">
-              <span className="font-display text-lg sm:text-xl text-secondary font-bold">36 Specialists</span>
+              <span className="font-display text-lg sm:text-xl text-secondary font-bold">36 Members</span>
               <p className="text-[0.62rem] sm:text-[0.7rem] uppercase tracking-wider text-muted-foreground mt-0.5 leading-snug">
-                On-Ground Crew
+                On-Ground Team
               </p>
             </div>
           </div>

@@ -22,20 +22,20 @@ export default function GalleryPage() {
     Array.isArray(header.stats) && header.stats.length > 0
       ? header.stats
       : [
-          "500+ Celebrations Across India",
-          "15+ Landmark Destination Cities",
-          "100% 3D CAD-to-Reality Fidelity",
-          "Zero-Glitch Stage Execution",
+          "500+ Happy Weddings Across India",
+          "15+ Cities Across India",
+          "100% Custom 3D Decor Designs",
+          "Smooth On-Ground Execution",
         ];
 
   const perksList =
     Array.isArray(cta.perks) && cta.perks.length > 0
       ? cta.perks
       : [
-          "60–90 Min Vision & Budget Mapping",
-          "Direct Founder Interaction (Ashish & Rutik)",
-          "3D Spatial CAD Concept Previews",
-          "Clear Line-Item Vendor Estimates",
+          "60–90 Min Planning Session",
+          "Talk Directly with Founders (Ashish & Rutik)",
+          "3D Decor Design Previews",
+          "Clear & Honest Cost Estimates",
         ];
 
   return (
@@ -53,22 +53,20 @@ export default function GalleryPage() {
         </div>
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-          {header.badge && (
-            <div className="inline-flex items-center gap-1.5 sm:gap-2 rounded-full border border-secondary/40 bg-white/5 px-3.5 py-1 text-[0.62rem] sm:text-[0.68rem] uppercase tracking-[0.25em] sm:tracking-[0.28em] text-secondary font-semibold backdrop-blur-md mb-2 sm:mb-3 shadow-soft">
-              <Sparkles className="h-3 w-3 text-secondary animate-pulse" />
-              <span>{header.badge}</span>
-            </div>
-          )}
+          <div className="inline-flex items-center gap-1.5 sm:gap-2 rounded-full border border-secondary/40 bg-white/5 px-3.5 py-1 text-[0.62rem] sm:text-[0.68rem] uppercase tracking-[0.25em] sm:tracking-[0.28em] text-secondary font-semibold backdrop-blur-md mb-2 sm:mb-3 shadow-soft">
+            <Sparkles className="h-3 w-3 text-secondary animate-pulse" />
+            <span>{header.badge || "Wedding Photo Gallery"}</span>
+          </div>
 
           <h1 className="mt-2 font-display text-3xl sm:text-5xl lg:text-6xl text-background font-normal tracking-tight leading-tight">
-            {header.title || "The Wedding Gallery"}
+            {header.title || "Wedding Photo Gallery"}
           </h1>
 
           <div className="rule-gold mx-auto my-3.5 sm:my-5" />
 
           <p className="mx-auto max-w-2xl text-xs sm:text-sm md:text-base text-background/85 font-light leading-relaxed">
             {header.subtitle ||
-              "Immerse yourself in close-up details of floral centerpieces, bridal entries, fairy-lit courtyards, and grand lavender stages."}
+              "Explore photos of our mandap decor, floral arrangements, bridal entries, and wedding celebrations."}
           </p>
 
           {/* Floating Trust Metrics Chips */}
@@ -95,7 +93,7 @@ export default function GalleryPage() {
       {/* 4. Follow Our Journey Instagram Feed */}
       <InstagramSection showAll={true} />
 
-      {/* 5. Bespoke Consultation CTA Banner */}
+      {/* 5. Consultation CTA Banner */}
       <section className="py-12 sm:py-16 lg:py-24 relative bg-ink text-background overflow-hidden border-t border-white/10">
         <div className="absolute inset-0 z-0 opacity-15">
           <img
@@ -108,18 +106,18 @@ export default function GalleryPage() {
 
         <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 text-center">
           <span className="text-[0.62rem] sm:text-[0.68rem] uppercase tracking-[0.25em] sm:tracking-[0.3em] text-secondary font-semibold block">
-            {cta.eyebrow || "WHERE WEDDINGS BECOME STORIES"}
+            {cta.eyebrow || "LET'S PLAN YOUR SPECIAL DAY"}
           </span>
 
           <h2 className="mt-2.5 sm:mt-3 font-display text-2xl sm:text-4xl lg:text-5xl text-background font-normal leading-tight">
-            {cta.headline || "Envision Your Wedding in Our Visual Chronicle"}
+            {cta.headline || "Let Us Plan Your Dream Wedding"}
           </h2>
 
           <div className="rule-gold mx-auto my-3.5 sm:my-5" />
 
           <p className="mx-auto max-w-2xl text-xs sm:text-sm md:text-base text-background/80 font-light leading-relaxed">
             {cta.subtitle ||
-              "Schedule a private 60-90 minute consultation with Ashish Wankhede and Rutik Pund in Warje, Pune to design your bespoke 3D CAD wedding decor."}
+              "Schedule a free 60–90 minute consultation with Ashish Wankhede and Rutik Pund in Warje, Pune to plan your wedding decor and celebration."}
           </p>
 
           {/* Perks Grid */}
@@ -144,7 +142,7 @@ export default function GalleryPage() {
               className="btn-luxe gradient-gold text-ink font-bold text-xs py-3 px-6 sm:px-8 shadow-luxe flex items-center justify-center gap-2 w-full sm:w-auto text-center"
             >
               <Calendar className="h-4 w-4" />
-              <span>{cta.buttonText || "Book Your Free Consultation"}</span>
+              <span>{cta.buttonText || "Book Free Consultation"}</span>
             </Link>
 
             <a

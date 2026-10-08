@@ -17,15 +17,15 @@ export default function BudgetCalculatorSection() {
   });
 
   const decorRates = {
-    classic: { label: "Essential Elegance", costPerGuest: 800, base: 120000 },
-    royal: { label: "Royal Signature", costPerGuest: 1600, base: 250000 },
-    imperial: { label: "Imperial Bespoke", costPerGuest: 2800, base: 500000 },
+    classic: { label: "Simple & Elegant", costPerGuest: 800, base: 120000 },
+    royal: { label: "Royal Decor", costPerGuest: 1600, base: 250000 },
+    imperial: { label: "Grand Luxury", costPerGuest: 2800, base: 500000 },
   };
 
   const entertainmentRates = {
-    dj: { label: "DJ & Atmospheric Lighting", cost: 60000 },
-    live: { label: "Live Sufi/Folk Band & DJ", cost: 160000 },
-    celebrity: { label: "Celebrity Artist & Production", cost: 380000 },
+    dj: { label: "DJ & Lighting Setup", cost: 60000 },
+    live: { label: "Live Music Band & DJ", cost: 160000 },
+    celebrity: { label: "Celebrity Singers & Big Stage", cost: 380000 },
   };
 
   const breakdown = useMemo(() => {
@@ -67,7 +67,7 @@ export default function BudgetCalculatorSection() {
         <SectionHeading
           eyebrow="Interactive Planner"
           title="Instant Wedding Budget Estimator"
-          subtitle="Customize your guest count, ceremony duration, decor aesthetics, and entertainment to receive an immediate realistic investment projection."
+          subtitle="Choose your guest count, event days, decor style, and entertainment to get an instant cost estimate."
         />
 
         <div className="reveal mt-12 grid gap-8 lg:grid-cols-12 lg:items-start">
@@ -146,9 +146,9 @@ export default function BudgetCalculatorSection() {
                   >
                     <div className="text-xs font-bold text-ink">{val.label}</div>
                     <div className="mt-1 text-[0.7rem] text-muted-foreground">
-                      {key === "classic" && "Minimalist florals & elegant drape"}
-                      {key === "royal" && "Fresh exotic blooms & statement stage"}
-                      {key === "imperial" && "Palatial ceiling drapes & 3D sets"}
+                      {key === "classic" && "Simple fresh flowers & clean drapes"}
+                      {key === "royal" && "Fresh flowers & grand stage setup"}
+                      {key === "imperial" && "Full ceiling drapery, lighting & 3D stage"}
                     </div>
                   </button>
                 ))}
@@ -158,7 +158,7 @@ export default function BudgetCalculatorSection() {
             {/* Entertainment Curation */}
             <div>
               <label className="text-xs font-semibold uppercase tracking-wider text-ink block mb-2.5">
-                Entertainment &amp; Artist Management
+                Entertainment &amp; Music
               </label>
               <div className="grid sm:grid-cols-3 gap-3">
                 {Object.entries(entertainmentRates).map(([key, val]) => (
@@ -181,13 +181,13 @@ export default function BudgetCalculatorSection() {
             {/* Addon Toggles */}
             <div>
               <label className="text-xs font-semibold uppercase tracking-wider text-ink block mb-2.5">
-                Optional Logistics Add-ons
+                Optional Support Add-ons
               </label>
               <div className="space-y-2">
                 {[
                   { key: "hospitality", label: "Guest Logistics & Airport Pickup Desk" },
-                  { key: "photoCoordination", label: "Dedicated Photography Run-Sheet Manager" },
-                  { key: "shadowCrew", label: "Bridal & Groom Shadow Coordinator" },
+                  { key: "photoCoordination", label: "Photography Schedule Coordinator" },
+                  { key: "shadowCrew", label: "Personal Helper for Bride & Groom" },
                 ].map((item) => (
                   <label
                     key={item.key}
@@ -247,7 +247,7 @@ export default function BudgetCalculatorSection() {
                 </div>
                 {breakdown.addons > 0 && (
                   <div className="flex justify-between py-1.5 border-b border-border/50">
-                    <span className="text-muted-foreground">Selected Logistics Add-ons</span>
+                    <span className="text-muted-foreground">Selected Add-ons</span>
                     <span className="font-semibold text-ink">{formatINR(breakdown.addons)}</span>
                   </div>
                 )}
@@ -257,7 +257,7 @@ export default function BudgetCalculatorSection() {
             <div className="rounded-2xl bg-primary/5 p-4 border border-primary/10 flex items-start gap-3">
               <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
               <p className="text-[0.72rem] text-muted-foreground leading-relaxed">
-                Confianza provides transparent cost sheets with zero hidden markups. We customize all contracts to your exact venue and vendor selections.
+                Confianza gives clear, honest price sheets with no hidden charges. We customize all services to match your venue and selections.
               </p>
             </div>
 
@@ -265,7 +265,7 @@ export default function BudgetCalculatorSection() {
               href="/contact"
               className="btn-luxe gradient-royal w-full text-primary-foreground text-xs font-semibold shadow-luxe text-center"
             >
-              <span>Lock in This Estimate with Ashish</span>
+              <span>Talk to Ashish About This Estimate</span>
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>

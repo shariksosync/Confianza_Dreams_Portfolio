@@ -31,7 +31,7 @@ export default function Footer() {
             <span className="font-display text-xl text-background font-bold">Confianza</span>
           </div>
           <p className="mt-4 text-xs sm:text-sm leading-relaxed text-background/65 max-w-sm">
-            {settings?.brand?.tagline || "Where Weddings Become Stories"}. Luxury wedding planning, decor and execution from Pune to every destination you dream of.
+            {settings?.brand?.tagline || "Where Weddings Become Stories"}. Complete wedding planning, decor, and event management from Pune to any destination across India.
           </p>
           <div className="mt-5 flex gap-2.5">
             {(contact?.socials || []).map((s) => {

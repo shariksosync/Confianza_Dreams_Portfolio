@@ -16,9 +16,9 @@ export default function TeamSection() {
     <section className="section-pad relative bg-accent/30 overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
         <SectionHeading
-          eyebrow="The Minds Behind The Magic"
-          title="Meet Our Visionaries &amp; Coordinators"
-          subtitle="A passionate ensemble of artists, logistics masters, and ground directors dedicated to making your big day effortless. Click any member to view full background."
+          eyebrow="Our Team"
+          title="Meet Our Wedding Planners &amp; Coordinators"
+          subtitle="Our experienced planners, decorators, and coordinators work together to make your wedding day smooth and stress-free. Click any member to view details."
         />
 
         {/* Loading skeleton placeholder */}

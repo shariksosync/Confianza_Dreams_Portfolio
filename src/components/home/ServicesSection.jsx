@@ -46,10 +46,10 @@ export default function ServicesSection() {
         ? serviceCategories
         : [
             { id: "all", name: "All Services", label: "All Services" },
-            { id: "planning", name: "Signature Planning & Direction", label: "Signature Planning & Direction" },
-            { id: "decor", name: "Mandap & Spatial Decor", label: "Mandap & Spatial Decor" },
-            { id: "hospitality", name: "Royal Hospitality & Shadows", label: "Royal Hospitality & Shadows" },
-            { id: "rituals", name: "Rituals, Artists & F&B", label: "Rituals, Artists & F&B" },
+            { id: "planning", name: "Complete Wedding Planning", label: "Complete Wedding Planning" },
+            { id: "decor", name: "Mandap & Stage Decor", label: "Mandap & Stage Decor" },
+            { id: "hospitality", name: "Guest Hospitality & Personal Helpers", label: "Guest Hospitality & Personal Helpers" },
+            { id: "rituals", name: "Rituals, Entertainment & Catering", label: "Rituals, Entertainment & Catering" },
           ];
     return list;
   }, [serviceCategories]);
@@ -67,9 +67,9 @@ export default function ServicesSection() {
     <section id="services" className="section-pad relative bg-accent/40">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
         <SectionHeading
-          eyebrow="Bespoke Offerings"
-          title="Curated Services for Every Milestone"
-          subtitle="From grand destination weddings to intimate family ceremonies, our bespoke services bring artistry, precision, and calm to your celebration."
+          eyebrow="Our Services"
+          title="Complete Services for Every Wedding Event"
+          subtitle="From big destination weddings to intimate family ceremonies, our services bring beauty, care, and peace of mind to your special day."
         />
 
         {/* Category Filter Pills */}
@@ -190,7 +190,7 @@ export default function ServicesSection() {
             href="/services"
             className="btn-luxe gradient-royal text-primary-foreground text-xs shadow-luxe py-3 px-6 sm:py-3.5 sm:px-8 inline-flex items-center justify-center gap-2 hover:scale-105 transition uppercase tracking-wider font-semibold w-full sm:w-auto"
           >
-            <span>Explore All Services &amp; Packages</span>
+            <span>View All Services &amp; Packages</span>
             <ArrowRight className="h-4 w-4 shrink-0" />
           </Link>
         </div>

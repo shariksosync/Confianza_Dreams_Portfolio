@@ -38,9 +38,9 @@ export default function WhyChooseUsSection() {
       <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
         <SectionHeading
           light
-          eyebrow="The Confianza Standard"
-          title="Why Discerning Couples Choose Us"
-          subtitle="We balance high romantic aesthetics with meticulous logistics so that you remain completely present in every moment."
+          eyebrow="Why Choose Us"
+          title="Why Couples Choose Us"
+          subtitle="We blend beautiful wedding designs with smooth planning so you and your family can enjoy every moment."
         />
 
         <div className="mt-14 sm:mt-18 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

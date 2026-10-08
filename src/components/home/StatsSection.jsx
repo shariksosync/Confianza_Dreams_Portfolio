@@ -42,10 +42,10 @@ export default function StatsSection() {
       <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
         <div className="text-center max-w-2xl mx-auto mb-14">
           <span className="text-[0.7rem] uppercase tracking-[0.34em] text-secondary font-medium">
-            Our Legacy in Numbers
+            Our Experience in Numbers
           </span>
           <h2 className="mt-2 font-display text-3xl sm:text-4xl text-background">
-            Milestones of Trust &amp; Joy
+            Weddings, Trust &amp; Happy Families
           </h2>
           <div className="rule-gold mx-auto my-4" />
         </div>

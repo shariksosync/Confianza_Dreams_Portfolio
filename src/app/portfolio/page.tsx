@@ -11,30 +11,35 @@ export default function PortfolioPage() {
   const { portfolioHeader, portfolioCta, contact } = useSite();
 
   const header = portfolioHeader || {
-    badge: "500+ Stories & Counting",
-    eyebrow: "OUR SIGNATURE WORKS",
-    title: "The Wedding Portfolio",
+    badge: "500+ Happy Weddings",
+    eyebrow: "OUR WORK",
+    title: "Our Work",
     subtitle:
-      "A curated gallery of our mandap concepts, floral installations, destination beach setups, and grand reception stages created across India.",
+      "A photo gallery of our mandap setups, flower decor, beach weddings, and grand reception stages across India.",
     image: "/images/hero-2.jpg",
-    stats: ["500+ Weddings", "15+ Cities Across India", "100% On-Time Cue Execution"],
+    stats: ["500+ Weddings", "15+ Cities Across India", "100% On-Time Events"],
   };
 
   const cta = portfolioCta || {
-    eyebrow: "WHERE WEDDINGS BECOME STORIES",
-    headline: "Want Your Wedding to Be Our Next Masterpiece?",
+    eyebrow: "LET'S PLAN YOUR SPECIAL DAY",
+    headline: "Ready to Plan Your Dream Wedding?",
     subtitle:
-      "Connect directly with Ashish Wankhede and Rutik Pund to review your venue options, custom 3D decor concepts, and complete management timeline.",
-    buttonText: "Book Your Free Consultation",
+      "Connect directly with founders Ashish Wankhede and Rutik Pund to discuss your venue, 3D decor ideas, and event timeline.",
+    buttonText: "Book Free Consultation",
     buttonLink: "/contact",
     notice: "Free Consultation • No Obligation",
     perks: [
-      "Personalized 1-on-1 Vision Mapping",
-      "Direct Founder Interaction (Ashish & Rutik)",
-      "Realistic 3D Decor CAD Renderings",
-      "Clear & Transparent Line-Item Estimates",
+      "1-on-1 Planning Meeting",
+      "Talk Directly with Founders (Ashish & Rutik)",
+      "Realistic 3D Decor Previews",
+      "Clear & Honest Cost Estimates",
     ],
   };
+
+  const displayTitle =
+    header.title === "The Wedding Portfolio" || !header.title ? "Our Work" : header.title;
+  const displayEyebrow =
+    header.eyebrow === "OUR SIGNATURE WORKS" || !header.eyebrow ? "OUR WORK" : header.eyebrow;
 
   return (
     <SiteLayout revealKey="portfolio-page">
@@ -59,7 +64,7 @@ export default function PortfolioPage() {
           </span>
 
           <h1 className="mt-4 font-display text-4xl sm:text-5xl lg:text-6xl text-background font-normal">
-            {header.title || "The Wedding Portfolio"}
+            {displayTitle}
           </h1>
 
           <div className="rule-gold mx-auto my-5" />
@@ -92,7 +97,7 @@ export default function PortfolioPage() {
       {/* 3. Words of Gratitude (Client Testimonials & Stories - Only Selected Portfolio Testimonials) */}
       <TestimonialsSection showOnlyPortfolio={true} />
 
-      {/* 4. Private Consultation CTA Banner */}
+      {/* 4. Consultation CTA Banner */}
       <section className="relative py-20 px-4 sm:px-6 lg:px-8 bg-ink text-background overflow-hidden border-t border-white/10">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/30 via-ink to-ink pointer-events-none" />
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-secondary/15 rounded-full blur-3xl pointer-events-none" />
@@ -104,14 +109,14 @@ export default function PortfolioPage() {
           </span>
 
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl text-background font-normal mb-4">
-            {cta.headline || "Want Your Wedding to Be Our Next Masterpiece?"}
+            {cta.headline || "Ready to Plan Your Dream Wedding?"}
           </h2>
 
           <div className="rule-gold mx-auto my-4" />
 
           <p className="text-sm sm:text-base text-background/85 font-light mb-8 max-w-2xl mx-auto leading-relaxed">
             {cta.subtitle ||
-              "Connect directly with Ashish Wankhede and Rutik Pund to review your venue options, custom 3D decor concepts, and complete management timeline."}
+              "Connect directly with Ashish Wankhede and Rutik Pund to discuss your wedding venue options, 3D decor concepts, and complete planning timeline."}
           </p>
 
           {/* Consultation Perks */}

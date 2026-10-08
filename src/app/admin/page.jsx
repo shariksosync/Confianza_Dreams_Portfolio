@@ -97,6 +97,78 @@ function ModuleRefreshButton({ site, showSaved, label = "Refresh Database", clas
   );
 }
 
+function limitFrontSelection(list, targetId, max = 3) {
+  const updated = list.map((item) => {
+    const id = item.id || item.name || item.label || item.slug;
+    const isTarget = id === targetId || item.name === targetId || item.label === targetId || item.slug === targetId;
+    const isObj = typeof item === "object";
+    const base = isObj
+      ? { ...item }
+      : { id: `cat-${id}`, name: item, label: item, slug: String(item).toLowerCase().replace(/[^a-z0-9]+/g, "-") };
+    if (isTarget) {
+      return { ...base, showInFront: !Boolean(base.showInFront) };
+    }
+    return base;
+  });
+
+  const frontIndices = [];
+  updated.forEach((c, idx) => {
+    if (c.showInFront && c.id !== "all" && c.slug !== "all") {
+      frontIndices.push(idx);
+    }
+  });
+
+  if (frontIndices.length > max) {
+    const excess = frontIndices.length - max;
+    let deselectedCount = 0;
+    for (let i = 0; i < frontIndices.length && deselectedCount < excess; i++) {
+      const catIdx = frontIndices[i];
+      const cat = updated[catIdx];
+      const catId = cat.id || cat.name || cat.label || cat.slug;
+      const isTarget = catId === targetId || cat.name === targetId || cat.label === targetId || cat.slug === targetId;
+      if (!isTarget) {
+        updated[catIdx] = { ...updated[catIdx], showInFront: false };
+        deselectedCount++;
+      }
+    }
+  }
+
+  return updated;
+}
+
+function enforceMaxFrontCategories(list, targetId = null, max = 3) {
+  let updated = list.map((item) => {
+    const isObj = typeof item === "object";
+    return isObj
+      ? { ...item }
+      : { id: `cat-${item}`, name: item, label: item, slug: String(item).toLowerCase().replace(/[^a-z0-9]+/g, "-") };
+  });
+
+  const frontIndices = [];
+  updated.forEach((c, idx) => {
+    if (c.showInFront && c.id !== "all" && c.slug !== "all") {
+      frontIndices.push(idx);
+    }
+  });
+
+  if (frontIndices.length > max) {
+    const excess = frontIndices.length - max;
+    let deselectedCount = 0;
+    for (let i = 0; i < frontIndices.length && deselectedCount < excess; i++) {
+      const catIdx = frontIndices[i];
+      const cat = updated[catIdx];
+      const catId = cat.id || cat.name || cat.label || cat.slug;
+      const isTarget = targetId && (catId === targetId || cat.name === targetId || cat.label === targetId || cat.slug === targetId);
+      if (!isTarget) {
+        updated[catIdx] = { ...updated[catIdx], showInFront: false };
+        deselectedCount++;
+      }
+    }
+  }
+
+  return updated;
+}
+
 export default function AdminPage() {
   const { user, login, logout, ready: authReady } = useAuth();
   const site = useSite();
@@ -232,6 +304,7 @@ export default function AdminPage() {
   // Navigation Items
   const NAV_ITEMS = [
     { id: "overview", label: "Dashboard Overview", icon: LayoutDashboard },
+    { id: "hero", label: "Home Page Banner", icon: Sliders },
     {
       id: "contact-us",
       label: pendingInquiriesCount > 0 ? `Contact Us (${pendingInquiriesCount} New)` : "Contact Us",
@@ -614,7 +687,7 @@ function ContactUsModule({ site, showSaved }) {
         : [
             { day: "Monday – Friday", time: "10:00 AM – 8:00 PM" },
             { day: "Saturday", time: "10:00 AM – 8:00 PM" },
-            { day: "Sunday", time: "By Private Appointment Only" },
+            { day: "Sunday", time: "By Appointment" },
           ],
   });
 
@@ -1662,80 +1735,262 @@ function SectionsManagerModule({ site, showSaved }) {
 }
 
 // -------------------------------------------------------------
-// MODULE 4: Hero Editor
+// MODULE 4: Home Hero Banner Slider Manager (Fully Dynamic)
 // -------------------------------------------------------------
 function HeroEditorModule({ site, showSaved }) {
   const [formData, setFormData] = useState(site.hero || {});
   const [newImageUrl, setNewImageUrl] = useState("");
+  const [previewIndex, setPreviewIndex] = useState(0);
 
-  const handleSave = (e) => {
-    if (e) e.preventDefault();
-    site.update("hero", formData);
-    showSaved("Homepage luxury banner slider saved successfully!");
-  };
+  // Sync state if site context refreshes
+  useEffect(() => {
+    if (site.hero) {
+      setFormData(site.hero);
+    }
+  }, [site.hero]);
+
+  const defaultSlides = ["/images/hero-1.jpg", "/images/hero-2.jpg", "/images/hero-3.jpg"];
 
   const images = Array.isArray(formData.images) && formData.images.length > 0
-    ? formData.images
-    : ["/images/hero-1.jpg", "/images/hero-2.jpg", "/images/hero-3.jpg"];
+    ? formData.images.filter(Boolean)
+    : defaultSlides;
+
+  const handleSave = async (e) => {
+    if (e) e.preventDefault();
+    try {
+      await site.update("hero", {
+        ...formData,
+        images,
+        slideInterval: Number(formData.slideInterval) || 5000,
+      });
+      showSaved("Homepage luxury banner slider saved successfully in MongoDB!");
+    } catch (err) {
+      console.error("Failed to save hero banner:", err);
+    }
+  };
 
   const addImage = (url) => {
     if (!url) return;
-    const updated = [...(formData.images || ["/images/hero-1.jpg", "/images/hero-2.jpg", "/images/hero-3.jpg"]), url];
+    const updated = [...images, url.trim()];
     setFormData({ ...formData, images: updated });
     setNewImageUrl("");
+    setPreviewIndex(updated.length - 1);
   };
 
   const removeImage = (idx) => {
     const updated = images.filter((_, i) => i !== idx);
     setFormData({ ...formData, images: updated });
+    if (previewIndex >= updated.length) {
+      setPreviewIndex(Math.max(0, updated.length - 1));
+    }
+  };
+
+  const moveSlide = (idx, direction) => {
+    const targetIdx = idx + direction;
+    if (targetIdx < 0 || targetIdx >= images.length) return;
+    const updated = [...images];
+    const temp = updated[idx];
+    updated[idx] = updated[targetIdx];
+    updated[targetIdx] = temp;
+    setFormData({ ...formData, images: updated });
+    setPreviewIndex(targetIdx);
   };
 
   return (
-    <div className="glass-card rounded-3xl p-6 sm:p-8 border border-border space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-border/50">
-        <div>
-          <h3 className="font-display text-xl text-ink font-semibold">Homepage Luxury Banner Slider</h3>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Manage full-width 100% visible luxury banner slides (zero text overlay, pure visual elegance)
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <ModuleRefreshButton site={site} showSaved={showSaved} label="Refresh Banner" />
-          <button
-            type="button"
-            onClick={handleSave}
-            className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-4 flex items-center gap-1.5 cursor-pointer"
-          >
-            <Save className="h-4 w-4" />
-            <span>Save Banner Slider</span>
-          </button>
-        </div>
-      </div>
+    <div className="space-y-6 animate-fade-in">
+      {/* Module Header Bar */}
+      <div className="glass-card rounded-3xl p-6 sm:p-8 border border-border space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-border/60">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[0.68rem] uppercase tracking-[0.25em] text-secondary font-bold">
+                Homepage Hero Slider
+              </span>
+              <span className="px-2.5 py-0.5 rounded-full bg-secondary/20 text-secondary text-[0.68rem] font-bold">
+                {images.length} Active Slides
+              </span>
+            </div>
+            <h3 className="font-display text-2xl text-ink font-bold mt-1">
+              Home Page Banner Manager
+            </h3>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Full dynamic control over Homepage luxury hero slides, Cloudinary uploads, slide order, and auto-transition speeds.
+            </p>
+          </div>
 
-      {/* Cloudinary Single Upload to Add New Slide */}
-      <div className="space-y-4">
-        <ImageUploadField
-          label="Upload New Slide to Banner (Cloudinary)"
-          value={newImageUrl}
-          onChange={(url) => {
-            if (url) {
-              addImage(url);
-            }
-          }}
-        />
+          <div className="flex flex-wrap items-center gap-2.5">
+            <ModuleRefreshButton site={site} showSaved={showSaved} label="Refresh Banner" />
+            <button
+              type="button"
+              onClick={handleSave}
+              className="btn-luxe gradient-royal text-primary-foreground text-xs py-2.5 px-6 flex items-center gap-2 cursor-pointer shadow-luxe font-semibold"
+            >
+              <Save className="h-4 w-4 text-secondary" />
+              <span>Save Banner Changes</span>
+            </button>
+          </div>
+        </div>
 
-        {/* Existing Slide Cards */}
-        <div>
-          <label className="font-semibold text-foreground text-xs block mb-2">
-            Active Banner Slides ({images.length})
-          </label>
+        {/* Slider Controls & Cloudinary Upload */}
+        <div className="grid lg:grid-cols-12 gap-6 items-start">
+          {/* Left Column: Upload & Settings (7 cols) */}
+          <div className="lg:col-span-7 space-y-5">
+            {/* 1. Direct Cloudinary Upload */}
+            <div className="p-5 rounded-2xl bg-card border border-border/80 shadow-xs space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-ink flex items-center gap-2">
+                  <Upload className="h-4 w-4 text-secondary" />
+                  <span>Add New Banner Slide</span>
+                </span>
+                <span className="text-[0.68rem] text-muted-foreground">Upload to Cloudinary</span>
+              </div>
+              <ImageUploadField
+                label="Upload Image (Recommended: 1920x1080 or High-Res Landscape)"
+                value={newImageUrl}
+                onChange={(url) => {
+                  if (url) {
+                    addImage(url);
+                  }
+                }}
+              />
+            </div>
+
+            {/* 2. Slide Transition Timing */}
+            <div className="p-5 rounded-2xl bg-card border border-border/80 shadow-xs flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <label className="text-xs font-bold text-ink block">
+                  Auto-Slide Transition Interval
+                </label>
+                <p className="text-[0.72rem] text-muted-foreground mt-0.5">
+                  How long each image stays on screen before transitioning to the next slide.
+                </p>
+              </div>
+              <select
+                value={formData.slideInterval || 5000}
+                onChange={(e) =>
+                  setFormData({ ...formData, slideInterval: Number(e.target.value) })
+                }
+                className="rounded-xl border border-border bg-background px-3.5 py-2 text-xs font-semibold text-foreground focus:outline-none focus:border-secondary cursor-pointer"
+              >
+                <option value={3000}>3 Seconds (Fast)</option>
+                <option value={4000}>4 Seconds</option>
+                <option value={5000}>5 Seconds (Recommended)</option>
+                <option value={6000}>6 Seconds</option>
+                <option value={8000}>8 Seconds (Relaxed)</option>
+                <option value={10000}>10 Seconds (Slow)</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Right Column: Interactive Live Preview (5 cols) */}
+          <div className="lg:col-span-5 space-y-4">
+            <div className="p-5 rounded-2xl bg-card border border-border/80 shadow-xs space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-ink flex items-center gap-1.5">
+                  <Eye className="h-4 w-4 text-secondary" />
+                  <span>Interactive Live Preview</span>
+                </span>
+                <span className="text-[0.68rem] font-bold text-secondary font-mono">
+                  Slide {images.length > 0 ? previewIndex + 1 : 0} / {images.length}
+                </span>
+              </div>
+
+              {/* Live Simulated Carousel */}
+              <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden bg-black/90 border border-border shadow-md select-none group">
+                {images.length > 0 ? (
+                  <img
+                    src={images[previewIndex] || images[0]}
+                    alt={`Preview Slide ${previewIndex + 1}`}
+                    className="w-full h-full object-cover object-center transition-all duration-500"
+                    onError={(e) => {
+                      e.currentTarget.src = "/images/hero-1.jpg";
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
+                    No slides uploaded
+                  </div>
+                )}
+
+                {/* Left navigation arrow */}
+                {images.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setPreviewIndex((prev) => (prev - 1 + images.length) % images.length)
+                    }
+                    className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center transition cursor-pointer"
+                    title="Previous Slide"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </button>
+                )}
+
+                {/* Right navigation arrow */}
+                {images.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => setPreviewIndex((prev) => (prev + 1) % images.length)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center transition cursor-pointer"
+                    title="Next Slide"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                )}
+
+                {/* Bottom slide indicators */}
+                {images.length > 1 && (
+                  <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-md">
+                    {images.map((_, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => setPreviewIndex(i)}
+                        className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                          i === previewIndex
+                            ? "w-5 bg-[#C2A438]"
+                            : "w-1.5 bg-white/40 hover:bg-white/80"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+              <p className="text-[0.68rem] text-muted-foreground text-center">
+                Click arrows to test slide transitions. All slides display 100% full-width on the public homepage.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Active Slides Manager (Cards with Reorder & Delete) */}
+        <div className="pt-4 border-t border-border/60 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="font-display text-lg text-ink font-bold">
+                Active Slide Sequence ({images.length})
+              </h4>
+              <p className="text-xs text-muted-foreground">
+                Reorder slides using the left/right arrows, or delete slides anytime.
+              </p>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {images.map((img, idx) => (
               <div
                 key={img + idx}
-                className="relative group rounded-2xl overflow-hidden border border-border bg-card shadow-sm"
+                className={`relative group rounded-2xl overflow-hidden border bg-card shadow-sm transition-all duration-300 ${
+                  previewIndex === idx
+                    ? "border-secondary ring-2 ring-secondary/30 shadow-md"
+                    : "border-border hover:border-primary/40"
+                }`}
               >
-                <div className="aspect-[16/9] w-full bg-muted overflow-hidden relative">
+                {/* Photo Preview with Aspect Ratio */}
+                <div
+                  className="aspect-[16/9] w-full bg-muted overflow-hidden relative cursor-pointer"
+                  onClick={() => setPreviewIndex(idx)}
+                >
                   <img
                     src={img}
                     alt={`Slide ${idx + 1}`}
@@ -1744,20 +1999,51 @@ function HeroEditorModule({ site, showSaved }) {
                       e.currentTarget.src = "/images/hero-1.jpg";
                     }}
                   />
-                  <div className="absolute top-2 left-2 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-[0.65rem] font-bold text-white uppercase tracking-wider">
-                    Slide {idx + 1}
+                  <div className="absolute top-2.5 left-2.5 px-3 py-1 rounded-full bg-black/70 backdrop-blur-md text-[0.68rem] font-bold text-champagne uppercase tracking-wider shadow-sm flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-secondary" />
+                    <span>Slide 0{idx + 1}</span>
                   </div>
+
+                  {previewIndex === idx && (
+                    <div className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full gradient-gold text-ink text-[0.62rem] font-bold uppercase shadow-sm">
+                      Active In Preview
+                    </div>
+                  )}
                 </div>
 
-                <div className="p-3 flex items-center justify-between gap-2 border-t border-border/50 bg-background/50">
-                  <span className="text-[0.7rem] text-muted-foreground truncate font-mono">
-                    {img}
-                  </span>
+                {/* Card Controls & Reordering */}
+                <div className="p-3 bg-card border-t border-border/60 flex items-center justify-between gap-2">
+                  {/* Reorder Buttons */}
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      disabled={idx === 0}
+                      onClick={() => moveSlide(idx, -1)}
+                      className="p-1.5 rounded-lg border border-border bg-background hover:bg-muted disabled:opacity-30 disabled:pointer-events-none transition text-xs cursor-pointer"
+                      title="Move Left (Earlier in sequence)"
+                    >
+                      <ChevronLeft className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      disabled={idx === images.length - 1}
+                      onClick={() => moveSlide(idx, 1)}
+                      className="p-1.5 rounded-lg border border-border bg-background hover:bg-muted disabled:opacity-30 disabled:pointer-events-none transition text-xs cursor-pointer"
+                      title="Move Right (Later in sequence)"
+                    >
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </button>
+                    <span className="text-[0.68rem] text-muted-foreground font-mono ml-1 truncate max-w-[120px]">
+                      {img}
+                    </span>
+                  </div>
+
+                  {/* Delete Button */}
                   <button
                     type="button"
                     onClick={() => removeImage(idx)}
-                    className="p-1.5 rounded-lg text-destructive hover:bg-destructive/10 transition-colors shrink-0 cursor-pointer"
-                    title="Delete Slide"
+                    className="p-1.5 rounded-lg text-destructive hover:bg-destructive/15 transition shrink-0 cursor-pointer"
+                    title={`Delete Slide ${idx + 1}`}
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -1767,69 +2053,17 @@ function HeroEditorModule({ site, showSaved }) {
           </div>
         </div>
 
-        {/* Bulk Image URLs Input (Optional) */}
-        <div>
-          <label className="font-medium text-foreground text-xs block mb-1">
-            Bulk Edit Image URLs (one per line)
-          </label>
-          <textarea
-            rows={3}
-            value={images.join("\n")}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                images: e.target.value.split("\n").map((s) => s.trim()).filter(Boolean),
-              })
-            }
-            className="w-full rounded-xl border border-border bg-card px-4 py-2 text-xs text-foreground font-mono leading-relaxed"
-            placeholder="https://...&#10;https://..."
-          />
+        {/* Bottom Save Action */}
+        <div className="pt-4 border-t border-border/60 flex justify-end">
+          <button
+            type="button"
+            onClick={handleSave}
+            className="btn-luxe gradient-royal text-primary-foreground text-xs py-3 px-8 flex items-center gap-2 cursor-pointer shadow-luxe font-bold"
+          >
+            <Save className="h-4 w-4 text-secondary" />
+            <span>Save All Banner Changes</span>
+          </button>
         </div>
-      </div>
-
-      {/* Live Preview */}
-      <div className="pt-4 border-t border-border/50">
-        <div className="flex items-center gap-2 mb-2">
-          <Eye className="h-4 w-4 text-primary" />
-          <h4 className="text-xs font-bold uppercase tracking-wider text-ink">
-            Live Banner Visual Preview (100% Image Visibility)
-          </h4>
-        </div>
-        <div className="rounded-2xl overflow-hidden border border-border shadow-inner bg-black">
-          <div className="relative w-full aspect-[21/9] sm:aspect-[24/9] overflow-hidden">
-            {images.length > 0 && (
-              <img
-                src={images[0]}
-                alt="Banner Preview"
-                className="w-full h-full object-cover object-center"
-                onError={(e) => {
-                  e.currentTarget.src = "/images/hero-1.jpg";
-                }}
-              />
-            )}
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-md">
-              {images.map((_, i) => (
-                <span
-                  key={i}
-                  className={`h-1.5 rounded-full ${
-                    i === 0 ? "w-5 bg-[#C2A438]" : "w-1.5 bg-white/40"
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="pt-2 flex justify-end">
-        <button
-          type="button"
-          onClick={handleSave}
-          className="btn-luxe gradient-royal text-primary-foreground text-xs py-2.5 px-6 flex items-center gap-2 cursor-pointer shadow-luxe"
-        >
-          <Save className="h-4 w-4" />
-          <span>Save Banner Changes</span>
-        </button>
       </div>
     </div>
   );
@@ -1855,64 +2089,98 @@ function AboutEditorModule({ site, showSaved }) {
     founderAddress: {
       badge: site.about?.founderAddress?.badge || "FOUNDER'S VISION",
       eyebrow: site.about?.founderAddress?.eyebrow || "FOUNDER'S ADDRESS",
-      quote: site.about?.founderAddress?.quote || "We don't just decorate halls; we architect emotional memories that outlast generations.",
+      quote: site.about?.founderAddress?.quote || "We believe every couple has a unique story, and we make sure your wedding is planned with love and care.",
       image: site.about?.founderAddress?.image || "/images/couple.jpg",
       name: site.about?.founderAddress?.name || "Mr. Ashish Wankhede",
       role: site.about?.founderAddress?.role || "Founder & Managing Director",
-      story: site.about?.founderAddress?.story || "When we founded Confianza Event's and Entertainment, our singular mission was to bring authenticity, structured elegance, and heartfelt reverence back to Indian wedding celebrations.\n\nIn a country rich with boundless youth potential, traditions, and royal heritage, our couples deserve bespoke spatial styling, transparent budgeting, and calm, legitimate execution that elevates their special day from a routine banquet into a cinematic family heirloom.\n\nWe pledge our continuous dedication to nurturing not just flawless events, but lifelong relationships with the families who place their deepest faith in our hands.",
+      story: site.about?.founderAddress?.story || "When we started Confianza Events and Entertainment, our goal was simple: to make wedding planning easy, transparent, and memorable for every family.\n\nEvery couple deserves custom 3D decor, honest pricing, and calm, reliable management so their special day feels truly joyful.\n\nWe are committed to delivering beautiful weddings and building lifelong relationships with every family who trusts us.",
       signatureName: site.about?.founderAddress?.signatureName || "Mr. Ashish Wankhede",
       signatureTitle: site.about?.founderAddress?.signatureTitle || "Founder & Principal Director, Confianza Events",
     },
+    leadership: Array.isArray(site.about?.leadership) && site.about.leadership.length > 0
+      ? site.about.leadership
+      : [
+          {
+            id: "founder",
+            badge: site.about?.founderAddress?.badge || "FOUNDER'S VISION",
+            eyebrow: site.about?.founderAddress?.eyebrow || "FOUNDER'S ADDRESS",
+            quote: site.about?.founderAddress?.quote || "We believe that every couple's love story is unique, and that's what inspires us to create truly personalized weddings.",
+            image: site.about?.founderAddress?.image || "/images/couple.jpg",
+            name: site.about?.founderAddress?.name || "Mr. Ashish Wankhede",
+            role: site.about?.founderAddress?.role || "Founder & Managing Director",
+            story: site.about?.founderAddress?.story || "At Confianza, we are passionate wedding planners who bring your dream celebrations to life with care and creativity.\n\nFor us, your wedding is just like our own family celebration. From traditional poojas to destination weddings across India, we take care of all arrangements, guest hospitality, vendors, and timing so your family can enjoy freely.\n\nOur commitment is to create beautiful weddings and lifelong memories for you and your family.",
+          },
+          {
+            id: "cfo",
+            badge: "CLEAR & HONEST BUDGETING",
+            eyebrow: "CFO'S PERSPECTIVE",
+            quote: "Clear cost estimates and honest pricing are the foundation of a stress-free wedding.",
+            image: "/images/hero-2.jpg",
+            name: "Mr. Rutik Pund",
+            role: "CFO & Co-Founder",
+            story: "At Confianza, we manage every family's wedding budget with complete honesty and care. True quality is about smart budget planning, clear vendor prices, and zero hidden markups.\n\nFrom detailed itemized cost sheets to hotel negotiations, our pricing approach ensures you get the best value for every rupee spent.\n\nWe believe financial peace of mind allows families to celebrate happily and with complete confidence.",
+          },
+          {
+            id: "management-head",
+            badge: "ON-GROUND EVENT MANAGEMENT",
+            eyebrow: "MANAGEMENT ADDRESS",
+            quote: "Smooth weddings happen through careful planning, on-time coordination, and calm teamwork.",
+            image: "/images/hero-3.jpg",
+            name: "Management Head",
+            role: "Head of Operations & Production",
+            story: "Behind every beautiful bride & groom entry and mandap setup is our hardworking on-ground team. Our setup teams, helpers, and sound/light technicians start early to make sure everything is ready on time.\n\nWe check every detail in advance and solve issues quickly behind the scenes so your event flows smoothly without delay.\n\nOur promise is simple: you enjoy as guests while we take care of everything on-ground.",
+          },
+        ],
     visionPillars: Array.isArray(site.about?.visionPillars) && site.about.visionPillars.length > 0
       ? site.about.visionPillars
       : [
-          "Pioneering royal destination wedding experiences across India & abroad",
-          "Setting the benchmark for bespoke spatial architecture & floral aesthetics",
-          "Preserving authentic cultural rituals while infusing contemporary elegance",
+          "Creating memorable destination wedding experiences across India",
+          "Creating beautiful mandap, stage, and floral decor",
+          "Honoring authentic cultural traditions with modern elegance",
         ],
     missionCommitments: Array.isArray(site.about?.missionCommitments) && site.about.missionCommitments.length > 0
       ? site.about.missionCommitments
       : [
-          "Lifting all logistical burdens so families remain fully present guests",
+          "Handling all the planning and logistics so families can enjoy as guests",
           "Complete budget transparency with zero hidden markups or surprises",
-          "Precision-timed execution delivered by calm, dedicated ground crews",
+          "On-time execution managed by our calm, dedicated team",
         ],
     coreValues: Array.isArray(site.about?.coreValues) && site.about.coreValues.length > 0
       ? site.about.coreValues
       : [
           {
             icon: "ShieldCheck",
-            title: "Uncompromised Trust (Confianza)",
-            subtitle: "Absolute Honesty in Costing",
-            text: "True to our name, we believe trust is the cornerstone of luxury. We provide completely transparent itemized sheets with zero hidden commissions or eleventh-hour markups.",
+            title: "Complete Trust (Confianza)",
+            subtitle: "Clear & Honest Pricing",
+            text: "True to our name, we believe trust is everything. We provide clear, itemized price sheets with zero hidden charges or last-minute surprises.",
             gradient: "from-secondary to-amber-500",
           },
           {
             icon: "Palette",
-            title: "Artistic Distinction",
-            subtitle: "Tailored, Never Templated",
-            text: "Every couple has a unique rhythm. We craft custom mood boards, bespoke drape geometries, and original floral installations designed specifically for your aesthetic.",
+            title: "Unique Creative Designs",
+            subtitle: "Customized For You",
+            text: "Every couple has a unique style. We create custom mood boards, beautiful fabric draping, and fresh floral setups designed specifically for your taste.",
             gradient: "from-primary to-purple-600",
           },
           {
             icon: "Clock",
-            title: "Operational Precision",
-            subtitle: "Time-Tested Execution",
-            text: "Our production crews start before sunrise with minute-by-minute run sheets, dual generator backups, and proactive weather contingencies to ensure zero delays.",
+            title: "Timely Execution",
+            subtitle: "On-Time Every Time",
+            text: "Our setup teams start early with clear timelines, backup power, and weather plans to make sure every ceremony starts right on time.",
             gradient: "from-blue-600 to-indigo-600",
           },
           {
             icon: "HeartHandshake",
-            title: "Empathetic Hospitality",
+            title: "Warm Hospitality",
             subtitle: "Caring for Your Family",
-            text: "Weddings are emotional milestones. We coordinate with elders, prioritize guest comfort, and manage vendor interactions so you stay relaxed throughout.",
+            text: "Weddings are emotional family moments. We coordinate with elders, prioritize guest comfort, and manage vendors so you stay relaxed throughout.",
             gradient: "from-rose-500 to-primary",
           },
           {
             icon: "Leaf",
-            title: "Sustainable Elegance",
-            subtitle: "Conscious Celebrations",
-            text: "We partner with local floral cultivators, utilize low-emission LED lighting designs, and recycle organic decor waste responsibly after grand events.",
+            title: "Eco-Friendly Practices",
+            subtitle: "Mindful Celebrations",
+            text: "We source fresh flowers from local farms, use energy-saving LED lights, and clean up responsibly after every event.",
             gradient: "from-emerald-600 to-teal-600",
           },
         ],
@@ -1921,38 +2189,24 @@ function AboutEditorModule({ site, showSaved }) {
       : [
           {
             num: "01",
-            title: "Discovery & Story Session",
-            timeline: "Month 1 • Foundation",
-            summary: "We begin by listening deeply to your love story, preferred aesthetic, family rituals, guest demographics, and realistic budget expectations.",
-            deliverables: ["Comprehensive Wedding Questionnaire", "Budget Allocation Framework", "Timeline Strategy Map"],
+            title: "First Meeting & Discussion",
+            timeline: "60–90 Min Meeting • Ideas & Budget",
+            summary: "A friendly one-on-one session to understand your wedding ideas, style preferences, guest count, and budget. We explain our planning options clearly and share a simple, honest wedding plan.",
+            deliverables: ["Understanding Your Vision", "Clear Budget Planning", "Custom Wedding Plan & Timeline"],
           },
           {
             num: "02",
-            title: "3D Spatial Design & Mood Boards",
-            timeline: "Month 2 - 3 • Artistry",
-            summary: "Our design studio creates realistic 3D renderings of the mandap, entrance arches, stage, and tablescapes so you see your wedding before we build it.",
-            deliverables: ["Custom Color & Floral Palettes", "3D CAD Decor Previews", "Lighting & Sound Schematics"],
+            title: "Detailed Planning & 3D Decor Design",
+            timeline: "Design & Bookings • Creative Concepts",
+            summary: "Our design team creates realistic 3D designs for your mandap, entrance, and stage so you see everything before setup starts. We help book trusted venues, caterers, sound, lights, and artists with honest pricing.",
+            deliverables: ["3D Decor Previews & Flower Colors", "Venue & Vendor Confirmations", "Wedding Cards & Stationery"],
           },
           {
             num: "03",
-            title: "Vendor Curation & Venue Scouting",
-            timeline: "Month 4 - 6 • Procurement",
-            summary: "We scout and lock in premier venues across India, negotiate with top caterers, celebrity artists, photographers, and priests with zero hidden fees.",
-            deliverables: ["Venue Contract Finalization", "Menu Tastings & Artist Bookings", "Licensing & Permissions"],
-          },
-          {
-            num: "04",
-            title: "Production & Technical Rehearsals",
-            timeline: "Final Weeks • Engineering",
-            summary: "Our ground crew takes over the venue 24 hours prior. Carpentry, structural draping, floral conditioning, and sound tests run seamlessly through the night.",
-            deliverables: ["Minute-by-Minute Master Run Sheet", "Vendor Arrival Checklists", "Sound & Light Rehearsals"],
-          },
-          {
-            num: "05",
-            title: "Celebration Day & Calm Execution",
-            timeline: "Wedding Day • Pure Joy",
-            summary: "You step into your wedding as honored guests. Our shadow coordinators and ground directors handle all logistics, cues, and guest care with quiet poise.",
-            deliverables: ["Dedicated Bride & Groom Shadows", "Family VIP Hospitality", "Flawless Show Flow Management"],
+            title: "Wedding Day Management & Execution",
+            timeline: "Wedding Day • Smooth Delivery",
+            summary: "Our team manages everything on the wedding day. Dedicated personal helpers assist the bride and groom, while our on-ground crew handles guest check-ins, food timings, rituals, and music so your family can enjoy freely.",
+            deliverables: ["Personal Helpers for Bride & Groom", "Detailed Event Schedule", "Guest Care & Food Timing Supervision"],
           },
         ],
   }));
@@ -1966,7 +2220,7 @@ function AboutEditorModule({ site, showSaved }) {
         headerBanner: {
           badge: site.about?.headerBanner?.badge || "Since 2018 • Warje, Pune",
           title: site.about?.headerBanner?.title || site.about?.heading || "Where Weddings Become Stories",
-          subtitle: site.about?.headerBanner?.subtitle || site.about?.story || "At Confianza, we're the romantic and elegant wedding experts who bring love stories to life with passion and precision. For us, your event is no less than our own.",
+          subtitle: site.about?.headerBanner?.subtitle || site.about?.story || "At Confianza, we create beautiful, memorable weddings with personal care and creative design. For us, your event is just like our own.",
           image: site.about?.headerBanner?.image || "/images/hero-1.jpg",
           ...(site.about.headerBanner || {}),
         },
@@ -1974,12 +2228,49 @@ function AboutEditorModule({ site, showSaved }) {
           ...prev.founderAddress,
           ...(site.about.founderAddress || {}),
         },
+        leadership: Array.isArray(site.about?.leadership) && site.about.leadership.length > 0
+          ? site.about.leadership
+          : (prev.leadership || [
+              {
+                id: "founder",
+                badge: site.about?.founderAddress?.badge || "FOUNDER'S VISION",
+                eyebrow: site.about?.founderAddress?.eyebrow || "FOUNDER'S ADDRESS",
+                quote: site.about?.founderAddress?.quote || "We believe that every couple's love story is unique, and that's what inspires us to create truly personalized weddings.",
+                image: site.about?.founderAddress?.image || "/images/couple.jpg",
+                name: site.about?.founderAddress?.name || "Mr. Ashish Wankhede",
+                role: site.about?.founderAddress?.role || "Founder & Managing Director",
+                story: site.about?.founderAddress?.story || "At Confianza, we are passionate wedding planners who bring your dream celebrations to life with care and creativity.\n\nFor us, your wedding is just like our own family celebration. From traditional poojas to destination weddings across India, we take care of all arrangements, guest hospitality, vendors, and timing so your family can enjoy freely.\n\nOur commitment is to create beautiful weddings and lifelong memories for you and your family.",
+              },
+              {
+                id: "cfo",
+                badge: "CLEAR & HONEST BUDGETING",
+                eyebrow: "CFO'S PERSPECTIVE",
+                quote: "Clear cost estimates and honest pricing are the foundation of a stress-free wedding.",
+                image: "/images/hero-2.jpg",
+                name: "Mr. Rutik Pund",
+                role: "CFO & Co-Founder",
+                story: "At Confianza, we manage every family's wedding budget with complete honesty and care. True quality is about smart budget planning, clear vendor prices, and zero hidden markups.\n\nFrom detailed itemized cost sheets to hotel negotiations, our pricing approach ensures you get the best value for every rupee spent.\n\nWe believe financial peace of mind allows families to celebrate happily and with complete confidence.",
+              },
+              {
+                id: "management-head",
+                badge: "ON-GROUND EVENT MANAGEMENT",
+                eyebrow: "MANAGEMENT ADDRESS",
+                quote: "Smooth weddings happen through careful planning, on-time coordination, and calm teamwork.",
+                image: "/images/hero-3.jpg",
+                name: "Management Head",
+                role: "Head of Operations & Production",
+                story: "Behind every beautiful bride & groom entry and mandap setup is our hardworking on-ground team. Our setup teams, helpers, and sound/light technicians start early to make sure everything is ready on time.\n\nWe check every detail in advance and solve issues quickly behind the scenes so your event flows smoothly without delay.\n\nOur promise is simple: you enjoy as guests while we take care of everything on-ground.",
+              },
+            ]),
       }));
     }
     if (site.team) {
       setTeamMembers(site.team);
     }
   }, [site.about, site.team]);
+
+  // Executive Leadership Leader Index (0 = Founder, 1 = CFO, 2 = Management Head)
+  const [selectedLeaderIdx, setSelectedLeaderIdx] = useState(0);
 
   // Team state and modal inside About
   const [teamMembers, setTeamMembers] = useState(site.team || []);
@@ -2051,309 +2342,329 @@ function AboutEditorModule({ site, showSaved }) {
         <ModuleRefreshButton site={site} showSaved={showSaved} label="Refresh About Data" />
       </div>
 
-      {/* 1. FOUNDER'S VISION SUB-TAB (LUXURY SPLIT REDESIGN) */}
-      {subTab === "founder" && (
-        <div className="space-y-8">
-          {/* Header Card */}
-          <div className="glass-card rounded-3xl p-6 sm:p-8 border border-border flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 text-secondary text-xs uppercase tracking-[0.25em] font-bold">
-                <Sparkles className="h-4 w-4 text-secondary" />
-                <span>Executive Management</span>
-              </div>
-              <h3 className="font-display text-2xl text-ink font-bold mt-1">Founder's Address &amp; Vision</h3>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Customize the luxury dark card displayed on the public <span className="text-primary font-semibold">About page</span>. Changes reflect live below.
-              </p>
-            </div>
-            <button
-              type="button"
-              disabled={isSaving}
-              onClick={() => saveAbout(aboutData)}
-              className="btn-luxe gradient-royal text-primary-foreground text-xs py-2.5 px-6 shadow-luxe flex items-center gap-2 disabled:opacity-60 cursor-pointer"
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin text-secondary" />
-                  <span>Saving to Database...</span>
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4 text-secondary" />
-                  <span>Save Founder Section</span>
-                </>
-              )}
-            </button>
-          </div>
+      {/* 1. EXECUTIVE LEADERSHIP / FOUNDER SUB-TAB (3 DYNAMIC CARDS: FOUNDER, CFO, MANAGEMENT HEAD) */}
+      {subTab === "founder" && (() => {
+        const leaders = Array.isArray(aboutData.leadership) && aboutData.leadership.length >= 3
+          ? aboutData.leadership
+          : [
+              {
+                id: "founder",
+                badge: aboutData.founderAddress?.badge || "FOUNDER'S VISION",
+                eyebrow: aboutData.founderAddress?.eyebrow || "FOUNDER'S ADDRESS",
+                quote: aboutData.founderAddress?.quote || "We believe that every couple's love story is unique, and that's what inspires us to create truly personalized weddings.",
+                image: aboutData.founderAddress?.image || "/images/couple.jpg",
+                name: aboutData.founderAddress?.name || "Mr. Ashish Wankhede",
+                role: aboutData.founderAddress?.role || "Founder & Managing Director",
+                story: aboutData.founderAddress?.story || "At Confianza, we're the romantic and elegant wedding experts who bring love stories to life with passion and precision. We are a dedicated team obsessed with love, laughter, and happily ever afters.\n\nFor us, your event is no less than our own. From sacred heritage rituals to grand multi-day luxury weddings across India, we shoulder all logistics, hospitality, vendor coordination, and minute-by-minute show running so your family can celebrate as honored guests.\n\nWe pledge our continuous devotion to crafting not just flawless weddings, but heartfelt lifelong memories that outlast generations.",
+              },
+              {
+                id: "cfo",
+                badge: "FINANCIAL ARCHITECTURE",
+                eyebrow: "CFO'S PERSPECTIVE",
+                quote: "Transparent financial forecasting and ethical budgeting are the true foundation of stress-free luxury celebrations.",
+                image: "/images/hero-2.jpg",
+                name: "Mr. Rutik Pund",
+                role: "CFO & Co-Founder",
+                story: "At Confianza, we treat every family's wedding investment with absolute accountability and care. True luxury isn't about exorbitant markups—it is about intelligent budget allocation, transparent vendor pricing, and meticulous fiscal management.\n\nFrom detailed line-item expenditure sheets to contract negotiations with 5-star properties, our financial governance ensures you get maximum aesthetic and operational value at every milestone.\n\nWe believe financial peace of mind allows families to celebrate with uninhibited joy and complete confidence.",
+              },
+              {
+                id: "management-head",
+                badge: "OPERATIONAL MASTERY",
+                eyebrow: "MANAGEMENT ADDRESS",
+                quote: "Flawless weddings are not an accident—they are the result of disciplined show running, precision rehearsals, and calm leadership.",
+                image: "/images/hero-3.jpg",
+                name: "Management Head",
+                role: "Head of Operations & Production",
+                story: "Behind every breathtaking bridal entry and awe-inspiring floral mandap lies a clockwork production engine. Our ground crews, shadow coordinators, and technical teams begin work before sunrise to orchestrate acoustics, lighting, and hospitality transitions with millisecond precision.\n\nWe anticipate every variable before it arises, troubleshooting silently behind the scenes so that each celebration unfolds like a symphony.\n\nOur commitment is simple: you celebrate as honored guests while we handle every detail with military precision.",
+              },
+            ];
 
-          {/* Form & Live Real-Time Preview Grid */}
-          <div className="grid gap-8 lg:grid-cols-12 items-start">
-            {/* Left Column: Form Controls */}
-            <div className="lg:col-span-6 space-y-6 glass-card rounded-3xl p-6 sm:p-7 border border-border">
-              <div className="border-b border-border/60 pb-3">
-                <h4 className="font-display text-base font-bold text-ink flex items-center gap-2">
-                  <span>Founder Information &amp; Photo</span>
-                </h4>
-                <p className="text-[0.68rem] text-muted-foreground mt-0.5">
-                  Upload founder portrait and customize key titles and badges.
+        const currentLeader = leaders[selectedLeaderIdx] || leaders[0];
+
+        const updateLeaderField = (field, val) => {
+          const nextList = [...leaders];
+          nextList[selectedLeaderIdx] = {
+            ...nextList[selectedLeaderIdx],
+            [field]: val,
+          };
+
+          const nextAbout = {
+            ...aboutData,
+            leadership: nextList,
+          };
+
+          // If editing Founder (index 0), also sync founderAddress for backwards compatibility
+          if (selectedLeaderIdx === 0) {
+            nextAbout.founderAddress = {
+              ...nextAbout.founderAddress,
+              [field]: val,
+            };
+          }
+
+          setAboutData(nextAbout);
+        };
+
+        const leaderTabLabels = [
+          { icon: "👑", title: "Founder", subtitle: "Ashish Wankhede" },
+          { icon: "💼", title: "CFO", subtitle: "Rutik Pund" },
+          { icon: "⚙️", title: "Management Head", subtitle: "Operations & Production" },
+        ];
+
+        return (
+          <div className="space-y-8">
+            {/* Header Card */}
+            <div className="glass-card rounded-3xl p-6 sm:p-8 border border-border flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2 text-secondary text-xs uppercase tracking-[0.25em] font-bold">
+                  <Sparkles className="h-4 w-4 text-secondary" />
+                  <span>Executive Management</span>
+                </div>
+                <h3 className="font-display text-2xl text-ink font-bold mt-1">Executive Leadership &amp; Addresses</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Customize the 3 executive cards (<span className="text-primary font-semibold">Founder, CFO, Management Head</span>) displayed on the public <span className="text-primary font-semibold">About page</span>.
                 </p>
               </div>
-
-              {/* Founder Photo Uploader */}
-              <ImageUploadField
-                label="Founder Portrait Photo"
-                description="Upload a high-resolution portrait from your device or paste a URL."
-                value={aboutData.founderAddress?.image || ""}
-                onChange={(url) =>
-                  setAboutData({
-                    ...aboutData,
-                    founderAddress: { ...aboutData.founderAddress, image: url },
-                  })
-                }
-              />
-
-              <div className="grid sm:grid-cols-2 gap-4 text-xs">
-                <div>
-                  <label className="font-semibold text-foreground block mb-1">Founder Full Name</label>
-                  <input
-                    type="text"
-                    value={aboutData.founderAddress?.name || ""}
-                    onChange={(e) =>
-                      setAboutData({
-                        ...aboutData,
-                        founderAddress: { ...aboutData.founderAddress, name: e.target.value },
-                      })
-                    }
-                    className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-medium focus:border-secondary focus:outline-none"
-                    placeholder="Mr. Ashish Wankhede"
-                  />
-                </div>
-
-                <div>
-                  <label className="font-semibold text-foreground block mb-1">Founder Role / Title</label>
-                  <input
-                    type="text"
-                    value={aboutData.founderAddress?.role || ""}
-                    onChange={(e) =>
-                      setAboutData({
-                        ...aboutData,
-                        founderAddress: { ...aboutData.founderAddress, role: e.target.value },
-                      })
-                    }
-                    className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs focus:border-secondary focus:outline-none"
-                    placeholder="Founder & Managing Director"
-                  />
-                </div>
-              </div>
-
-              <div className="grid sm:grid-cols-2 gap-4 text-xs">
-                <div>
-                  <label className="font-semibold text-foreground block mb-1">Badge Tag</label>
-                  <input
-                    type="text"
-                    value={aboutData.founderAddress?.badge || ""}
-                    onChange={(e) =>
-                      setAboutData({
-                        ...aboutData,
-                        founderAddress: { ...aboutData.founderAddress, badge: e.target.value },
-                      })
-                    }
-                    className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs focus:border-secondary focus:outline-none uppercase font-semibold"
-                    placeholder="FOUNDER'S VISION"
-                  />
-                </div>
-
-                <div>
-                  <label className="font-semibold text-foreground block mb-1">Eyebrow Heading</label>
-                  <input
-                    type="text"
-                    value={aboutData.founderAddress?.eyebrow || ""}
-                    onChange={(e) =>
-                      setAboutData({
-                        ...aboutData,
-                        founderAddress: { ...aboutData.founderAddress, eyebrow: e.target.value },
-                      })
-                    }
-                    className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs focus:border-secondary focus:outline-none uppercase font-semibold"
-                    placeholder="FOUNDER'S ADDRESS"
-                  />
-                </div>
-              </div>
-
-              <div className="text-xs">
-                <label className="font-semibold text-foreground block mb-1">
-                  Highlight Quote Headline
-                </label>
-                <textarea
-                  rows={2}
-                  value={aboutData.founderAddress?.quote || ""}
-                  onChange={(e) =>
-                    setAboutData({
-                      ...aboutData,
-                      founderAddress: { ...aboutData.founderAddress, quote: e.target.value },
-                    })
-                  }
-                  className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-medium leading-relaxed focus:border-secondary focus:outline-none"
-                  placeholder="We don't just decorate halls; we architect emotional memories that outlast generations."
-                />
-              </div>
-
-              <div className="text-xs">
-                <label className="font-semibold text-foreground block mb-1">
-                  Founder Address / Message Narrative (Separate paragraphs by blank line)
-                </label>
-                <textarea
-                  rows={6}
-                  value={aboutData.founderAddress?.story || ""}
-                  onChange={(e) =>
-                    setAboutData({
-                      ...aboutData,
-                      founderAddress: { ...aboutData.founderAddress, story: e.target.value },
-                    })
-                  }
-                  className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs leading-relaxed focus:border-secondary focus:outline-none font-sans"
-                  placeholder="Enter full founder vision and journey story here..."
-                />
-              </div>
-
-              <div className="grid sm:grid-cols-2 gap-4 text-xs pt-2 border-t border-border/60">
-                <div>
-                  <label className="font-semibold text-foreground block mb-1">
-                    Signature Sign-off Name
-                  </label>
-                  <input
-                    type="text"
-                    value={aboutData.founderAddress?.signatureName || ""}
-                    onChange={(e) =>
-                      setAboutData({
-                        ...aboutData,
-                        founderAddress: { ...aboutData.founderAddress, signatureName: e.target.value },
-                      })
-                    }
-                    className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs focus:border-secondary focus:outline-none"
-                    placeholder="Mr. Ashish Wankhede"
-                  />
-                </div>
-
-                <div>
-                  <label className="font-semibold text-foreground block mb-1">
-                    Signature Sign-off Title
-                  </label>
-                  <input
-                    type="text"
-                    value={aboutData.founderAddress?.signatureTitle || ""}
-                    onChange={(e) =>
-                      setAboutData({
-                        ...aboutData,
-                        founderAddress: { ...aboutData.founderAddress, signatureTitle: e.target.value },
-                      })
-                    }
-                    className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs focus:border-secondary focus:outline-none"
-                    placeholder="Founder & Principal Director, Confianza Events"
-                  />
-                </div>
-              </div>
-
-              <div className="pt-2">
-                <button
-                  type="button"
-                  disabled={isSaving}
-                  onClick={() => saveAbout(aboutData)}
-                  className="btn-luxe gradient-royal w-full text-primary-foreground text-xs py-3 rounded-xl shadow-md flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
-                >
-                  {isSaving ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin text-secondary" />
-                      <span>Saving Changes to Database...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Save className="h-4 w-4 text-secondary" />
-                      <span>Save Founder Changes to Database</span>
-                    </>
-                  )}
-                </button>
-              </div>
+              <button
+                type="button"
+                disabled={isSaving}
+                onClick={() => saveAbout(aboutData)}
+                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2.5 px-6 shadow-luxe flex items-center gap-2 disabled:opacity-60 cursor-pointer"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin text-secondary" />
+                    <span>Saving to Database...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 text-secondary" />
+                    <span>Save Executive Section</span>
+                  </>
+                )}
+              </button>
             </div>
 
-            {/* Right Column: Real-Time Live Royal Preview Card */}
-            <div className="lg:col-span-6 space-y-3 sticky top-6">
-              <div className="flex items-center justify-between px-2">
-                <span className="text-[0.68rem] uppercase tracking-[0.25em] text-primary font-bold flex items-center gap-1.5">
-                  <Eye className="h-3.5 w-3.5 text-secondary" /> Live About Page Preview
-                </span>
-                <span className="text-[0.62rem] text-muted-foreground font-mono">
-                  Exact Frontend Replica (Smooth Cloud Luxe)
-                </span>
-              </div>
-
-              {/* Exact replica of the FounderFeatureSection smooth cloud card */}
-              <div className="bg-gradient-to-br from-white/95 via-card/90 to-accent/20 backdrop-blur-2xl rounded-3xl p-6 sm:p-7 border border-secondary/30 shadow-2xl relative overflow-hidden text-foreground space-y-5 ring-1 ring-secondary/15">
-                {/* Background glow effects */}
-                <div className="absolute top-0 right-0 w-60 h-60 bg-secondary/15 rounded-full blur-3xl pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-60 h-60 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
-
-                <div className="relative z-10 space-y-5">
-                  {/* Photo Card Preview */}
-                  <div className="relative rounded-2xl overflow-hidden h-64 sm:h-72 border-2 border-secondary/30 shadow-md bg-card ring-2 ring-secondary/10">
-                    <img
-                      src={aboutData.founderAddress?.image || "/images/couple.jpg"}
-                      alt={aboutData.founderAddress?.name || "Founder"}
-                      className="h-full w-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.src = "/images/couple.jpg";
-                      }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/20 to-transparent" />
-
-                    <div className="absolute bottom-4 left-4 right-4">
-                      <span className="inline-flex items-center gap-1 rounded-full gradient-gold text-ink font-bold text-[0.62rem] tracking-wider uppercase px-2.5 py-0.5 shadow-sm">
-                        <Sparkles className="h-2.5 w-2.5" />
-                        {aboutData.founderAddress?.badge || "FOUNDER'S VISION"}
-                      </span>
-                      <h4 className="font-display text-lg text-white font-bold mt-1.5">
-                        {aboutData.founderAddress?.name || "Mr. Ashish Wankhede"}
-                      </h4>
-                      <p className="text-[0.7rem] text-secondary font-semibold tracking-wide">
-                        {aboutData.founderAddress?.role || "Founder & Managing Director"}
-                      </p>
+            {/* Executive Leader Selector Tabs */}
+            <div className="glass-card rounded-2xl p-2 border border-border flex flex-wrap gap-2">
+              {leaderTabLabels.map((tab, idx) => {
+                const isActive = selectedLeaderIdx === idx;
+                const activeLead = leaders[idx] || {};
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setSelectedLeaderIdx(idx)}
+                    className={`flex-1 min-w-[200px] flex items-center justify-between px-4 py-3 rounded-xl text-left transition-all ${
+                      isActive
+                        ? "gradient-royal text-primary-foreground shadow-md ring-2 ring-secondary/40"
+                        : "bg-card hover:bg-muted/60 text-foreground/80"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-base">{tab.icon}</span>
+                      <div>
+                        <span className="text-xs font-bold block leading-tight">
+                          {tab.title}
+                        </span>
+                        <span className={`text-[0.65rem] ${isActive ? "text-secondary font-semibold" : "text-muted-foreground"}`}>
+                          {activeLead.name || tab.subtitle}
+                        </span>
+                      </div>
                     </div>
+                    <span className="font-mono text-[0.68rem] font-bold opacity-60">
+                      0{idx + 1}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Form & Live Real-Time Preview Grid */}
+            <div className="grid gap-8 lg:grid-cols-12 items-start">
+              {/* Left Column: Form Controls */}
+              <div className="lg:col-span-6 space-y-6 glass-card rounded-3xl p-6 sm:p-7 border border-border">
+                <div className="border-b border-border/60 pb-3 flex items-center justify-between">
+                  <div>
+                    <h4 className="font-display text-base font-bold text-ink flex items-center gap-2">
+                      <span>{leaderTabLabels[selectedLeaderIdx]?.title} Information &amp; Photo</span>
+                    </h4>
+                    <p className="text-[0.68rem] text-muted-foreground mt-0.5">
+                      Upload portrait photo and customize name, role, quote, and vision narrative.
+                    </p>
+                  </div>
+                  <span className="text-[0.62rem] uppercase tracking-wider font-semibold text-secondary px-2.5 py-0.5 rounded-full bg-secondary/10 border border-secondary/20">
+                    Card 0{selectedLeaderIdx + 1} of 03
+                  </span>
+                </div>
+
+                {/* Photo Uploader */}
+                <ImageUploadField
+                  label={`${leaderTabLabels[selectedLeaderIdx]?.title} Portrait Photo`}
+                  description="Upload a high-resolution portrait from your device or paste a URL."
+                  value={currentLeader.image || ""}
+                  onChange={(url) => updateLeaderField("image", url)}
+                />
+
+                <div className="grid sm:grid-cols-2 gap-4 text-xs">
+                  <div>
+                    <label className="font-semibold text-foreground block mb-1">Full Name</label>
+                    <input
+                      type="text"
+                      value={currentLeader.name || ""}
+                      onChange={(e) => updateLeaderField("name", e.target.value)}
+                      className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-medium focus:border-secondary focus:outline-none"
+                      placeholder="e.g. Mr. Ashish Wankhede"
+                    />
                   </div>
 
-                  {/* Prose Preview */}
-                  <div className="space-y-3">
-                    <div className="inline-flex items-center gap-1.5 text-primary font-bold text-[0.65rem] uppercase tracking-[0.25em] bg-primary/10 px-2.5 py-1 rounded-full border border-primary/20">
-                      <Quote className="h-3 w-3 text-secondary rotate-180" />
-                      <span>{aboutData.founderAddress?.eyebrow || "FOUNDER'S ADDRESS"}</span>
+                  <div>
+                    <label className="font-semibold text-foreground block mb-1">Role / Designation Title</label>
+                    <input
+                      type="text"
+                      value={currentLeader.role || ""}
+                      onChange={(e) => updateLeaderField("role", e.target.value)}
+                      className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs focus:border-secondary focus:outline-none"
+                      placeholder="e.g. Founder & Managing Director"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4 text-xs">
+                  <div>
+                    <label className="font-semibold text-foreground block mb-1">Badge Tag</label>
+                    <input
+                      type="text"
+                      value={currentLeader.badge || ""}
+                      onChange={(e) => updateLeaderField("badge", e.target.value)}
+                      className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs focus:border-secondary focus:outline-none uppercase font-semibold"
+                      placeholder="e.g. FOUNDER'S VISION"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-foreground block mb-1">Eyebrow Heading</label>
+                    <input
+                      type="text"
+                      value={currentLeader.eyebrow || ""}
+                      onChange={(e) => updateLeaderField("eyebrow", e.target.value)}
+                      className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs focus:border-secondary focus:outline-none uppercase font-semibold"
+                      placeholder="e.g. FOUNDER'S ADDRESS"
+                    />
+                  </div>
+                </div>
+
+                <div className="text-xs">
+                  <label className="font-semibold text-foreground block mb-1">
+                    Highlight Quote Headline
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={currentLeader.quote || ""}
+                    onChange={(e) => updateLeaderField("quote", e.target.value)}
+                    className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-medium leading-relaxed focus:border-secondary focus:outline-none"
+                    placeholder="We don't just decorate halls; we architect emotional memories that outlast generations."
+                  />
+                </div>
+
+                <div className="text-xs">
+                  <label className="font-semibold text-foreground block mb-1">
+                    Address / Message Narrative (Separate paragraphs by blank line)
+                  </label>
+                  <textarea
+                    rows={6}
+                    value={currentLeader.story || ""}
+                    onChange={(e) => updateLeaderField("story", e.target.value)}
+                    className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs leading-relaxed focus:border-secondary focus:outline-none font-sans"
+                    placeholder="Enter full vision and journey narrative here..."
+                  />
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    disabled={isSaving}
+                    onClick={() => saveAbout(aboutData)}
+                    className="btn-luxe gradient-royal w-full text-primary-foreground text-xs py-3 rounded-xl shadow-md flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
+                  >
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin text-secondary" />
+                        <span>Saving Changes to Database...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4 text-secondary" />
+                        <span>Save {leaderTabLabels[selectedLeaderIdx]?.title} Changes</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Right Column: Real-Time Live Royal Preview Card */}
+              <div className="lg:col-span-6 space-y-3 sticky top-6">
+                <div className="flex items-center justify-between px-2">
+                  <span className="text-[0.68rem] uppercase tracking-[0.25em] text-primary font-bold flex items-center gap-1.5">
+                    <Eye className="h-3.5 w-3.5 text-secondary" /> Live About Page Preview
+                  </span>
+                  <span className="text-[0.62rem] text-muted-foreground font-mono">
+                    Previewing {leaderTabLabels[selectedLeaderIdx]?.title} Card
+                  </span>
+                </div>
+
+                {/* Exact replica of the updated FounderFeatureSection smooth cloud card */}
+                <div className="bg-gradient-to-br from-white/95 via-card/90 to-accent/20 backdrop-blur-2xl rounded-3xl p-6 sm:p-7 border border-secondary/30 shadow-2xl relative overflow-hidden text-foreground space-y-5 ring-1 ring-secondary/15">
+                  {/* Background glow effects */}
+                  <div className="absolute top-0 right-0 w-60 h-60 bg-secondary/15 rounded-full blur-3xl pointer-events-none" />
+                  <div className="absolute bottom-0 left-0 w-60 h-60 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+
+                  <div className="relative z-10 space-y-4">
+                    {/* Clean Photo Card Preview (No Overlay Text or Dark Gradient) */}
+                    <div className="relative rounded-2xl overflow-hidden h-60 sm:h-68 border-2 border-secondary/30 shadow-md bg-card ring-2 ring-secondary/10">
+                      <img
+                        src={currentLeader.image || "/images/couple.jpg"}
+                        alt={currentLeader.name || "Leader"}
+                        className="h-full w-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = "/images/couple.jpg";
+                        }}
+                      />
                     </div>
 
-                    <h3 className="font-display text-lg sm:text-xl text-ink font-normal leading-snug tracking-tight">
-                      "{aboutData.founderAddress?.quote || "We don't just decorate halls; we architect emotional memories that outlast generations."}"
-                    </h3>
-
-                    <div className="rule-gold" />
-
-                    <div className="space-y-2 text-[0.75rem] text-foreground/80 leading-relaxed font-normal max-h-48 overflow-y-auto pr-1">
-                      {(aboutData.founderAddress?.story || "")
-                        .split("\n\n")
-                        .filter(Boolean)
-                        .map((p, idx) => (
-                          <p key={idx}>{p}</p>
-                        ))}
+                    {/* Details Positioned Cleanly Below The Image */}
+                    <div className="space-y-1 pt-1 pb-2 border-b border-border/60">
+                      <span className="inline-flex items-center gap-1 rounded-full gradient-gold text-ink font-bold text-[0.62rem] tracking-wider uppercase px-2.5 py-0.5 shadow-sm">
+                        <Sparkles className="h-2.5 w-2.5" />
+                        {currentLeader.badge || "EXECUTIVE LEADERSHIP"}
+                      </span>
+                      <h4 className="font-display text-lg text-ink font-bold mt-1">
+                        {currentLeader.name || "Executive Leader"}
+                      </h4>
+                      <p className="text-[0.72rem] text-secondary font-semibold tracking-wide">
+                        {currentLeader.role || "Executive Role"}
+                      </p>
                     </div>
 
-                    {/* Signature Preview */}
-                    <div className="pt-3 border-t border-border/80 flex items-center gap-3">
-                      <div className="grid h-9 w-9 shrink-0 rounded-full gradient-royal text-primary-foreground place-items-center font-display text-xs font-bold shadow-sm ring-1 ring-secondary/40">
-                        <Feather className="h-4 w-4 text-secondary" />
+                    {/* Prose Preview */}
+                    <div className="space-y-3">
+                      <div className="inline-flex items-center gap-1.5 text-primary font-bold text-[0.65rem] uppercase tracking-[0.25em] bg-primary/10 px-2.5 py-1 rounded-full border border-primary/20">
+                        <Quote className="h-3 w-3 text-secondary rotate-180" />
+                        <span>{currentLeader.eyebrow || "EXECUTIVE ADDRESS"}</span>
                       </div>
-                      <div>
-                        <h5 className="font-display text-sm font-bold text-ink">
-                          {aboutData.founderAddress?.signatureName || aboutData.founderAddress?.name || "Mr. Ashish Wankhede"}
-                        </h5>
-                        <p className="text-[0.62rem] uppercase tracking-wider text-secondary font-semibold">
-                          {aboutData.founderAddress?.signatureTitle || "Founder & Principal Director, Confianza Events"}
-                        </p>
+
+                      <h3 className="font-display text-base sm:text-lg text-ink font-normal leading-snug tracking-tight">
+                        "{currentLeader.quote || "Where Weddings Become Stories."}"
+                      </h3>
+
+                      <div className="rule-gold" />
+
+                      <div className="space-y-2 text-[0.75rem] text-foreground/80 leading-relaxed font-normal max-h-48 overflow-y-auto pr-1">
+                        {(currentLeader.story || "")
+                          .split("\n\n")
+                          .filter(Boolean)
+                          .map((p, idx) => (
+                            <p key={idx}>{p}</p>
+                          ))}
                       </div>
                     </div>
                   </div>
@@ -2361,8 +2672,8 @@ function AboutEditorModule({ site, showSaved }) {
               </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* 2. TEAM MEMBERS SUB-TAB (FULL CRUD) */}
       {subTab === "team" && (
@@ -3499,6 +3810,21 @@ function ServicesEditorModule({ site, showSaved }) {
     }
   };
 
+  const toggleCategoryFront = (catId) => {
+    const updated = limitFrontSelection(categories, catId, 3);
+    saveCategoryList(updated);
+  };
+
+  const moveCategory = (idx, direction) => {
+    const targetIdx = idx + direction;
+    if (targetIdx < 0 || targetIdx >= categories.length) return;
+    const updated = [...categories];
+    const temp = updated[idx];
+    updated[idx] = updated[targetIdx];
+    updated[targetIdx] = temp;
+    saveCategoryList(updated);
+  };
+
   const saveCategoryModal = (e) => {
     e.preventDefault();
     const cleanName = (editingCat.name || editingCat.label || "").trim();
@@ -3516,6 +3842,7 @@ function ServicesEditorModule({ site, showSaved }) {
       name: cleanName,
       label: cleanName,
       slug: autoSlug,
+      showInFront: Boolean(editingCat.showInFront),
       order: editingCat.order || (editingCat.isNew ? categories.length + 1 : 1),
     };
 
@@ -3532,6 +3859,11 @@ function ServicesEditorModule({ site, showSaved }) {
         return c;
       });
     }
+
+    if (catData.showInFront) {
+      updated = enforceMaxFrontCategories(updated, catData.id, 3);
+    }
+
     saveCategoryList(updated);
     setEditingCat(null);
   };
@@ -3744,7 +4076,7 @@ function ServicesEditorModule({ site, showSaved }) {
         <div>
           <h3 className="font-display text-2xl text-ink">Services &amp; Packages Manager</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Full dynamic CRUD control over Disciplines, Categories, Packages, Ceremonies, Stationery, and Consultation CTA.
+            Full dynamic CRUD control over Services, Categories, Packages, Ceremonies, Stationery, and Consultation CTA.
           </p>
         </div>
 
@@ -3791,7 +4123,7 @@ function ServicesEditorModule({ site, showSaved }) {
             <div>
               <h4 className="font-display text-lg text-ink">Services Catalog ({services.length})</h4>
               <p className="text-xs text-muted-foreground">
-                Disciplines rendered under "Designed for Every Step of the Journey".
+                Services rendered under "What We Offer".
               </p>
             </div>
             <button
@@ -3801,7 +4133,7 @@ function ServicesEditorModule({ site, showSaved }) {
                   isNew: true,
                   title: "",
                   category: categories[0]?.name || categories[0]?.label || categories[0]?.id || "Signature Planning & Direction",
-                  badge: "Specialized Craft",
+                  badge: "Our Service",
                   description: "",
                   features: "",
                   image: "",
@@ -4072,57 +4404,121 @@ function ServicesEditorModule({ site, showSaved }) {
             </button>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {categories.map((cat, idx) => {
-              const cName = cat.name || cat.label || cat.id;
-              const count = services.filter((s) => {
-                const sc = (s.category || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
-                const cid = (cat.id || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
-                const cnam = (cat.name || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
-                const clab = (cat.label || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
-                return Boolean(sc && (sc === cid || sc === cnam || sc === clab));
-              }).length;
-              return (
-                <div
-                  key={cat.id || idx}
-                  className="glass-card rounded-2xl p-4 border border-border flex items-center justify-between"
-                >
-                  <div>
-                    <h5 className="font-display text-base font-semibold text-ink">{cName}</h5>
-                    <div className="flex items-center gap-2 mt-1.5">
-                      <span className="text-[0.68rem] px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">
-                        {count} {count === 1 ? "Service" : "Services"}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setEditingCat({
-                          ...cat,
-                          name: cat.name || cat.label || "",
-                          label: cat.label || cat.name || "",
-                          _origName: cat.name || cat.label,
-                        })
-                      }
-                      className="p-1.5 rounded-lg border border-border hover:bg-muted text-xs cursor-pointer"
-                      title="Edit Category"
-                    >
-                      <Edit2 className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => deleteCategory(cat.id || cat.name || cat.label)}
-                      className="p-1.5 rounded-lg border border-border hover:bg-destructive/10 text-destructive text-xs cursor-pointer"
-                      title="Delete Category"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-xs">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="border-b border-border/80 bg-muted/40 text-[0.68rem] uppercase tracking-wider text-muted-foreground font-bold">
+                    <th className="py-3 px-4 w-12 text-center">#</th>
+                    <th className="py-3 px-4">Category Name</th>
+                    <th className="py-3 px-4 text-center">Linked Services</th>
+                    <th className="py-3 px-4 text-center">
+                      Front Row Visibility ({categories.filter((c) => Boolean(c.showInFront)).length}/3 Selected)
+                    </th>
+                    <th className="py-3 px-4 text-center w-28">Order</th>
+                    <th className="py-3 px-4 text-right w-24">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/60">
+                  {categories.map((cat, idx) => {
+                    const cName = cat.name || cat.label || cat.id;
+                    const count = services.filter((s) => {
+                      const sc = (s.category || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
+                      const cid = (cat.id || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
+                      const cnam = (cat.name || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
+                      const clab = (cat.label || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
+                      return Boolean(sc && (sc === cid || sc === cnam || sc === clab));
+                    }).length;
+
+                    return (
+                      <tr key={cat.id || idx} className="hover:bg-muted/30 transition-colors">
+                        <td className="py-3.5 px-4 text-center font-mono text-[0.72rem] text-muted-foreground font-bold">
+                          {String(idx + 1).padStart(2, "0")}
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <span className="font-display font-bold text-ink text-sm block">
+                            {cName}
+                          </span>
+                          <span className="text-[0.68rem] text-muted-foreground font-mono">
+                            slug: {cat.slug || cat.id}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 text-center">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[0.68rem] font-bold bg-primary/10 text-primary">
+                            {count} {count === 1 ? "Service" : "Services"}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 text-center">
+                          <button
+                            type="button"
+                            onClick={() => toggleCategoryFront(cat.id || cat.name || cat.label)}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition cursor-pointer shadow-xs ${
+                              cat.showInFront
+                                ? "gradient-gold text-ink ring-1 ring-secondary/40 font-bold"
+                                : "bg-muted/70 text-muted-foreground hover:text-foreground hover:bg-muted"
+                            }`}
+                            title="Toggle whether this category appears in the 4 front pills on the Services page"
+                          >
+                            <Sparkles className="h-3 w-3" />
+                            <span>{cat.showInFront ? "★ In Front Row" : "In Dropdown"}</span>
+                          </button>
+                        </td>
+                        <td className="py-3.5 px-4 text-center">
+                          <div className="inline-flex items-center gap-1">
+                            <button
+                              type="button"
+                              disabled={idx === 0}
+                              onClick={() => moveCategory(idx, -1)}
+                              className="p-1 rounded-md border border-border hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                              title="Move Up"
+                            >
+                              <ArrowUp className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              disabled={idx === categories.length - 1}
+                              onClick={() => moveCategory(idx, 1)}
+                              className="p-1 rounded-md border border-border hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                              title="Move Down"
+                            >
+                              <ArrowDown className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          <div className="inline-flex items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setEditingCat({
+                                  ...cat,
+                                  name: cat.name || cat.label || "",
+                                  label: cat.label || cat.name || "",
+                                  showInFront: Boolean(cat.showInFront),
+                                  _origName: cat.name || cat.label,
+                                })
+                              }
+                              className="p-1.5 rounded-lg border border-border hover:bg-muted text-primary cursor-pointer"
+                              title="Edit Category"
+                            >
+                              <Edit2 className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => deleteCategory(cat.id || cat.name || cat.label)}
+                              className="p-1.5 rounded-lg border border-border hover:bg-destructive/10 text-destructive cursor-pointer"
+                              title="Delete Category"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {editingCat && (
@@ -4165,6 +4561,25 @@ function ServicesEditorModule({ site, showSaved }) {
                   </p>
                 </div>
 
+                <label className="flex items-center gap-2.5 p-3 rounded-xl border border-[#E8E2EE] bg-white cursor-pointer hover:bg-[#F4F1F7]/60 transition">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(editingCat.showInFront)}
+                    onChange={(e) =>
+                      setEditingCat({ ...editingCat, showInFront: e.target.checked })
+                    }
+                    className="rounded border-[#E8E2EE] text-[#6A439E] focus:ring-[#6A439E] h-4 w-4 cursor-pointer"
+                  />
+                  <div>
+                    <span className="text-xs font-semibold text-[#2B2138] block">
+                      Show in Front Row (Public Page Pill)
+                    </span>
+                    <span className="text-[0.68rem] text-[#7E7688] block">
+                      Top 3 categories marked "Show in Front" appear directly as pills; others appear in the "More Services" dropdown.
+                    </span>
+                  </div>
+                </label>
+
                 <div className="flex justify-end gap-3 pt-3 border-t border-[#E8E2EE]">
                   <button
                     type="button"
@@ -4205,7 +4620,7 @@ function ServicesEditorModule({ site, showSaved }) {
                   isNew: true,
                   name: "",
                   price: "₹",
-                  tag: "Bespoke Tier",
+                  tag: "Custom Plan",
                   features: "Dedicated Wedding Coordinator\nCustom Mood Boards\nVendor Management",
                   featured: false,
                 })
@@ -4441,9 +4856,9 @@ function ServicesEditorModule({ site, showSaved }) {
         <div className="space-y-6 animate-fade-in">
           <div className="flex justify-between items-center">
             <div>
-              <h4 className="font-display text-lg text-ink">Ceremony Management Matrix ({ceremonies.length})</h4>
+              <h4 className="font-display text-lg text-ink">Wedding Ceremonies &amp; Functions ({ceremonies.length})</h4>
               <p className="text-xs text-muted-foreground">
-                Wedding functions &amp; ritual curation rendered under "Curated Functions &amp; Ritual Mastery".
+                Wedding functions &amp; rituals rendered under "Wedding Functions &amp; Ceremonies".
               </p>
             </div>
             <button
@@ -4668,9 +5083,9 @@ function ServicesEditorModule({ site, showSaved }) {
         <div className="space-y-6 animate-fade-in">
           <div className="flex justify-between items-center">
             <div>
-              <h4 className="font-display text-lg text-ink">Event Stationery &amp; Hospitality Touchpoints ({stationery.length})</h4>
+              <h4 className="font-display text-lg text-ink">Wedding Stationery &amp; Welcome Items ({stationery.length})</h4>
               <p className="text-xs text-muted-foreground">
-                Physical guest touchpoints rendered under "Event Stationery &amp; Touchpoint Suite".
+                Physical guest items rendered under "Wedding Stationery &amp; Welcome Items".
               </p>
             </div>
             <button
@@ -4681,7 +5096,7 @@ function ServicesEditorModule({ site, showSaved }) {
                   title: "",
                   subtitle: "",
                   description: "",
-                  badge: "Event Branding",
+                  badge: "Stationery",
                   image: "",
                 })
               }
@@ -4697,7 +5112,7 @@ function ServicesEditorModule({ site, showSaved }) {
               <Feather className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
               <h4 className="font-display text-lg text-ink font-semibold">0 Stationery Items Listed</h4>
               <p className="text-xs text-muted-foreground mt-1">
-                Click "Add Stationery Item" above to showcase bespoke guest collateral.
+                Click "Add Stationery Item" above to showcase wedding stationery &amp; guest welcome items.
               </p>
             </div>
           ) : (
@@ -4780,7 +5195,7 @@ function ServicesEditorModule({ site, showSaved }) {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Bespoke Itinerary Cards"
+                    placeholder="e.g. Custom Itinerary Cards"
                     value={editingStationery.title || ""}
                     onChange={(e) => setEditingStationery({ ...editingStationery, title: e.target.value })}
                     className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
@@ -5054,25 +5469,25 @@ function PortfolioEditorModule({ site, showSaved }) {
   // 5. Gratitude / Testimonials state
   const [testimonials, setTestimonials] = useState(site.testimonials || []);
   const [testimonialsHeader, setTestimonialsHeader] = useState(site.testimonialsHeader || {
-    eyebrow: "Words of Gratitude",
-    title: "Stories of Love, Captured Forever",
-    subtitle: "Read how our couples and their families experienced the ease, beauty, and grandeur of a Confianza managed wedding.",
+    eyebrow: "Client Reviews",
+    title: "What Couples & Families Say",
+    subtitle: "Read how couples and families experienced their wedding celebrations with Confianza.",
   });
   const [editingTestimonial, setEditingTestimonial] = useState(null);
 
   // 6. Portfolio CTA state
   const [ctaData, setCtaData] = useState(site.portfolioCta || {
-    eyebrow: "WHERE WEDDINGS BECOME STORIES",
-    headline: "Want Your Wedding to Be Our Next Masterpiece?",
-    subtitle: "Connect directly with Ashish Wankhede and Rutik Pund to review your venue options, custom 3D decor concepts, and complete management timeline.",
-    buttonText: "Book Your Free Consultation",
+    eyebrow: "LET'S PLAN YOUR SPECIAL DAY",
+    headline: "Ready to Plan Your Dream Wedding?",
+    subtitle: "Connect directly with founders Ashish Wankhede and Rutik Pund to discuss your venue options, custom 3D decor ideas, and event timeline.",
+    buttonText: "Book Free Consultation",
     buttonLink: "/contact",
-    notice: "Free Consultation • No Commitment Required",
+    notice: "Free Consultation • No Obligation",
     perks: [
-      "Personalized 1-on-1 Vision Mapping",
-      "Direct Founder Interaction (Ashish & Rutik)",
-      "Realistic 3D Decor CAD Renderings",
-      "Clear & Transparent Line-Item Estimates",
+      "1-on-1 Planning Meeting",
+      "Talk Directly with Founders (Ashish & Rutik)",
+      "Realistic 3D Decor Previews",
+      "Clear & Honest Cost Estimates",
     ],
   });
 
@@ -5276,7 +5691,7 @@ function PortfolioEditorModule({ site, showSaved }) {
                   <span>Section Header Customizer</span>
                 </div>
                 <h3 className="font-display text-xl text-ink font-bold mt-1">
-                  Moments of Grandeur &amp; Intimacy Section
+                  Our Work Section
                 </h3>
               </div>
               <button
@@ -5307,7 +5722,7 @@ function PortfolioEditorModule({ site, showSaved }) {
                   value={sectionData.eyebrow || ""}
                   onChange={(e) => setSectionData({ ...sectionData, eyebrow: e.target.value })}
                   className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs"
-                  placeholder="e.g. Our Signature Works"
+                  placeholder="e.g. Our Work"
                 />
               </div>
               <div>
@@ -5317,7 +5732,7 @@ function PortfolioEditorModule({ site, showSaved }) {
                   value={sectionData.title || ""}
                   onChange={(e) => setSectionData({ ...sectionData, title: e.target.value })}
                   className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-semibold"
-                  placeholder="e.g. Moments of Grandeur & Intimacy"
+                  placeholder="e.g. Moments of Joy & Celebration"
                 />
               </div>
             </div>
@@ -5329,7 +5744,7 @@ function PortfolioEditorModule({ site, showSaved }) {
                 value={sectionData.subtitle || ""}
                 onChange={(e) => setSectionData({ ...sectionData, subtitle: e.target.value })}
                 className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs leading-relaxed"
-                placeholder="Explore a curated portfolio of mandaps, opulent ballrooms..."
+                placeholder="Explore our portfolio of mandaps, reception stages, cheerful haldi events..."
               />
             </div>
           </div>
@@ -5677,61 +6092,144 @@ function PortfolioEditorModule({ site, showSaved }) {
               </button>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {categories.map((cat, idx) => {
-                const cName = typeof cat === "string" ? cat : cat.name || cat.label;
-                const cId = typeof cat === "string" ? `cat-${idx}` : cat.id || `cat-${idx}`;
-                const count = items.filter((p) => {
-                  const pc = (p.category || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
-                  const nc = (cName || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
-                  return Boolean(pc && nc && pc === nc);
-                }).length;
+            {/* Table / List View */}
+            <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-xs">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="border-b border-border/80 bg-muted/40 text-[0.68rem] uppercase tracking-wider text-muted-foreground font-bold">
+                      <th className="py-3 px-4 w-12 text-center">#</th>
+                      <th className="py-3 px-4">Category Name</th>
+                      <th className="py-3 px-4 text-center">Linked Projects</th>
+                      <th className="py-3 px-4 text-center">
+                        Front Row Visibility ({categories.filter((c) => Boolean(typeof c === "object" ? c.showInFront : false)).length}/3 Selected)
+                      </th>
+                      <th className="py-3 px-4 text-center w-28">Order</th>
+                      <th className="py-3 px-4 text-right w-24">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/60">
+                    {categories.map((cat, idx) => {
+                      const cName = typeof cat === "string" ? cat : cat.name || cat.label;
+                      const cId = typeof cat === "string" ? `cat-${idx}` : cat.id || `cat-${idx}`;
+                      const count = items.filter((p) => {
+                        const pc = (p.category || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
+                        const nc = (cName || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
+                        return Boolean(pc && nc && pc === nc);
+                      }).length;
+                      const isFront = typeof cat === "object" ? Boolean(cat.showInFront) : false;
 
-                return (
-                  <div
-                    key={cId}
-                    className="glass-card rounded-2xl p-4 border border-border flex items-center justify-between gap-3 hover:shadow-sm transition"
-                  >
-                    <div className="truncate">
-                      <h4 className="font-display text-sm font-bold text-ink truncate">{cName}</h4>
-                      <span className="text-[0.68rem] text-muted-foreground font-medium">
-                        {count} linked {count === 1 ? "project" : "projects"}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setEditingCategory({
-                            isNew: false,
-                            _origName: cName,
-                            name: cName,
-                            id: cId,
-                          })
-                        }
-                        className="p-1.5 rounded-lg border border-border hover:bg-muted text-xs text-primary cursor-pointer"
-                        title="Edit Category"
-                      >
-                        <Edit2 className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (window.confirm(`Delete category "${cName}"?`)) {
-                            const updated = categories.filter((_, i) => i !== idx);
-                            saveCategoriesList(updated);
-                          }
-                        }}
-                        className="p-1.5 rounded-lg border border-border hover:bg-destructive/10 text-destructive text-xs cursor-pointer"
-                        title="Delete Category"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
+                      return (
+                        <tr key={cId} className="hover:bg-muted/30 transition-colors">
+                          <td className="py-3.5 px-4 text-center font-mono text-[0.72rem] text-muted-foreground font-bold">
+                            {String(idx + 1).padStart(2, "0")}
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <span className="font-display font-bold text-ink text-sm block">
+                              {cName}
+                            </span>
+                            <span className="text-[0.68rem] text-muted-foreground font-mono">
+                              slug: {typeof cat === "object" ? cat.slug || cat.id : cName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 text-center">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[0.68rem] font-bold bg-primary/10 text-primary">
+                              {count} {count === 1 ? "project" : "projects"}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 text-center">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = limitFrontSelection(categories, cId, 3);
+                                saveCategoriesList(updated);
+                              }}
+                              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition cursor-pointer shadow-xs ${
+                                isFront
+                                  ? "gradient-gold text-ink ring-1 ring-secondary/40 font-bold"
+                                  : "bg-muted/70 text-muted-foreground hover:text-foreground hover:bg-muted"
+                              }`}
+                              title="Toggle whether this category appears in the 4 front pills on the Portfolio page"
+                            >
+                              <Sparkles className="h-3 w-3" />
+                              <span>{isFront ? "★ In Front Row" : "In Dropdown"}</span>
+                            </button>
+                          </td>
+                          <td className="py-3.5 px-4 text-center">
+                            <div className="inline-flex items-center gap-1">
+                              <button
+                                type="button"
+                                disabled={idx === 0}
+                                onClick={() => {
+                                  if (idx === 0) return;
+                                  const updated = [...categories];
+                                  const temp = updated[idx];
+                                  updated[idx] = updated[idx - 1];
+                                  updated[idx - 1] = temp;
+                                  saveCategoriesList(updated);
+                                }}
+                                className="p-1 rounded-md border border-border hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                                title="Move Up"
+                              >
+                                <ArrowUp className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                disabled={idx === categories.length - 1}
+                                onClick={() => {
+                                  if (idx === categories.length - 1) return;
+                                  const updated = [...categories];
+                                  const temp = updated[idx];
+                                  updated[idx] = updated[idx + 1];
+                                  updated[idx + 1] = temp;
+                                  saveCategoriesList(updated);
+                                }}
+                                className="p-1 rounded-md border border-border hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                                title="Move Down"
+                              >
+                                <ArrowDown className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                          <td className="py-3.5 px-4 text-right">
+                            <div className="inline-flex items-center justify-end gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setEditingCategory({
+                                    isNew: false,
+                                    _origName: cName,
+                                    name: cName,
+                                    id: cId,
+                                    showInFront: isFront,
+                                  })
+                                }
+                                className="p-1.5 rounded-lg border border-border hover:bg-muted text-primary cursor-pointer"
+                                title="Edit Category"
+                              >
+                                <Edit2 className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (window.confirm(`Delete category "${cName}"?`)) {
+                                    const updated = categories.filter((_, i) => i !== idx);
+                                    saveCategoriesList(updated);
+                                  }
+                                }}
+                                className="p-1.5 rounded-lg border border-border hover:bg-destructive/10 text-destructive cursor-pointer"
+                                title="Delete Category"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
 
@@ -5748,6 +6246,7 @@ function PortfolioEditorModule({ site, showSaved }) {
                     id: editingCategory.id || `cat-${Date.now()}`,
                     name: cleanName,
                     slug: cleanName.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+                    showInFront: Boolean(editingCategory.showInFront),
                   };
 
                   let updated;
@@ -5759,8 +6258,11 @@ function PortfolioEditorModule({ site, showSaved }) {
                       if (currName === editingCategory._origName) {
                         return cleanCat;
                       }
-                      return c;
+                      return typeof c === "string" ? { id: `cat-${currName}`, name: currName, slug: currName.toLowerCase().replace(/[^a-z0-9]+/g, "-") } : c;
                     });
+                  }
+                  if (cleanCat.showInFront) {
+                    updated = enforceMaxFrontCategories(updated, cleanCat.id, 3);
                   }
                   saveCategoriesList(updated);
                   setEditingCategory(null);
@@ -5793,6 +6295,25 @@ function PortfolioEditorModule({ site, showSaved }) {
                     placeholder="e.g. Royal Baraat & Entry"
                   />
                 </div>
+
+                <label className="flex items-center gap-2.5 p-3 rounded-xl border border-[#E8E2EE] bg-white cursor-pointer hover:bg-[#F4F1F7]/60 transition">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(editingCategory.showInFront)}
+                    onChange={(e) =>
+                      setEditingCategory({ ...editingCategory, showInFront: e.target.checked })
+                    }
+                    className="rounded border-[#E8E2EE] text-[#6A439E] focus:ring-[#6A439E] h-4 w-4 cursor-pointer"
+                  />
+                  <div>
+                    <span className="text-xs font-semibold text-[#2B2138] block">
+                      Show in Front Row (Public Page Pill)
+                    </span>
+                    <span className="text-[0.68rem] text-[#7E7688] block">
+                      Top 3 categories marked "Show in Front" appear directly as pills; others appear in the "More Categories" dropdown.
+                    </span>
+                  </div>
+                </label>
 
                 <div className="flex justify-end gap-3 pt-3 border-t border-[#E8E2EE]">
                   <button
@@ -6034,7 +6555,7 @@ function PortfolioEditorModule({ site, showSaved }) {
                   <span>Section Header Customizer</span>
                 </div>
                 <h3 className="font-display text-xl text-ink font-bold mt-1">
-                  Words of Gratitude Section
+                  Client Reviews &amp; Testimonials Section
                 </h3>
               </div>
               <button
@@ -6065,7 +6586,7 @@ function PortfolioEditorModule({ site, showSaved }) {
                   value={testimonialsHeader.eyebrow || ""}
                   onChange={(e) => setTestimonialsHeader({ ...testimonialsHeader, eyebrow: e.target.value })}
                   className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs"
-                  placeholder="e.g. Words of Gratitude"
+                  placeholder="e.g. Client Reviews & Stories"
                 />
               </div>
               <div>
@@ -6372,7 +6893,7 @@ function PortfolioEditorModule({ site, showSaved }) {
                             "Royal & Destination Weddings",
                             "Mandap & Rituals",
                             "Haldi & Sangeet",
-                            "Opulent Receptions",
+                            "Grand Receptions",
                             "Corporate Celebrations",
                           ];
                       const currentCat = editingTestimonial.category || standardCats[0];
@@ -6504,7 +7025,7 @@ function PortfolioEditorModule({ site, showSaved }) {
                   <span>Portfolio Consultation Action</span>
                 </div>
                 <h3 className="font-display text-xl text-ink font-bold mt-1">
-                  Private Consultation CTA Banner
+                  Free Consultation Banner
                 </h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   Customize the luxury action card displayed at the bottom of the <span className="text-primary font-semibold">Portfolio page</span>.
@@ -6780,7 +7301,7 @@ function GalleryEditorModule({ site, showSaved }) {
     { id: "haldi-sangeet", name: "Haldi & Sangeet", slug: "haldi-sangeet", order: 4 },
     { id: "bridal-entries", name: "Bridal Entries & Portraits", slug: "bridal-entries", order: 5 },
     { id: "destination", name: "Destination Venues", slug: "destination", order: 6 },
-    { id: "spatial-decor", name: "Spatial Decor & Floral Art", slug: "spatial-decor", order: 7 },
+    { id: "spatial-decor", name: "Mandap & Flower Decor", slug: "spatial-decor", order: 7 },
   ];
 
   const [categories, setCategories] = useState(
@@ -6792,17 +7313,17 @@ function GalleryEditorModule({ site, showSaved }) {
 
   // Hero Banner State
   const defaultHeroHeader = {
-    badge: "Curated Visual Archive",
-    eyebrow: "VISUAL INSPIRATIONS",
-    title: "The Wedding Gallery",
+    badge: "Wedding Photo Gallery",
+    eyebrow: "OUR PHOTOS",
+    title: "Wedding Photo Gallery",
     subtitle:
-      "Immerse yourself in close-up details of floral centerpieces, bridal entries, fairy-lit courtyards, and grand lavender stages.",
+      "Photos of our mandap decor, flower arrangements, bridal entries, and grand wedding stages.",
     image: "https://res.cloudinary.com/tridevsosync/image/upload/v1790881511/confianza_heroes/gallery_hero_banner.jpg",
     stats: [
-      "500+ Celebrations Across India",
-      "15+ Landmark Destination Cities",
-      "100% 3D CAD-to-Reality Fidelity",
-      "Zero-Glitch Stage Execution",
+      "500+ Happy Weddings Across India",
+      "15+ Cities Across India",
+      "100% Custom 3D Decor Designs",
+      "Smooth On-Ground Execution",
     ],
   };
   const [heroHeader, setHeroHeader] = useState(site.galleryHeader || defaultHeroHeader);
@@ -6811,39 +7332,39 @@ function GalleryEditorModule({ site, showSaved }) {
   const defaultHighlights = [
     {
       id: "mandap-sanctum",
-      title: "Mandap Architecture & Vedic Sanctums",
-      subtitle: "Auspicious Engineering & Floral Art",
+      title: "Mandap & Traditional Ritual Setups",
+      subtitle: "Sacred Setups & Floral Art",
       description:
-        "From custom temple pillars to floating lotus pools, our mandaps blend sacred Vedic geometry with opulent seasonal florals.",
+        "From temple pillars to lotus pools, our mandaps blend traditional Vedic rituals with fresh seasonal flowers.",
       icon: "Sparkles",
-      badge: "Vedic Precision",
+      badge: "Traditional Mandap",
     },
     {
       id: "stage-production",
-      title: "Stage, Lighting & SFX Production",
-      subtitle: "3D CAD-to-Reality Fidelity",
+      title: "Stage, Lighting & Special Effects",
+      subtitle: "3D Design-to-Reality Execution",
       description:
-        "Intelligent moving beam arrays, high-resolution curved LED walls, cold pyrotechnics, and hydraulic stages managed with millisecond cues.",
+        "Moving light setups, LED screens, cold pyro fireworks, and stages managed with precise timing.",
       icon: "Layers",
-      badge: "Show Runner Direct",
+      badge: "Stage & Lights",
     },
     {
       id: "haldi-carnival",
-      title: "Themed Haldi & Mehendi Carnivals",
-      subtitle: "Joyous Yellow Blooms & Folk Artistry",
+      title: "Themed Haldi & Mehendi Setups",
+      subtitle: "Bright Yellow Blooms & Traditional Art",
       description:
-        "Phoolon ki Holi setups, handcrafted marigold canopies, brass urlis, artisanal mehendi cabanas, and energetic dhol tasha troupes.",
+        "Phoolon ki Holi setups, marigold canopies, brass urlis, mehendi cabanas, and energetic dhol tasha groups.",
       icon: "Award",
-      badge: "Cultural Extravaganza",
+      badge: "Haldi & Mehendi",
     },
     {
       id: "luxe-tablescapes",
-      title: "Luxe Tablescapes & Hospitality Styling",
-      subtitle: "Intimate Ambiance & Event Branding",
+      title: "Guest Tables & Welcome Hampers",
+      subtitle: "Warm Hospitality & Personal Touches",
       description:
-        "Crystal chandeliers, candlelit floral centerpieces, customized luggage tags, itinerary jackets, and dedicated guest concierge suites.",
+        "Chandeliers, candlelit centerpieces, personalized luggage tags, itinerary cards, and dedicated guest hospitality.",
       icon: "Users",
-      badge: "Concierge Elegance",
+      badge: "Guest Hospitality",
     },
   ];
   const [highlights, setHighlights] = useState(
@@ -6869,18 +7390,18 @@ function GalleryEditorModule({ site, showSaved }) {
 
   // Consultation CTA State
   const defaultGalleryCta = {
-    eyebrow: "WHERE WEDDINGS BECOME STORIES",
-    headline: "Envision Your Wedding in Our Visual Chronicle",
+    eyebrow: "LET'S PLAN YOUR SPECIAL DAY",
+    headline: "Let Us Plan Your Dream Wedding",
     subtitle:
-      "Connect directly with founders Ashish Wankhede and Rutik Pund in Warje, Pune to design your bespoke 3D CAD wedding decor.",
-    buttonText: "Book Your Free Consultation",
+      "Connect directly with founders Ashish Wankhede and Rutik Pund in Warje, Pune to plan your wedding decor.",
+    buttonText: "Book Free Consultation",
     buttonLink: "/contact",
     notice: "Free 1-on-1 Consultation • Direct Founder Interaction",
     perks: [
-      "60–90 Min Vision & Budget Mapping",
-      "Direct Founder Interaction (Ashish & Rutik)",
-      "3D Spatial CAD Concept Previews",
-      "Clear Line-Item Vendor Estimates",
+      "60–90 Min Planning Session",
+      "Talk Directly with Founders (Ashish & Rutik)",
+      "3D Decor Design Previews",
+      "Clear & Honest Cost Estimates",
     ],
   };
   const [galleryCta, setGalleryCta] = useState(site.galleryCta || defaultGalleryCta);
@@ -6993,7 +7514,7 @@ function GalleryEditorModule({ site, showSaved }) {
             </span>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Manage Visual Chronicles, Filter Categories, Hero Banner, Social Feed & Highlights
+            Manage Photo Gallery, Filter Categories, Hero Banner, Social Feed & Highlights
           </p>
         </div>
         <div className="flex items-center gap-2.5">
@@ -7004,7 +7525,7 @@ function GalleryEditorModule({ site, showSaved }) {
               setEditingPhoto({
                 isNew: true,
                 caption: "",
-                category: categories[1]?.name || "Mandap Architecture",
+                category: categories[1]?.name || "Mandap & Decor",
                 location: "Pune",
                 image: "",
                 order: gallery.length + 1,
@@ -7021,10 +7542,10 @@ function GalleryEditorModule({ site, showSaved }) {
       {/* Subtabs Navigation */}
       <div className="flex flex-wrap items-center gap-2 border-b border-border/80 pb-3">
         {[
-          { id: "photos", label: `Visual Chronicles (${gallery.length})`, icon: ImageIcon },
+          { id: "photos", label: `Photo Gallery (${gallery.length})`, icon: ImageIcon },
           { id: "categories", label: `Categories (${categories.length})`, icon: Layers },
           { id: "header", label: "Hero Header Banner", icon: Sliders },
-          { id: "highlights", label: `Spatial Highlights (${highlights.length})`, icon: Sparkles },
+          { id: "highlights", label: `Decor & Stage Highlights (${highlights.length})`, icon: Sparkles },
           { id: "instagram", label: `Follow Journey (${featuredOnHomeCount}/6 on Home)`, icon: MessageSquareQuote },
           { id: "cta", label: "Consultation CTA", icon: PhoneCall },
         ].map((tab) => {
@@ -7048,7 +7569,7 @@ function GalleryEditorModule({ site, showSaved }) {
         })}
       </div>
 
-      {/* SUBTAB 1: Visual Chronicles Photo Archive */}
+      {/* SUBTAB 1: Photo Gallery Archive */}
       {subTab === "photos" && (
         <div className="space-y-5">
           {/* Controls: Search & Category Filter */}
@@ -7191,75 +7712,156 @@ function GalleryEditorModule({ site, showSaved }) {
             </button>
           </div>
 
-          <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-            {categories.map((cat, idx) => {
-              const count =
-                cat.id === "all" || cat.slug === "all"
-                  ? gallery.length
-                  : gallery.filter((it) => {
-                      const c = (it.category || "")
-                        .toLowerCase()
-                        .replace(/&/g, "and")
-                        .replace(/[^a-z0-9]/g, "")
-                        .trim();
-                      const n = (cat.name || "")
-                        .toLowerCase()
-                        .replace(/&/g, "and")
-                        .replace(/[^a-z0-9]/g, "")
-                        .trim();
-                      const s = (cat.slug || "")
-                        .toLowerCase()
-                        .replace(/&/g, "and")
-                        .replace(/[^a-z0-9]/g, "")
-                        .trim();
-                      return Boolean(c && ((n && c === n) || (s && c === s)));
-                    }).length;
+          <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-xs">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="border-b border-border/80 bg-muted/40 text-[0.68rem] uppercase tracking-wider text-muted-foreground font-bold">
+                    <th className="py-3 px-4 w-12 text-center">#</th>
+                    <th className="py-3 px-4">Category Name</th>
+                    <th className="py-3 px-4 text-center">Linked Photos</th>
+                    <th className="py-3 px-4 text-center">
+                      Front Row Visibility ({categories.filter((c) => Boolean(c.showInFront) && c.id !== "all" && c.slug !== "all").length}/3 Selected)
+                    </th>
+                    <th className="py-3 px-4 text-center w-28">Order</th>
+                    <th className="py-3 px-4 text-right w-24">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/60">
+                  {categories.map((cat, idx) => {
+                    const count =
+                      cat.id === "all" || cat.slug === "all"
+                        ? gallery.length
+                        : gallery.filter((it) => {
+                            const c = (it.category || "")
+                              .toLowerCase()
+                              .replace(/&/g, "and")
+                              .replace(/[^a-z0-9]/g, "")
+                              .trim();
+                            const n = (cat.name || "")
+                              .toLowerCase()
+                              .replace(/&/g, "and")
+                              .replace(/[^a-z0-9]/g, "")
+                              .trim();
+                            const s = (cat.slug || "")
+                              .toLowerCase()
+                              .replace(/&/g, "and")
+                              .replace(/[^a-z0-9]/g, "")
+                              .trim();
+                            return Boolean(c && ((n && c === n) || (s && c === s)));
+                          }).length;
 
-              return (
-                <div
-                  key={cat.id || idx}
-                  className="p-4 rounded-2xl border border-border bg-card shadow-xs flex items-center justify-between gap-3"
-                >
-                  <div className="truncate">
-                    <div className="flex items-center gap-2">
-                      <span className="font-display text-sm text-ink font-semibold truncate">
-                        {cat.name}
-                      </span>
-                      <span className="text-[0.68rem] px-2 py-0.5 rounded-full bg-secondary/15 text-secondary font-mono font-bold">
-                        {count} items
-                      </span>
-                    </div>
-                    <span className="text-[0.68rem] font-medium text-muted-foreground block mt-0.5">
-                      Display Order #{cat.order || idx + 1}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => setEditingCategory({ ...cat })}
-                      className="p-1.5 rounded-lg bg-accent text-foreground hover:text-secondary transition"
-                      title="Edit Category"
-                    >
-                      <Edit2 className="h-3.5 w-3.5" />
-                    </button>
-                    {cat.id !== "all" && cat.slug !== "all" && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (confirm(`Delete category "${cat.name}"?`)) {
-                            saveCategories(categories.filter((c) => c.id !== cat.id));
-                          }
-                        }}
-                        className="p-1.5 rounded-lg bg-destructive/15 text-destructive hover:bg-destructive hover:text-white transition"
-                        title="Delete Category"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+                    const isAll = cat.id === "all" || cat.slug === "all";
+                    const isFront = Boolean(cat.showInFront);
+
+                    return (
+                      <tr key={cat.id || idx} className="hover:bg-muted/30 transition-colors">
+                        <td className="py-3.5 px-4 text-center font-mono text-[0.72rem] text-muted-foreground font-bold">
+                          {String(idx + 1).padStart(2, "0")}
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <span className="font-display font-bold text-ink text-sm block">
+                            {cat.name}
+                          </span>
+                          <span className="text-[0.68rem] text-muted-foreground font-mono">
+                            slug: {cat.slug || cat.id}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 text-center">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[0.68rem] font-bold bg-primary/10 text-primary">
+                            {count} {count === 1 ? "photo" : "photos"}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 text-center">
+                          {isAll ? (
+                            <span className="text-[0.68rem] text-muted-foreground italic">Always Front</span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = limitFrontSelection(categories, cat.id || cat.slug || cat.name, 3);
+                                saveCategories(updated);
+                              }}
+                              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition cursor-pointer shadow-xs ${
+                                isFront
+                                  ? "gradient-gold text-ink ring-1 ring-secondary/40 font-bold"
+                                  : "bg-muted/70 text-muted-foreground hover:text-foreground hover:bg-muted"
+                              }`}
+                              title="Toggle whether this category appears in the 4 front pills on the Gallery page"
+                            >
+                              <Sparkles className="h-3 w-3" />
+                              <span>{isFront ? "★ In Front Row" : "In Dropdown"}</span>
+                            </button>
+                          )}
+                        </td>
+                        <td className="py-3.5 px-4 text-center">
+                          <div className="inline-flex items-center gap-1">
+                            <button
+                              type="button"
+                              disabled={idx === 0}
+                              onClick={() => {
+                                if (idx === 0) return;
+                                const updated = [...categories];
+                                const temp = updated[idx];
+                                updated[idx] = updated[idx - 1];
+                                updated[idx - 1] = temp;
+                                saveCategories(updated);
+                              }}
+                              className="p-1 rounded-md border border-border hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                              title="Move Up"
+                            >
+                              <ArrowUp className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              disabled={idx === categories.length - 1}
+                              onClick={() => {
+                                if (idx === categories.length - 1) return;
+                                const updated = [...categories];
+                                const temp = updated[idx];
+                                updated[idx] = updated[idx + 1];
+                                updated[idx + 1] = temp;
+                                saveCategories(updated);
+                              }}
+                              className="p-1 rounded-md border border-border hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                              title="Move Down"
+                            >
+                              <ArrowDown className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          <div className="inline-flex items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => setEditingCategory({ ...cat, showInFront: isFront })}
+                              className="p-1.5 rounded-lg border border-border hover:bg-muted text-primary cursor-pointer"
+                              title="Edit Category"
+                            >
+                              <Edit2 className="h-3.5 w-3.5" />
+                            </button>
+                            {!isAll && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (confirm(`Delete category "${cat.name}"?`)) {
+                                    saveCategories(categories.filter((c) => c.id !== cat.id));
+                                  }
+                                }}
+                                className="p-1.5 rounded-lg border border-border hover:bg-destructive/10 text-destructive cursor-pointer"
+                                title="Delete Category"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
@@ -7380,16 +7982,16 @@ function GalleryEditorModule({ site, showSaved }) {
         </div>
       )}
 
-      {/* SUBTAB 4: Spatial Craft Highlights (From PDF Materials) */}
+      {/* SUBTAB 4: Decor & Stage Highlights */}
       {subTab === "highlights" && (
         <div className="space-y-6">
           <div className="flex items-center justify-between gap-4 p-4 bg-card rounded-2xl border border-border">
             <div>
               <h4 className="font-display text-base text-ink font-semibold">
-                Signature Spatial Craft & Highlights
+                Signature Decor &amp; Stage Highlights
               </h4>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Aesthetic feature cards showcasing Confianza's specialty engineering and production from the official PDF materials.
+                Aesthetic feature cards showcasing Confianza's specialty decor and production from our wedding portfolio.
               </p>
             </div>
             <button
@@ -7920,13 +8522,16 @@ function GalleryEditorModule({ site, showSaved }) {
                 slug: cleanSlug,
               };
 
+              let updated;
               if (editingCategory.isNew) {
-                saveCategories([...categories, cleanCat]);
+                updated = [...categories, cleanCat];
               } else {
-                saveCategories(
-                  categories.map((c) => (c.id === editingCategory.id ? cleanCat : c))
-                );
+                updated = categories.map((c) => (c.id === editingCategory.id ? cleanCat : c));
               }
+              if (cleanCat.showInFront) {
+                updated = enforceMaxFrontCategories(updated, cleanCat.id, 3);
+              }
+              saveCategories(updated);
               setEditingCategory(null);
             }}
             className="modal-dialog-luxury bg-[#FFFDFB] max-w-md w-full rounded-3xl p-6 sm:p-8 space-y-4 max-h-[88vh] overflow-y-auto no-scrollbar border border-[#E8E2EE] shadow-luxe"
@@ -7960,6 +8565,25 @@ function GalleryEditorModule({ site, showSaved }) {
                 className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
               />
             </div>
+
+            <label className="flex items-center gap-2.5 p-3 rounded-xl border border-[#E8E2EE] bg-white cursor-pointer hover:bg-[#F4F1F7]/60 transition">
+              <input
+                type="checkbox"
+                checked={Boolean(editingCategory.showInFront)}
+                onChange={(e) =>
+                  setEditingCategory({ ...editingCategory, showInFront: e.target.checked })
+                }
+                className="rounded border-[#E8E2EE] text-[#6A439E] focus:ring-[#6A439E] h-4 w-4 cursor-pointer"
+              />
+              <div>
+                <span className="text-xs font-semibold text-[#2B2138] block">
+                  Show in Front Row (Public Page Pill)
+                </span>
+                <span className="text-[0.68rem] text-[#7E7688] block">
+                  Top 3 categories marked "Show in Front" appear directly as pills; others appear in the "More Categories" dropdown.
+                </span>
+              </div>
+            </label>
 
             <div className="flex justify-end gap-3 pt-3 border-t border-[#E8E2EE]">
               <button
@@ -8020,7 +8644,7 @@ function GalleryEditorModule({ site, showSaved }) {
                 required
                 value={editingHighlight.title || ""}
                 onChange={(e) => setEditingHighlight({ ...editingHighlight, title: e.target.value })}
-                placeholder="e.g. Mandap Architecture & Vedic Sanctums"
+                placeholder="e.g. Mandap & Traditional Ritual Setups"
                 className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
               />
             </div>
@@ -8031,7 +8655,7 @@ function GalleryEditorModule({ site, showSaved }) {
                 type="text"
                 value={editingHighlight.subtitle || ""}
                 onChange={(e) => setEditingHighlight({ ...editingHighlight, subtitle: e.target.value })}
-                placeholder="e.g. Auspicious Engineering & Floral Art"
+                placeholder="e.g. Sacred Setups & Floral Art"
                 className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
               />
             </div>
@@ -8054,7 +8678,7 @@ function GalleryEditorModule({ site, showSaved }) {
                   type="text"
                   value={editingHighlight.badge || ""}
                   onChange={(e) => setEditingHighlight({ ...editingHighlight, badge: e.target.value })}
-                  placeholder="e.g. Vedic Precision"
+                  placeholder="e.g. Traditional Mandap"
                   className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                 />
               </div>
@@ -8272,19 +8896,19 @@ function TestimonialsEditorModule({ site, showSaved }) {
   // Header Banner & Trust Stats
   const [headerData, setHeaderData] = useState({
     badge: site.testimonialsHeader?.badge || "Couples & Families",
-    eyebrow: site.testimonialsHeader?.eyebrow || "Words of Gratitude",
-    title: site.testimonialsHeader?.title || "Testimonials & Love Stories",
+    eyebrow: site.testimonialsHeader?.eyebrow || "Client Reviews",
+    title: site.testimonialsHeader?.title || "What Couples & Families Say",
     subtitle:
       site.testimonialsHeader?.subtitle ||
-      "Read first-hand accounts of couples and families who entrusted their most sacred days to Confianza's care and aesthetic vision.",
+      "Read honest feedback and reviews from couples and families whose weddings we planned.",
     image:
       site.testimonialsHeader?.image ||
       "https://res.cloudinary.com/tridevsosync/image/upload/v1790838224/confianza_portfolio/portfolio_hero_banner.jpg",
     stats: site.testimonialsHeader?.stats || [
       "5.0 Average Couple Rating ★",
-      "500+ Celebrations Across India",
-      "100% On-Time Cue Execution",
-      "0% Day-Of Stress with Shadow Management",
+      "500+ Happy Weddings Across India",
+      "100% On-Time Event Flow",
+      "Zero Day-Of Stress for Families",
     ],
   });
 
@@ -8294,7 +8918,7 @@ function TestimonialsEditorModule({ site, showSaved }) {
       { id: "royal-destination", name: "Royal & Destination Weddings", slug: "royal-destination", order: 1 },
       { id: "mandap-rituals", name: "Mandap & Rituals", slug: "mandap-rituals", order: 2 },
       { id: "haldi-sangeet", name: "Haldi & Sangeet", slug: "haldi-sangeet", order: 3 },
-      { id: "receptions", name: "Opulent Receptions", slug: "receptions", order: 4 },
+      { id: "receptions", name: "Grand Receptions", slug: "receptions", order: 4 },
       { id: "video-reviews", name: "Video Reviews & Reels", slug: "video-reviews", order: 5 },
       { id: "corporate-events", name: "Corporate Celebrations", slug: "corporate-events", order: 6 },
     ]
@@ -8306,39 +8930,39 @@ function TestimonialsEditorModule({ site, showSaved }) {
     site.testimonialsExperience || [
       {
         id: "shadow-mgmt",
-        title: "Shadow Management",
-        subtitle: "Dedicated Bride & Groom Liaison",
+        title: "Personal Helpers",
+        subtitle: "Dedicated Support for Bride & Groom",
         description:
-          "A personal shadow coordinator attends to every personal need, attire touch-up, refreshment, and family coordination behind the scenes.",
+          "A dedicated helper assists with every personal need, dress touch-ups, snacks, and water behind the scenes.",
         icon: "Users",
-        badge: "Signature Care",
+        badge: "Personal Care",
       },
       {
         id: "ritual-mgmt",
-        title: "Sacred Ritual Coordination",
-        subtitle: "Flawless Pandit & Samagri Prep",
+        title: "Smooth Pooja Coordination",
+        subtitle: "Complete Pandit & Pooja Item Setup",
         description:
-          "Complete management of traditional Vedic rituals (Baraat, Milni, Saptapadi, Havan) ensuring exact customs and priest requirements are honored.",
+          "Complete management of traditional poojas (Baraat, Milni, Pheras, Havan) ensuring all rituals happen at the right time.",
         icon: "Sparkles",
-        badge: "Cultural Precision",
+        badge: "Traditional Rituals",
       },
       {
         id: "production-decor",
-        title: "3D CAD Decor & Production",
-        subtitle: "100% Design-to-Reality Fidelity",
+        title: "3D Decor Design & Setup",
+        subtitle: "Exact Real-Life Match to 3D Previews",
         description:
-          "From custom stage carpentry to imported floral conditioning and ambient warm lighting, every spatial element matches the 3D CAD design.",
+          "From custom stage backdrops to fresh flower arrangements and lighting, everything matches your 3D design preview.",
         icon: "Layers",
-        badge: "Spatial Artistry",
+        badge: "Custom 3D Decor",
       },
       {
         id: "show-runner",
-        title: "Show Runner Timeline Execution",
-        subtitle: "Zero-Glitch Stage Management",
+        title: "On-Ground Event Direction",
+        subtitle: "Smooth On-Time Stage Coordination",
         description:
-          "The Show Runner acts as the single point-of-contact for artists, DJs, sound technicians, and entry pyrotechnics with millisecond timing.",
+          "Our ground team coordinates artists, DJs, sound engineers, and couple entries with clear timing.",
         icon: "Award",
-        badge: "Live Direction",
+        badge: "Event Direction",
       },
     ]
   );
@@ -8347,23 +8971,23 @@ function TestimonialsEditorModule({ site, showSaved }) {
   const [faqs, setFaqs] = useState(
     site.testimonialsFaq || [
       {
-        question: "How do I submit our wedding review and photographs?",
+        question: "How do I share our wedding review and photos?",
         answer:
-          "Click the 'Share Your Love Story' button on this page. You can share your story, select your star rating, and upload your high-resolution wedding photos directly from your phone or computer.",
+          "Click the 'Share Your Story' button on this page. You can write your review, select your star rating, and upload your wedding photos directly.",
       },
       {
-        question: "Can we include our cinematic wedding teaser or Instagram Reel?",
+        question: "Can we include a video link or Instagram Reel?",
         answer:
           "Yes! You can paste your YouTube, Vimeo, Google Drive, or Instagram Reel link in the video link field. Our team will feature the interactive video player on your review card.",
       },
       {
-        question: "Why does my review say 'Awaiting Admin Moderation'?",
+        question: "Why does my review say 'Waiting for Approval'?",
         answer:
-          "To protect client privacy and ensure genuine testimonials, all public submissions are reviewed and verified by Ashish Wankhede & the Confianza editorial team before going live.",
+          "To ensure all reviews are genuine and appropriate, our team checks all submissions before publishing them on the website.",
       },
       {
         question: "How long does review verification take?",
-        answer: "Our team typically verifies and publishes new couple stories within 12 to 24 hours.",
+        answer: "Our team usually checks and publishes new reviews within 12 to 24 hours.",
       },
     ]
   );
@@ -9183,61 +9807,144 @@ function TestimonialsEditorModule({ site, showSaved }) {
               </button>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {categories.map((cat, idx) => {
-                const cName = typeof cat === "string" ? cat : cat.name || cat.label;
-                const cId = typeof cat === "string" ? `cat-${idx}` : cat.id || `cat-${idx}`;
-                const count = allReviews.filter((t) => {
-                  const norm1 = (t.category || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
-                  const norm2 = cName.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
-                  return Boolean(norm1 && norm2 && norm1 === norm2);
-                }).length;
+            {/* Table / List View */}
+            <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-xs">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="border-b border-border/80 bg-muted/40 text-[0.68rem] uppercase tracking-wider text-muted-foreground font-bold">
+                      <th className="py-3 px-4 w-12 text-center">#</th>
+                      <th className="py-3 px-4">Category Name</th>
+                      <th className="py-3 px-4 text-center">Linked Reviews</th>
+                      <th className="py-3 px-4 text-center">
+                        Front Row Visibility ({categories.filter((c) => Boolean(typeof c === "object" ? c.showInFront : false)).length}/3 Selected)
+                      </th>
+                      <th className="py-3 px-4 text-center w-28">Order</th>
+                      <th className="py-3 px-4 text-right w-24">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/60">
+                    {categories.map((cat, idx) => {
+                      const cName = typeof cat === "string" ? cat : cat.name || cat.label;
+                      const cId = typeof cat === "string" ? `cat-${idx}` : cat.id || `cat-${idx}`;
+                      const count = allReviews.filter((t) => {
+                        const norm1 = (t.category || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
+                        const norm2 = cName.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
+                        return Boolean(norm1 && norm2 && norm1 === norm2);
+                      }).length;
+                      const isFront = typeof cat === "object" ? Boolean(cat.showInFront) : false;
 
-                return (
-                  <div
-                    key={cId}
-                    className="glass-card rounded-2xl p-4 border border-border flex items-center justify-between gap-3 hover:shadow-sm transition"
-                  >
-                    <div className="truncate">
-                      <h4 className="font-display text-sm font-bold text-ink truncate">{cName}</h4>
-                      <span className="text-[0.68rem] text-muted-foreground font-medium">
-                        {count} linked {count === 1 ? "review" : "reviews"}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setEditingCategory({
-                            isNew: false,
-                            _origName: cName,
-                            name: cName,
-                            id: cId,
-                          })
-                        }
-                        className="p-1.5 rounded-lg border border-border hover:bg-muted text-xs text-primary cursor-pointer"
-                        title="Edit Category"
-                      >
-                        <Edit2 className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (window.confirm(`Delete category "${cName}"?`)) {
-                            const updated = categories.filter((_, i) => i !== idx);
-                            saveCategories(updated);
-                          }
-                        }}
-                        className="p-1.5 rounded-lg border border-border hover:bg-destructive/10 text-destructive text-xs cursor-pointer"
-                        title="Delete Category"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
+                      return (
+                        <tr key={cId} className="hover:bg-muted/30 transition-colors">
+                          <td className="py-3.5 px-4 text-center font-mono text-[0.72rem] text-muted-foreground font-bold">
+                            {String(idx + 1).padStart(2, "0")}
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <span className="font-display font-bold text-ink text-sm block">
+                              {cName}
+                            </span>
+                            <span className="text-[0.68rem] text-muted-foreground font-mono">
+                              slug: {typeof cat === "object" ? cat.slug || cat.id : cName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 text-center">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[0.68rem] font-bold bg-primary/10 text-primary">
+                              {count} {count === 1 ? "review" : "reviews"}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 text-center">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = limitFrontSelection(categories, cId, 3);
+                                saveCategories(updated);
+                              }}
+                              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition cursor-pointer shadow-xs ${
+                                isFront
+                                  ? "gradient-gold text-ink ring-1 ring-secondary/40 font-bold"
+                                  : "bg-muted/70 text-muted-foreground hover:text-foreground hover:bg-muted"
+                              }`}
+                              title="Toggle whether this category appears in the 4 front pills on the Testimonials page"
+                            >
+                              <Sparkles className="h-3 w-3" />
+                              <span>{isFront ? "★ In Front Row" : "In Dropdown"}</span>
+                            </button>
+                          </td>
+                          <td className="py-3.5 px-4 text-center">
+                            <div className="inline-flex items-center gap-1">
+                              <button
+                                type="button"
+                                disabled={idx === 0}
+                                onClick={() => {
+                                  if (idx === 0) return;
+                                  const updated = [...categories];
+                                  const temp = updated[idx];
+                                  updated[idx] = updated[idx - 1];
+                                  updated[idx - 1] = temp;
+                                  saveCategories(updated);
+                                }}
+                                className="p-1 rounded-md border border-border hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                                title="Move Up"
+                              >
+                                <ArrowUp className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                disabled={idx === categories.length - 1}
+                                onClick={() => {
+                                  if (idx === categories.length - 1) return;
+                                  const updated = [...categories];
+                                  const temp = updated[idx];
+                                  updated[idx] = updated[idx + 1];
+                                  updated[idx + 1] = temp;
+                                  saveCategories(updated);
+                                }}
+                                className="p-1 rounded-md border border-border hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                                title="Move Down"
+                              >
+                                <ArrowDown className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                          <td className="py-3.5 px-4 text-right">
+                            <div className="inline-flex items-center justify-end gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setEditingCategory({
+                                    isNew: false,
+                                    _origName: cName,
+                                    name: cName,
+                                    id: cId,
+                                    showInFront: isFront,
+                                  })
+                                }
+                                className="p-1.5 rounded-lg border border-border hover:bg-muted text-primary cursor-pointer"
+                                title="Edit Category"
+                              >
+                                <Edit2 className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (window.confirm(`Delete category "${cName}"?`)) {
+                                    const updated = categories.filter((_, i) => i !== idx);
+                                    saveCategories(updated);
+                                  }
+                                }}
+                                className="p-1.5 rounded-lg border border-border hover:bg-destructive/10 text-destructive cursor-pointer"
+                                title="Delete Category"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
 
@@ -9254,6 +9961,7 @@ function TestimonialsEditorModule({ site, showSaved }) {
                     id: editingCategory.id || `cat-${Date.now()}`,
                     name: cleanName,
                     slug: cleanName.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+                    showInFront: Boolean(editingCategory.showInFront),
                   };
 
                   let updated;
@@ -9265,8 +9973,11 @@ function TestimonialsEditorModule({ site, showSaved }) {
                       const currName = typeof c === "string" ? c : c.name || c.label;
                       if (editingCategory.id && currId === editingCategory.id) return cleanCat;
                       if (editingCategory._origName && currName === editingCategory._origName) return cleanCat;
-                      return c;
+                      return typeof c === "string" ? { id: `cat-${currName}`, name: currName, slug: currName.toLowerCase().replace(/[^a-z0-9]+/g, "-") } : c;
                     });
+                  }
+                  if (cleanCat.showInFront) {
+                    updated = enforceMaxFrontCategories(updated, cleanCat.id, 3);
                   }
                   saveCategories(updated);
                   setEditingCategory(null);
@@ -9296,9 +10007,28 @@ function TestimonialsEditorModule({ site, showSaved }) {
                     value={editingCategory.name || ""}
                     onChange={(e) => setEditingCategory({ ...editingCategory, name: e.target.value })}
                     className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
-                    placeholder="e.g. Royal Baraat &amp; Entry"
+                    placeholder="e.g. Royal Baraat & Entry"
                   />
                 </div>
+
+                <label className="flex items-center gap-2.5 p-3 rounded-xl border border-[#E8E2EE] bg-white cursor-pointer hover:bg-[#F4F1F7]/60 transition">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(editingCategory.showInFront)}
+                    onChange={(e) =>
+                      setEditingCategory({ ...editingCategory, showInFront: e.target.checked })
+                    }
+                    className="rounded border-[#E8E2EE] text-[#6A439E] focus:ring-[#6A439E] h-4 w-4 cursor-pointer"
+                  />
+                  <div>
+                    <span className="text-xs font-semibold text-[#2B2138] block">
+                      Show in Front Row (Public Page Pill)
+                    </span>
+                    <span className="text-[0.68rem] text-[#7E7688] block">
+                      Top 3 categories marked "Show in Front" appear directly as pills; others appear in the "More Categories" dropdown.
+                    </span>
+                  </div>
+                </label>
 
                 <div className="flex justify-end gap-3 pt-3 border-t border-[#E8E2EE]">
                   <button
