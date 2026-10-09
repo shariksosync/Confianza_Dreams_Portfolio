@@ -4,6 +4,8 @@ import connectDB from "@/lib/mongodb";
 import Admin from "@/models/Admin";
 import { signAdminToken, TOKEN_COOKIE_NAME } from "@/lib/auth";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
   try {
     await connectDB();

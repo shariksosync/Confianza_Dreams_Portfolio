@@ -12,8 +12,8 @@ export default function PortfolioPage() {
 
   const header = portfolioHeader || {
     badge: "500+ Happy Weddings",
-    eyebrow: "OUR WORK",
-    title: "Our Work",
+    eyebrow: "OUR WORKS",
+    title: "Our Works",
     subtitle:
       "A photo gallery of our mandap setups, flower decor, beach weddings, and grand reception stages across India.",
     image: "/images/hero-2.jpg",
@@ -22,24 +22,24 @@ export default function PortfolioPage() {
 
   const cta = portfolioCta || {
     eyebrow: "LET'S PLAN YOUR SPECIAL DAY",
-    headline: "Ready to Plan Your Dream Wedding?",
+    headline: "Let’s Plan Your Dream Wedding",
     subtitle:
-      "Connect directly with founders Ashish Wankhede and Rutik Pund to discuss your venue, 3D decor ideas, and event timeline.",
+      "Talk directly with Ashish Wankhede and Rutik Pund. We will help you pick a venue, show you 3D decor designs, and handle every detail from start to finish.",
     buttonText: "Book Free Consultation",
     buttonLink: "/contact",
-    notice: "Free Consultation • No Obligation",
+    notice: "100% Free Consultation • No Obligation",
     perks: [
-      "1-on-1 Planning Meeting",
-      "Talk Directly with Founders (Ashish & Rutik)",
-      "Realistic 3D Decor Previews",
-      "Clear & Honest Cost Estimates",
+      "1-on-1 Planning Meeting with Founders (Ashish & Rutik)",
+      "Realistic 3D Decor Previews Before Your Event",
+      "Clear, Honest & Transparent Cost Estimates",
+      "Complete Day-by-Day Event Plan",
     ],
   };
 
   const displayTitle =
-    header.title === "The Wedding Portfolio" || !header.title ? "Our Work" : header.title;
+    header.title === "The Wedding Portfolio" || header.title === "Our Work" || !header.title ? "Our Works" : header.title;
   const displayEyebrow =
-    header.eyebrow === "OUR SIGNATURE WORKS" || !header.eyebrow ? "OUR WORK" : header.eyebrow;
+    header.eyebrow === "OUR SIGNATURE WORKS" || header.eyebrow === "OUR WORK" || !header.eyebrow ? "OUR WORKS" : header.eyebrow;
 
   return (
     <SiteLayout revealKey="portfolio-page">
@@ -60,7 +60,7 @@ export default function PortfolioPage() {
         <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8 lg:px-10 text-center">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/20 px-3.5 py-1 text-[0.68rem] uppercase tracking-[0.3em] text-secondary font-medium backdrop-blur-md">
             <Sparkles className="h-3 w-3 text-secondary" />
-            <span>{header.badge || "500+ Stories & Counting"}</span>
+            <span>{header.badge || "500+ Happy Weddings"}</span>
           </span>
 
           <h1 className="mt-4 font-display text-4xl sm:text-5xl lg:text-6xl text-background font-normal">
@@ -71,7 +71,7 @@ export default function PortfolioPage() {
 
           <p className="mx-auto max-w-2xl text-sm sm:text-base text-background/85 font-light leading-relaxed">
             {header.subtitle ||
-              "A curated gallery of our mandap concepts, floral installations, destination beach setups, and grand reception stages created across India."}
+              "A photo gallery of our wedding setups, mandaps, flower decor, and reception stages across India."}
           </p>
 
           {/* Dynamic Highlight Stats Pills */}
@@ -105,18 +105,27 @@ export default function PortfolioPage() {
         <div className="relative max-w-4xl mx-auto text-center z-10">
           <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-secondary font-bold mb-3">
             <Sparkles className="h-4 w-4 text-secondary" />
-            <span>{cta.eyebrow || "WHERE WEDDINGS BECOME STORIES"}</span>
+            <span>{cta.eyebrow || "LET'S PLAN YOUR SPECIAL DAY"}</span>
           </span>
 
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl text-background font-normal mb-4">
-            {cta.headline || "Ready to Plan Your Dream Wedding?"}
+            {cta.headline === "Want Your Wedding to Be Our Next Masterpiece?" ||
+            cta.headline === "Ready to Plan Your Dream Wedding?" ||
+            !cta.headline
+              ? "Let’s Plan Your Dream Wedding"
+              : cta.headline}
           </h2>
 
           <div className="rule-gold mx-auto my-4" />
 
           <p className="text-sm sm:text-base text-background/85 font-light mb-8 max-w-2xl mx-auto leading-relaxed">
-            {cta.subtitle ||
-              "Connect directly with Ashish Wankhede and Rutik Pund to discuss your wedding venue options, 3D decor concepts, and complete planning timeline."}
+            {cta.subtitle ===
+              "Connect directly with Ashish Wankhede and Rutik Pund to review your venue options, custom 3D decor concepts, and complete management timeline." ||
+            cta.subtitle ===
+              "Talk directly with founders Ashish Wankhede and Rutik Pund in Warje, Pune or over a phone call to discuss your wedding venue, decor ideas, and budget." ||
+            !cta.subtitle
+              ? "Talk directly with Ashish Wankhede and Rutik Pund. We will help you pick a venue, show you 3D decor designs, and handle every detail from start to finish."
+              : cta.subtitle}
           </p>
 
           {/* Consultation Perks */}
@@ -140,7 +149,7 @@ export default function PortfolioPage() {
               href={cta.buttonLink || "/contact"}
               className="btn-luxe gradient-gold text-ink font-bold shadow-luxe py-3 px-8 text-xs tracking-wider uppercase flex items-center gap-2"
             >
-              <span>{cta.buttonText || "Book Your Free Consultation"}</span>
+              <span>{cta.buttonText || "Book Free Consultation"}</span>
               <ArrowRight className="h-4 w-4" />
             </Link>
 

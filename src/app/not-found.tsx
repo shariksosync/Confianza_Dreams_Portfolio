@@ -4,11 +4,11 @@ export default function NotFound() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-16">
       <div className="glass-card max-w-lg rounded-3xl p-8 sm:p-12 text-center shadow-luxe">
-        <div className="relative mx-auto h-16 w-16 rounded-full overflow-hidden shadow-luxe ring-2 ring-secondary/60 bg-ink flex items-center justify-center">
+        <div className="relative mx-auto h-16 w-auto flex items-center justify-center">
           <img
             src="/logo.png"
             alt="Confianza Logo"
-            className="h-full w-full object-cover"
+            className="h-full w-auto object-contain select-none"
           />
         </div>
         <span className="mt-4 block text-[0.7rem] uppercase tracking-[0.3em] text-secondary">

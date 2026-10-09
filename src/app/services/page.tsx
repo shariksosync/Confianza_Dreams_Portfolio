@@ -7,60 +7,152 @@ import {
   ArrowRight,
   CheckCircle2,
   Phone,
-  MessageCircle,
   Feather,
-  Layers,
+  Eye,
+  X,
   Calendar,
+  Layers,
+  ChevronRight,
 } from "lucide-react";
 import SiteLayout from "@/layouts/SiteLayout";
 import SectionHeading from "@/components/ui/SectionHeading";
 import PackagesSection from "@/components/home/PackagesSection";
 import ProcessSection from "@/components/home/ProcessSection";
-import CategoryFilterBar from "@/components/ui/CategoryFilterBar";
 import { useSite } from "@/context/SiteContext";
 
-const normalizeCategory = (str: string) =>
-  (str || "")
-    .toLowerCase()
-    .replace(/&/g, "and")
-    .replace(/[^a-z0-9]/g, "")
-    .trim();
+const defaultTypeOfServices = [
+  {
+    id: "tos-1",
+    title: "Event Management",
+    description:
+      "Our complete event management ensures every part of your celebration runs smoothly. We manage on-ground setup, stage schedules, sound systems, guest hospitality, vendor coordination, and team management so your family can enjoy every moment stress-free.",
+    order: 1,
+  },
+  {
+    id: "tos-2",
+    title: "Event Planning",
+    description:
+      "Good planning is the foundation of a memorable wedding. We create detailed event schedules, manage budgets, negotiate with vendors, and design creative themes to make your celebration special from start to finish.",
+    order: 2,
+  },
+  {
+    id: "tos-3",
+    title: "Decor",
+    description:
+      "We transform event spaces into beautiful environments. From realistic 3D designs to on-ground setup, our team creates custom mandaps, entry gates, table centerpieces, mood lighting, and grand stage backdrops.",
+    order: 3,
+  },
+  {
+    id: "tos-4",
+    title: "Venue",
+    description:
+      "Finding the right venue sets the perfect mood for your celebration. We help you explore and book top heritage palaces, beachside resorts, private lawns, and luxury banquet halls at the best rates.",
+    order: 4,
+  },
+  {
+    id: "tos-5",
+    title: "Photograph/Videography",
+    description:
+      "Capture your most precious wedding memories with beautiful photos and videos. Our team records candid emotions, traditional ceremonies, drone views, and highlight reels for your family to cherish forever.",
+    order: 5,
+  },
+  {
+    id: "tos-6",
+    title: "Catering",
+    description:
+      "Delight your guests with delicious food and drinks. We organize customized menus featuring traditional regional dishes, live food counters, fresh beverage bars, and warm hospitality.",
+    order: 6,
+  },
+  {
+    id: "tos-7",
+    title: "Outfits",
+    description:
+      "Look your best for every function. Our styling team helps you with wedding dress selection, matching colors across ceremonies, jewelry pairing, and on-day outfit assistance.",
+    order: 7,
+  },
+];
 
-const isAllCategory = (cat: any) => {
-  if (!cat) return false;
-  const str = typeof cat === "string" ? cat : cat?.name || cat?.label || cat?.id || "";
-  const norm = normalizeCategory(str);
-  return norm === "all" || norm === "alldisciplines" || norm === "allservices";
-};
+const defaultTypeOfEvents = [
+  {
+    id: "toe-1",
+    title: "Wedding",
+    description:
+      "From traditional wedding pheras under beautiful mandaps to grand multi-day destination weddings, we manage every ceremony and tradition smoothly with care.",
+    order: 1,
+  },
+  {
+    id: "toe-2",
+    title: "Social",
+    description:
+      "Celebrate life's meaningful milestones with style and warmth. We design memorable family events with themed decor, great food, lively entertainment, and smooth hosting.",
+    order: 2,
+  },
+  {
+    id: "toe-3",
+    title: "Sports",
+    description:
+      "Energetic sports events delivered with precision. We manage ground branding, audio and scoreboards, prize distributions, and guest management.",
+    order: 3,
+  },
+  {
+    id: "toe-4",
+    title: "Concert",
+    description:
+      "Exciting live shows with high-quality sound, concert lighting, stage setups, artist management, and smooth crowd entry.",
+    order: 4,
+  },
+  {
+    id: "toe-5",
+    title: "Corporate",
+    description:
+      "Professional event management for your business. We deliver modern audio-visual setups, stage designs, executive hospitality, and corporate award functions.",
+    order: 5,
+  },
+  {
+    id: "toe-6",
+    title: "Social Gathering",
+    description:
+      "Bring friends and families together in welcoming settings. We arrange delicious food, warm lighting, fun games, and photo booths for get-togethers of all sizes.",
+    order: 6,
+  },
+];
 
-const isCategoryMatch = (itemCategory: string, targetCategory: any) => {
-  if (!targetCategory || isAllCategory(targetCategory)) return true;
-  if (!itemCategory) return false;
-  const normItem = normalizeCategory(itemCategory);
-  const normTarget = normalizeCategory(
-    typeof targetCategory === "string"
-      ? targetCategory
-      : targetCategory?.name || targetCategory?.label || targetCategory?.id || ""
-  );
-  return Boolean(normItem && normTarget && normItem === normTarget);
+const defaultServicesHeader = {
+  badge: "Complete Wedding Planning & Decor",
+  eyebrow: "COMPLETE WEDDING PLANNING & DECOR",
+  title: "Our Wedding Services",
+  subtitle:
+    "From first design ideas to smooth execution on your big day, every service is delivered with care and quality.",
+  image: "/images/hero-1.jpg",
 };
 
 export default function ServicesPage() {
-  const { services, serviceCategories, ceremonies, stationery, servicesCta, contact, loading, ready } = useSite() as any;
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const {
+    servicesHeader,
+    typeOfServices,
+    typeOfEvents,
+    stationery,
+    servicesCta,
+    contact,
+    loading,
+    ready,
+  } = useSite() as any;
 
-  const serviceList = services || [];
-  const categoriesList =
-    Array.isArray(serviceCategories) && serviceCategories.length > 0
-      ? serviceCategories
-      : [
-          { id: "planning", name: "Complete Wedding Planning", label: "Complete Wedding Planning" },
-          { id: "decor", name: "Mandap & Stage Decor", label: "Mandap & Stage Decor" },
-          { id: "hospitality", name: "Guest Hospitality & Personal Helpers", label: "Guest Hospitality & Personal Helpers" },
-          { id: "rituals", name: "Rituals, Entertainment & Catering", label: "Rituals, Entertainment & Catering" },
-        ];
+  const [activeTab, setActiveTab] = useState<"services" | "events">("services");
+  const [selectedDetailItem, setSelectedDetailItem] = useState<any>(null);
 
-  const ceremonyList = ceremonies || [];
+  const header = servicesHeader || defaultServicesHeader;
+
+  const servicesList =
+    Array.isArray(typeOfServices) && typeOfServices.length > 0
+      ? typeOfServices
+      : defaultTypeOfServices;
+
+  const eventsList =
+    Array.isArray(typeOfEvents) && typeOfEvents.length > 0
+      ? typeOfEvents
+      : defaultTypeOfEvents;
+
   const stationeryList = stationery || [];
   const cta = servicesCta || {
     eyebrow: "LET'S PLAN YOUR SPECIAL DAY",
@@ -78,19 +170,16 @@ export default function ServicesPage() {
     ],
   };
 
-  const filteredServices = serviceList.filter((service: any) => {
-    if (isAllCategory(selectedCategory)) return true;
-    return isCategoryMatch(service.category, selectedCategory);
-  });
+  const currentItems = activeTab === "services" ? servicesList : eventsList;
 
   return (
     <SiteLayout revealKey="services-page">
-      {/* 1. Hero Banner */}
+      {/* 1. Dynamic Hero Banner from Admin Panel */}
       <section className="relative bg-ink pt-28 pb-14 sm:pt-36 sm:pb-20 lg:pt-44 lg:pb-24 text-background overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-25">
           <img
-            src="/images/hero-1.jpg"
-            alt="Confianza Services"
+            src={header.image || "/images/hero-1.jpg"}
+            alt={header.title || "Confianza Services"}
             className="h-full w-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/80 to-ink/40" />
@@ -98,19 +187,20 @@ export default function ServicesPage() {
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 text-center">
           <span className="text-[0.65rem] sm:text-[0.68rem] uppercase tracking-[0.25em] sm:tracking-[0.34em] text-secondary font-semibold">
-            Complete Wedding Planning &amp; Decor
+            {header.badge || header.eyebrow || "Complete Wedding Planning & Decor"}
           </span>
           <h1 className="mt-2.5 sm:mt-3 font-display text-3xl sm:text-5xl lg:text-6xl text-background font-normal leading-tight">
-            Our Wedding Services
+            {header.title || "Our Wedding Services"}
           </h1>
           <div className="rule-gold mx-auto my-4 sm:my-5" />
           <p className="mx-auto max-w-2xl text-xs sm:text-sm lg:text-base text-background/80 font-light leading-relaxed px-2">
-            From first design ideas to smooth execution on your big day, every service is delivered with care and quality.
+            {header.subtitle ||
+              "From first design ideas to smooth execution on your big day, every service is delivered with care and quality."}
           </p>
         </div>
       </section>
 
-      {/* 2. Detailed Services Catalog with Dynamic Category Filters */}
+      {/* 2. Type of Services & Type of Events Section */}
       <section className="section-pad relative bg-background">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
           <SectionHeading
@@ -119,212 +209,155 @@ export default function ServicesPage() {
             subtitle="Explore our complete range of wedding planning services, custom decor, destination management, and rituals."
           />
 
-          {/* 4 Front Category Filter Pills + Luxury Dropdown */}
-          <div className="mt-8 sm:mt-10">
-            <CategoryFilterBar
-              items={serviceList}
-              categories={categoriesList}
-              selectedCategory={selectedCategory}
-              onSelectCategory={(cat: string) => setSelectedCategory(cat === "All" ? "all" : cat)}
-              allLabel="All Services"
-              maxFrontCategories={3}
-              dropdownLabel="More Services"
-              getItemCount={(cat: any, itms: any[]) => {
-                if (isAllCategory(cat)) return itms.length;
-                const catName = typeof cat === "string" ? cat : cat.name || cat.label || cat.id || "";
-                return itms.filter((s: any) => isCategoryMatch(s.category, catName)).length;
-              }}
-            />
+          {/* 2 Dual Switcher Buttons */}
+          <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+            <button
+              type="button"
+              onClick={() => setActiveTab("services")}
+              className={`px-6 sm:px-8 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer shadow-xs ${
+                activeTab === "services"
+                  ? "gradient-royal text-primary-foreground shadow-luxe scale-105"
+                  : "glass-card text-foreground/80 hover:text-primary hover:border-primary/40"
+              }`}
+            >
+              Type of Services ({servicesList.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("events")}
+              className={`px-6 sm:px-8 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer shadow-xs ${
+                activeTab === "events"
+                  ? "gradient-royal text-primary-foreground shadow-luxe scale-105"
+                  : "glass-card text-foreground/80 hover:text-primary hover:border-primary/40"
+              }`}
+            >
+              Type of Events ({eventsList.length})
+            </button>
           </div>
 
-          {loading && !ready ? (
-            <div className="mt-10 sm:mt-14 grid gap-6 sm:gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="glass-card rounded-2xl sm:rounded-3xl overflow-hidden border border-border/80">
-                  <div className="h-48 sm:h-60 w-full skeleton" />
-                  <div className="p-5 sm:p-6 space-y-3">
-                    <div className="h-4 w-1/3 skeleton rounded" />
-                    <div className="h-6 w-3/4 skeleton rounded" />
-                    <div className="h-4 w-full skeleton rounded" />
-                    <div className="h-4 w-2/3 skeleton rounded" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : filteredServices.length === 0 ? (
-            <div className="mt-10 sm:mt-14 glass-card rounded-2xl sm:rounded-3xl p-8 sm:p-12 text-center text-muted-foreground border border-border max-w-2xl mx-auto transition-all duration-300 animate-in fade-in">
-              <Sparkles className="h-10 w-10 sm:h-12 sm:w-12 mx-auto text-secondary/50 mb-3" />
-              <h3 className="font-display text-lg sm:text-xl text-ink font-semibold">
-                {serviceList.length === 0 ? "0 Services Listed" : `No Services in "${selectedCategory}"`}
-              </h3>
-              <p className="text-xs text-muted-foreground mt-1.5 max-w-md mx-auto">
-                {serviceList.length === 0
-                  ? "No services have been added in the Admin Panel yet."
-                  : "No services are currently assigned to this category. Select another category or click below to view all services."}
-              </p>
-              {serviceList.length > 0 && !isAllCategory(selectedCategory) && (
-                <button
-                  type="button"
-                  onClick={() => setSelectedCategory("all")}
-                  className="mt-5 btn-luxe gradient-gold text-ink text-xs py-2 px-5 font-bold shadow-xs cursor-pointer"
-                >
-                  View All Services ({serviceList.length})
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="mt-10 sm:mt-14 grid gap-6 sm:gap-8 sm:grid-cols-2 lg:grid-cols-3 transition-all duration-300">
-              {filteredServices.map((service: any, idx: number) => (
-                <div
-                  key={service.id || service._id || idx}
-                  className="group glass-card rounded-2xl sm:rounded-3xl overflow-hidden border border-border/80 transition-all duration-500 hover:-translate-y-2 hover:shadow-luxe flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="relative h-48 sm:h-60 w-full overflow-hidden bg-ink">
-                      {service.image ? (
-                        <img
-                          src={service.image}
-                          alt={service.title}
-                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="h-full w-full flex items-center justify-center gradient-royal text-primary-foreground">
-                          <Sparkles className="h-10 w-10 sm:h-12 sm:w-12 text-secondary/60" />
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-transparent to-transparent" />
-                      <span className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 inline-flex items-center gap-1.5 rounded-full gradient-gold px-3 py-0.5 sm:px-3.5 sm:py-1 text-[0.62rem] sm:text-[0.65rem] font-bold uppercase tracking-wider text-ink shadow-md">
-                        <Sparkles className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                        <span>{service.badge || "Our Service"}</span>
-                      </span>
-                    </div>
-
-                    <div className="p-5 sm:p-6">
-                      <span className="text-[0.65rem] sm:text-[0.68rem] text-primary font-semibold uppercase tracking-widest block mb-1">
-                        Service 0{idx + 1}
-                      </span>
-                      <h3 className="font-display text-xl sm:text-2xl text-ink group-hover:text-primary transition-colors leading-snug">
-                        {service.title}
-                      </h3>
-                      <p className="mt-2.5 sm:mt-3 text-xs sm:text-sm leading-relaxed text-muted-foreground">
-                        {service.description}
-                      </p>
-
-                      {Array.isArray(service.features) && service.features.length > 0 && (
-                        <div className="mt-4 space-y-1.5 text-xs text-foreground/80">
-                          {service.features.map((feature: string, fIdx: number) => (
-                            <div key={fIdx} className="flex items-center gap-2">
-                              <CheckCircle2 className="h-3.5 w-3.5 text-secondary shrink-0" />
-                              <span>{feature}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="p-4 sm:p-6 pt-0">
-                    <Link
-                      href={`/contact?service=${encodeURIComponent(service.title)}`}
-                      className="btn-luxe gradient-royal w-full text-primary-foreground text-[0.72rem] sm:text-xs font-semibold shadow-sm flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-3 sm:px-4 text-center whitespace-normal leading-snug"
+          {/* Active Tab Cards Grid (No Images, Uniform Height with Line Clamp) */}
+          <div className="mt-10 sm:mt-14 grid gap-6 sm:gap-8 sm:grid-cols-2 lg:grid-cols-3 transition-all duration-300">
+            {currentItems.map((item: any, idx: number) => (
+              <div
+                key={item.id || idx}
+                className="group glass-card rounded-2xl sm:rounded-3xl p-6 sm:p-7 border border-border/80 transition-all duration-300 hover:-translate-y-1 hover:border-secondary/40 hover:shadow-luxe flex flex-col justify-between"
+              >
+                <div>
+                  {/* Top Bar: Eye View Details Button */}
+                  <div className="flex items-center justify-end mb-4">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setSelectedDetailItem({
+                          ...item,
+                          itemType: activeTab === "services" ? "Service" : "Event",
+                        })
+                      }
+                      className="p-2 sm:p-2.5 rounded-full bg-accent/60 hover:bg-secondary/20 text-muted-foreground hover:text-secondary transition-colors cursor-pointer border border-border/60 hover:border-secondary/40"
+                      title="View Details"
+                      aria-label={`View full details for ${item.title}`}
                     >
-                      <span>Inquire About This Service</span>
-                      <ArrowRight className="h-3.5 w-3.5 shrink-0" />
-                    </Link>
+                      <Eye className="h-4 w-4" />
+                    </button>
                   </div>
+
+                  {/* Card Heading */}
+                  <h3 className="font-display text-xl sm:text-2xl text-ink group-hover:text-primary transition-colors leading-snug">
+                    {item.title}
+                  </h3>
+
+                  {/* Single Description Field with Automatic Card Height Limit */}
+                  <p className="mt-3 text-xs sm:text-sm leading-relaxed text-muted-foreground line-clamp-3 min-h-[3.8rem]">
+                    {item.description}
+                  </p>
                 </div>
-              ))}
+
+                {/* Card Footer Actions */}
+                <div className="mt-6 pt-4 border-t border-border/50 flex items-center justify-end">
+                  <Link
+                    href={`/contact?service=${encodeURIComponent(item.title)}`}
+                    className="inline-flex items-center gap-1 text-[0.72rem] sm:text-xs font-bold uppercase tracking-wider text-secondary hover:text-primary transition-colors"
+                  >
+                    <span>Inquire</span>
+                    <ArrowRight className="h-3 w-3" />
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Type of Events Teaser Section when Type of Services is Active by Default */}
+          {activeTab === "services" && (
+            <div className="mt-16 sm:mt-24 pt-12 sm:pt-16 border-t border-border/60">
+              <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-12">
+                <span className="text-[0.65rem] sm:text-[0.68rem] uppercase tracking-[0.25em] sm:tracking-[0.32em] text-secondary font-bold block mb-2">
+                  EXPLORE CELEBRATIONS
+                </span>
+                <h3 className="font-display text-2xl sm:text-3xl text-ink font-normal">
+                  Type of Events We Plan & Manage
+                </h3>
+                <p className="mt-2 text-xs sm:text-sm text-muted-foreground">
+                  In addition to end-to-end services, we specialize in organizing distinct event types with full customized decor, entertainment, and logistics.
+                </p>
+              </div>
+
+              <div className="grid gap-6 sm:gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                {eventsList.map((event: any, eIdx: number) => (
+                  <div
+                    key={event.id || eIdx}
+                    className="group glass-card rounded-2xl sm:rounded-3xl p-6 sm:p-7 border border-border/80 transition-all duration-300 hover:-translate-y-1 hover:border-secondary/40 hover:shadow-luxe flex flex-col justify-between"
+                  >
+                    <div>
+                      {/* Top Bar: Eye View Details Button */}
+                      <div className="flex items-center justify-end mb-4">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setSelectedDetailItem({
+                              ...event,
+                              itemType: "Event",
+                            })
+                          }
+                          className="p-2 sm:p-2.5 rounded-full bg-accent/60 hover:bg-secondary/20 text-muted-foreground hover:text-secondary transition-colors cursor-pointer border border-border/60 hover:border-secondary/40"
+                          title="View Details"
+                          aria-label={`View full details for ${event.title}`}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
+                      </div>
+
+                      {/* Card Heading */}
+                      <h3 className="font-display text-xl sm:text-2xl text-ink group-hover:text-primary transition-colors leading-snug">
+                        {event.title}
+                      </h3>
+
+                      {/* Single Description Field with Automatic Card Height Limit */}
+                      <p className="mt-3 text-xs sm:text-sm leading-relaxed text-muted-foreground line-clamp-3 min-h-[3.8rem]">
+                        {event.description}
+                      </p>
+                    </div>
+
+                    {/* Card Footer Actions */}
+                    <div className="mt-6 pt-4 border-t border-border/50 flex items-center justify-end">
+                      <Link
+                        href={`/contact?service=${encodeURIComponent(event.title)}`}
+                        className="inline-flex items-center gap-1 text-[0.72rem] sm:text-xs font-bold uppercase tracking-wider text-secondary hover:text-primary transition-colors"
+                      >
+                        <span>Inquire</span>
+                        <ArrowRight className="h-3 w-3" />
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
       </section>
 
-      {/* 3. Ceremony-by-Ceremony Management Matrix */}
-      {ceremonyList.length > 0 && (
-        <section className="section-pad relative bg-accent/30 border-t border-b border-border/50">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
-            <SectionHeading
-              eyebrow="Wedding Functions &amp; Ceremonies"
-              title="From Sacred Pheras to Sangeet Nights"
-              subtitle="Every Indian wedding function has its own unique style, decor setup, and timing."
-            />
-
-            <div className="reveal mt-8 sm:mt-14 grid gap-5 sm:gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              {ceremonyList.map((ceremony: any, idx: number) => (
-                <div
-                  key={ceremony.id || ceremony._id || idx}
-                  className="group glass-card rounded-2xl sm:rounded-3xl overflow-hidden border border-border/80 transition-all duration-500 hover:-translate-y-2 hover:shadow-luxe flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="relative h-48 sm:h-56 w-full overflow-hidden bg-ink">
-                      {ceremony.image ? (
-                        <img
-                          src={ceremony.image}
-                          alt={ceremony.name}
-                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="h-full w-full flex items-center justify-center gradient-royal text-primary-foreground">
-                          <Sparkles className="h-10 w-10 text-secondary" />
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-transparent to-transparent" />
-                      <span className="absolute bottom-3 left-3 sm:left-4 inline-flex items-center gap-1.5 rounded-full bg-ink/75 px-3 py-1 text-[0.62rem] sm:text-[0.65rem] font-bold uppercase tracking-wider text-champagne backdrop-blur-md border border-white/10">
-                        <Sparkles className="h-2.5 w-2.5 text-secondary" />
-                        <span>{ceremony.theme || "Ceremony Milestone"}</span>
-                      </span>
-                    </div>
-
-                    <div className="p-4 sm:p-6">
-                      <h3 className="font-display text-lg sm:text-2xl text-ink group-hover:text-primary transition-colors leading-snug">
-                        {ceremony.name}
-                      </h3>
-                      {ceremony.subtitle && (
-                        <span className="text-[0.62rem] sm:text-[0.7rem] uppercase tracking-wider text-primary font-semibold block mt-0.5 mb-2">
-                          {ceremony.subtitle}
-                        </span>
-                      )}
-                      <p className="text-xs sm:text-sm leading-relaxed text-muted-foreground mt-2">
-                        {ceremony.description}
-                      </p>
-
-                      {Array.isArray(ceremony.highlights) && ceremony.highlights.length > 0 && (
-                        <div className="mt-4 pt-3 border-t border-border/50 space-y-1.5">
-                          <span className="text-[0.62rem] sm:text-[0.65rem] font-bold uppercase tracking-wider text-muted-foreground block">
-                            What's Included:
-                          </span>
-                          {ceremony.highlights.map((h: string, hIdx: number) => (
-                            <div key={hIdx} className="flex items-center gap-2 text-xs text-foreground/85">
-                              <CheckCircle2 className="h-3.5 w-3.5 text-secondary shrink-0" />
-                              <span className="break-words leading-snug">{h}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="p-4 sm:p-6 pt-0">
-                    <Link
-                      href={`/contact?service=${encodeURIComponent(ceremony.name)}`}
-                      className="btn-luxe gradient-royal w-full text-primary-foreground text-[0.72rem] sm:text-xs font-semibold shadow-sm flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-3 sm:px-4 text-center whitespace-normal leading-snug"
-                    >
-                      <span>Plan Your {ceremony.name}</span>
-                      <ArrowRight className="h-3.5 w-3.5 shrink-0" />
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* 4. Event Stationery & Hospitality Suite */}
+      {/* 3. Event Stationery & Hospitality Suite */}
       {stationeryList.length > 0 && (
-        <section className="section-pad relative bg-background">
+        <section className="section-pad relative bg-background border-t border-border/50">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
             <SectionHeading
               eyebrow="Wedding Stationery &amp; Welcome Items"
@@ -332,14 +365,14 @@ export default function ServicesPage() {
               subtitle="Personal details make weddings special. We design custom invitation cards, luggage tags, key jackets, and welcome hampers for your guests."
             />
 
-            <div className="reveal mt-10 sm:mt-14 grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-10 sm:mt-14 grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {stationeryList.map((item: any, idx: number) => (
                 <div
                   key={item.id || item._id || idx}
-                  className="group glass-card rounded-2xl sm:rounded-3xl overflow-hidden border border-border/80 transition-all duration-500 hover:-translate-y-2 hover:shadow-luxe flex flex-col justify-between"
+                  className="group glass-card rounded-2xl sm:rounded-3xl overflow-hidden border border-border/80 transition-all duration-300 hover:-translate-y-2 hover:shadow-luxe flex flex-col justify-between"
                 >
                   <div>
-                    <div className="relative h-40 sm:h-44 w-full overflow-hidden bg-ink">
+                    <div className="h-40 sm:h-44 w-full overflow-hidden bg-ink">
                       {item.image ? (
                         <img
                           src={item.image}
@@ -352,13 +385,15 @@ export default function ServicesPage() {
                           <Feather className="h-8 w-8 text-secondary" />
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-transparent to-transparent" />
-                      <span className="absolute bottom-3 left-3 inline-flex items-center gap-1 rounded-full gradient-gold px-2.5 py-0.5 text-[0.62rem] font-bold uppercase tracking-wider text-ink shadow-sm">
-                        <span>{item.badge || "Stationery"}</span>
-                      </span>
                     </div>
 
                     <div className="p-4 sm:p-5">
+                      <div className="mb-2.5">
+                        <span className="inline-flex items-center gap-1 rounded-full gradient-gold px-2.5 py-0.5 text-[0.62rem] font-bold uppercase tracking-wider text-ink shadow-sm">
+                          <span>{item.badge || "Stationery"}</span>
+                        </span>
+                      </div>
+
                       <h4 className="font-display text-base sm:text-lg font-semibold text-ink group-hover:text-primary transition-colors">
                         {item.title}
                       </h4>
@@ -379,13 +414,13 @@ export default function ServicesPage() {
         </section>
       )}
 
-      {/* 5. Wedding Packages Comparison */}
+      {/* 4. Wedding Packages Comparison */}
       <PackagesSection />
 
-      {/* 6. 5-Step Process */}
+      {/* 5. 5-Step Process */}
       <ProcessSection />
 
-      {/* 7. Dynamic Consultation CTA Banner */}
+      {/* 6. Dynamic Consultation CTA Banner */}
       <section className="bg-ink py-14 sm:py-20 text-center text-background relative overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-15">
           <img
@@ -408,7 +443,8 @@ export default function ServicesPage() {
           <div className="rule-gold mx-auto my-4 sm:my-5" />
 
           <p className="text-xs sm:text-sm lg:text-base text-background/85 font-light mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed px-2">
-            {cta.subtitle || "Book a free 60–90 minute consultation with Ashish Wankhede in Warje, Pune, or via video call."}
+            {cta.subtitle ||
+              "Book a free 60–90 minute consultation with Ashish Wankhede in Warje, Pune, or via video call."}
           </p>
 
           {/* Consultation Perks Pills */}
@@ -454,6 +490,61 @@ export default function ServicesPage() {
           )}
         </div>
       </section>
+
+      {/* 7. Detailed Popup Modal with Whole Description Text in Slider/Scrollable Container */}
+      {selectedDetailItem && (
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-ink/70 backdrop-blur-md p-4 animate-fade-in">
+          <div className="modal-dialog-luxury bg-card max-w-lg w-full rounded-3xl p-6 sm:p-8 space-y-4 border border-border shadow-luxe relative">
+            {/* Modal Header */}
+            <div className="flex items-start justify-between gap-4 border-b border-border pb-4">
+              <div>
+                <span className="inline-block text-[0.65rem] font-bold uppercase tracking-widest text-secondary font-mono mb-1">
+                  {selectedDetailItem.itemType || "Service"} Details
+                </span>
+                <h3 className="font-display text-2xl sm:text-3xl text-ink font-semibold leading-tight">
+                  {selectedDetailItem.title}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedDetailItem(null)}
+                className="p-2 rounded-full bg-muted/60 hover:bg-muted text-foreground transition-colors cursor-pointer shrink-0"
+                aria-label="Close details popup"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Modal Body: Displays the whole text in a scrollable slider container */}
+            <div className="space-y-3 max-h-64 sm:max-h-80 overflow-y-auto pr-2 custom-scrollbar">
+              <div className="p-4 rounded-2xl bg-secondary/10 border border-secondary/20">
+                <p className="text-xs sm:text-sm font-normal text-foreground/90 leading-relaxed whitespace-pre-line">
+                  {selectedDetailItem.description}
+                </p>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
+              <button
+                type="button"
+                onClick={() => setSelectedDetailItem(null)}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-muted-foreground hover:text-ink hover:bg-muted transition cursor-pointer"
+              >
+                Close
+              </button>
+
+              <Link
+                href={`/contact?service=${encodeURIComponent(selectedDetailItem.title)}`}
+                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5 font-semibold flex items-center gap-1.5 shadow-sm"
+              >
+                <span>Inquire About This {selectedDetailItem.itemType || "Service"}</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </SiteLayout>
   );
 }

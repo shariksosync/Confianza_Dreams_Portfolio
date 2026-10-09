@@ -12,6 +12,8 @@ import Faq from "@/models/Faq";
 import Blog from "@/models/Blog";
 import Admin from "@/models/Admin";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
   try {
     const conn = await connectDB();

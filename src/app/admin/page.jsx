@@ -17,6 +17,8 @@ import {
   Settings as SettingsIcon,
   Inbox,
   Sparkles,
+  Compass,
+  HeartHandshake,
   Plus,
   Trash2,
   Edit2,
@@ -223,33 +225,33 @@ export default function AdminPage() {
   // Not logged in -> Show luxury login screen
   if (!user) {
     return (
-      <div className="min-h-screen bg-ink flex items-center justify-center p-4">
-        <div className="glass-dark max-w-md w-full rounded-3xl p-8 sm:p-10 border border-white/15 shadow-luxe text-background">
+      <div className="min-h-screen bg-[#F5F3EF] flex items-center justify-center p-4">
+        <div className="bg-[#FAF8F5] max-w-md w-full rounded-3xl p-8 sm:p-10 border border-border shadow-2xl text-ink">
           <div className="text-center">
-            <div className="relative mx-auto h-14 w-14 rounded-full overflow-hidden shadow-luxe ring-2 ring-secondary/60 bg-ink flex items-center justify-center">
+            <div className="relative mx-auto h-16 w-auto flex items-center justify-center">
               <img
                 src="/logo.png"
                 alt="Confianza Logo"
-                className="h-full w-full object-cover"
+                className="h-full w-auto object-contain select-none"
               />
             </div>
-            <h1 className="mt-4 font-display text-2xl text-background">
+            <h1 className="mt-4 font-display text-2xl text-ink font-bold">
               Confianza Admin Portal
             </h1>
-            <p className="mt-1 text-xs text-champagne/75 uppercase tracking-[0.25em]">
+            <p className="mt-1 text-xs text-primary uppercase tracking-[0.25em] font-semibold">
               Executive Content Management
             </p>
           </div>
 
           <form onSubmit={handleLogin} className="mt-8 space-y-4">
             {loginError && (
-              <div className="rounded-xl bg-destructive/20 border border-destructive/40 p-3 text-xs text-destructive-foreground text-center">
+              <div className="rounded-xl bg-destructive/10 border border-destructive/30 p-3 text-xs text-destructive text-center font-medium">
                 {loginError}
               </div>
             )}
 
             <div>
-              <label className="text-xs font-medium text-background/80 block mb-1">
+              <label className="text-xs font-medium text-ink/80 block mb-1">
                 Username
               </label>
               <input
@@ -258,12 +260,12 @@ export default function AdminPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Enter username (e.g. admin)"
-                className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-background placeholder:text-background/40 focus:border-secondary focus:outline-none"
+                className="w-full rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-ink placeholder:text-ink/40 focus:border-primary focus:outline-none shadow-xs"
               />
             </div>
 
             <div>
-              <label className="text-xs font-medium text-background/80 block mb-1">
+              <label className="text-xs font-medium text-ink/80 block mb-1">
                 Password
               </label>
               <input
@@ -272,14 +274,14 @@ export default function AdminPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter password..."
-                className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-background placeholder:text-background/40 focus:border-secondary focus:outline-none"
+                className="w-full rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-ink placeholder:text-ink/40 focus:border-primary focus:outline-none shadow-xs"
               />
             </div>
 
             <div className="pt-2">
               <button
                 type="submit"
-                className="btn-luxe gradient-gold w-full text-ink font-bold shadow-luxe text-xs py-3"
+                className="btn-luxe gradient-gold w-full text-ink font-bold shadow-md text-xs py-3 rounded-xl flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.02] active:scale-98 transition"
               >
                 <Lock className="h-4 w-4" />
                 <span>Enter Admin Console</span>
@@ -287,7 +289,7 @@ export default function AdminPage() {
             </div>
 
             <div className="pt-3 text-center">
-              <Link href="/" className="text-xs text-background/60 hover:text-secondary transition inline-flex items-center gap-1.5">
+              <Link href="/" className="text-xs text-ink/60 hover:text-primary transition inline-flex items-center gap-1.5 font-medium">
                 <ChevronLeft className="h-3.5 w-3.5" />
                 <span>Return to Public Website</span>
               </Link>
@@ -305,13 +307,14 @@ export default function AdminPage() {
   const NAV_ITEMS = [
     { id: "overview", label: "Dashboard Overview", icon: LayoutDashboard },
     { id: "hero", label: "Home Page Banner", icon: Sliders },
+    { id: "home-story", label: "Our Story & Philosophy", icon: Sparkles },
     {
       id: "contact-us",
       label: pendingInquiriesCount > 0 ? `Contact Us (${pendingInquiriesCount} New)` : "Contact Us",
       icon: PhoneCall,
       badge: pendingInquiriesCount > 0 ? pendingInquiriesCount : null,
     },
-    { id: "about", label: "About", icon: Sparkles },
+    { id: "about", label: "About Us Page", icon: BookOpen },
     { id: "services", label: "Services & Packages", icon: Briefcase },
     { id: "portfolio", label: "Portfolio Works", icon: ImageIcon },
     { id: "gallery", label: "Gallery", icon: ImageIcon },
@@ -337,20 +340,20 @@ export default function AdminPage() {
       <aside
         className={`w-full ${
           sidebarCollapsed ? "lg:w-20" : "lg:w-72"
-        } transition-all duration-300 ease-in-out bg-ink text-background flex flex-col justify-between shrink-0 border-r border-white/10 ${
+        } transition-all duration-300 ease-in-out bg-[#FAF8F5] text-ink flex flex-col justify-between shrink-0 border-r border-border/80 shadow-xs ${
           sidebarCollapsed ? "p-3" : "p-4"
         } lg:min-h-screen sticky top-0 z-30`}
       >
         <div>
           {/* Brand header */}
           {sidebarCollapsed ? (
-            <div className="flex flex-col items-center gap-3 pb-3.5 border-b border-white/10">
+            <div className="flex flex-col items-center gap-3 pb-3.5 border-b border-border/70">
               <Link href="/" title="Confianza Home" className="flex items-center justify-center">
-                <div className="relative h-9 w-9 shrink-0 rounded-full overflow-hidden ring-2 ring-secondary/60 shadow-md bg-ink flex items-center justify-center">
+                <div className="relative h-10 w-auto shrink-0 flex items-center justify-center">
                   <img
                     src="/logo.png"
                     alt="Confianza Logo"
-                    className="h-full w-full object-cover"
+                    className="h-full w-auto object-contain select-none"
                   />
                 </div>
               </Link>
@@ -358,26 +361,26 @@ export default function AdminPage() {
                 type="button"
                 onClick={() => setSidebarCollapsed(false)}
                 title="Expand Sidebar"
-                className="p-1.5 rounded-lg border border-white/20 text-background/70 hover:text-secondary hover:border-secondary transition cursor-pointer flex items-center justify-center"
+                className="p-1.5 rounded-lg border border-border/80 text-ink/70 hover:text-primary hover:border-primary/50 hover:bg-black/5 transition cursor-pointer flex items-center justify-center"
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
             </div>
           ) : (
-            <div className="flex items-center justify-between pb-4 border-b border-white/10 gap-2">
-              <Link href="/" className="flex items-center gap-3 overflow-hidden">
-                <div className="relative h-10 w-10 shrink-0 rounded-full overflow-hidden ring-2 ring-secondary/60 shadow-md bg-ink flex items-center justify-center">
+            <div className="flex items-center justify-between pb-4 border-b border-border/70 gap-2">
+              <Link href="/" className="flex items-center gap-2.5 min-w-0">
+                <div className="relative h-11 w-auto shrink-0 flex items-center justify-center">
                   <img
                     src="/logo.png"
                     alt="Confianza Logo"
-                    className="h-full w-full object-cover"
+                    className="h-full w-auto object-contain select-none"
                   />
                 </div>
                 <div className="truncate">
-                  <span className="font-display text-base text-background block leading-tight truncate">
+                  <span className="font-display text-sm font-bold text-ink block leading-tight truncate">
                     Confianza
                   </span>
-                  <span className="text-[0.62rem] uppercase tracking-widest text-champagne block truncate">
+                  <span className="text-[0.58rem] uppercase tracking-widest text-primary/80 font-bold block truncate">
                     Admin Dashboard
                   </span>
                 </div>
@@ -387,7 +390,7 @@ export default function AdminPage() {
                 <Link
                   href="/"
                   title="View live site"
-                  className="p-1.5 rounded-lg border border-white/20 text-background/70 hover:text-secondary hover:border-secondary transition"
+                  className="p-1.5 rounded-lg border border-border/80 text-ink/70 hover:text-primary hover:border-primary/50 hover:bg-black/5 transition"
                 >
                   <Eye className="h-4 w-4" />
                 </Link>
@@ -395,7 +398,7 @@ export default function AdminPage() {
                   type="button"
                   onClick={() => setSidebarCollapsed(true)}
                   title="Collapse Sidebar"
-                  className="p-1.5 rounded-lg border border-white/20 text-background/70 hover:text-secondary hover:border-secondary transition cursor-pointer"
+                  className="p-1.5 rounded-lg border border-border/80 text-ink/70 hover:text-primary hover:border-primary/50 hover:bg-black/5 transition cursor-pointer"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
@@ -419,7 +422,7 @@ export default function AdminPage() {
                   } ${
                     isActive
                       ? "gradient-royal text-primary-foreground font-semibold shadow-md"
-                      : "text-background/75 hover:bg-white/10 hover:text-background"
+                      : "text-ink/75 hover:bg-black/[0.04] hover:text-primary"
                   }`}
                 >
                   <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-secondary" : ""}`} />
@@ -431,7 +434,7 @@ export default function AdminPage() {
         </div>
 
         {/* Sidebar Footer Controls */}
-        <div className="pt-4 border-t border-white/10 space-y-2 mt-4">
+        <div className="pt-4 border-t border-border/70 space-y-2 mt-4">
           <button
             type="button"
             onClick={() => {
@@ -441,11 +444,11 @@ export default function AdminPage() {
               }
             }}
             title="Refresh Database Data"
-            className={`w-full flex items-center justify-center gap-2 rounded-xl border border-white/20 py-2 text-[0.7rem] text-champagne hover:bg-white/10 transition cursor-pointer ${
+            className={`w-full flex items-center justify-center gap-2 rounded-xl border border-border/80 bg-white/60 py-2 text-[0.7rem] text-ink/80 hover:text-primary hover:bg-primary/5 hover:border-primary/40 transition cursor-pointer font-medium shadow-2xs ${
               sidebarCollapsed ? "px-0" : ""
             }`}
           >
-            <RotateCcw className="h-3.5 w-3.5 shrink-0" />
+            <RotateCcw className="h-3.5 w-3.5 shrink-0 text-primary" />
             {!sidebarCollapsed && <span>Refresh Database Data</span>}
           </button>
 
@@ -453,7 +456,7 @@ export default function AdminPage() {
             type="button"
             onClick={logout}
             title={`Sign Out (${user.username})`}
-            className={`w-full flex items-center justify-center gap-2 rounded-xl bg-destructive/20 border border-destructive/30 py-2 text-[0.7rem] text-destructive-foreground hover:bg-destructive/40 transition cursor-pointer ${
+            className={`w-full flex items-center justify-center gap-2 rounded-xl bg-destructive/10 border border-destructive/25 py-2 text-[0.7rem] text-destructive hover:bg-destructive/20 transition cursor-pointer font-semibold ${
               sidebarCollapsed ? "px-0" : ""
             }`}
           >
@@ -512,6 +515,10 @@ export default function AdminPage() {
               <HeroEditorModule site={site} showSaved={showSaved} />
             )}
 
+            {activeTab === "home-story" && (
+              <HomeStoryEditorModule site={site} showSaved={showSaved} />
+            )}
+
             {activeTab === "about" && (
               <AboutEditorModule site={site} showSaved={showSaved} />
             )}
@@ -560,6 +567,7 @@ export default function AdminPage() {
 function OverviewModule({ site, setActiveTab, showSaved }) {
   const cards = [
     { label: "Client Inquiries", value: site.messages?.length || 0, tab: "contact-us", icon: PhoneCall },
+    { label: "Story & Philosophy", value: "Dynamic", tab: "home-story", icon: Sparkles },
     { label: "Active Services", value: site.services?.length || 0, tab: "services", icon: Briefcase },
     { label: "Portfolio Projects", value: site.portfolio?.length || 0, tab: "portfolio", icon: ImageIcon },
     { label: "Gallery Photos", value: site.gallery?.length || 0, tab: "gallery", icon: ImageIcon },
@@ -2070,6 +2078,574 @@ function HeroEditorModule({ site, showSaved }) {
 }
 
 // -------------------------------------------------------------
+// MODULE 4B: Home Page "Our Story & Philosophy" Dynamic Editor
+// -------------------------------------------------------------
+function HomeStoryEditorModule({ site, showSaved }) {
+  const [subTab, setSubTab] = useState("header"); // "header" | "visual" | "features" | "story" | "pillars" | "cta"
+  const [formData, setFormData] = useState(() => ({
+    eyebrow: site.homeStory?.eyebrow || "Our Story & Philosophy",
+    title: site.homeStory?.title || site.about?.homepageHeading || "A Pune Studio Devoted to Weddings That Feel Personal",
+    subtitle:
+      site.homeStory?.subtitle ||
+      "Where real emotions meet beautiful design. We create unforgettable weddings made specially for you.",
+    badge: site.homeStory?.badge || "Since 2018 • Warje, Pune",
+    quote: site.homeStory?.quote || '"Every love story deserves a stage as breathtaking as the journey itself."',
+    quoteAuthor: site.homeStory?.quoteAuthor || "— Ashish Wankhede, Founder",
+    image: site.homeStory?.image || "/images/hero-1.jpg",
+    feature1Title: site.homeStory?.feature1Title || "Pan-India Destination",
+    feature1Text: site.homeStory?.feature1Text || "From Udaipur palatial courtyards to Goa beachside mandaps.",
+    feature2Title: site.homeStory?.feature2Title || "Zero Template Policy",
+    feature2Text:
+      site.homeStory?.feature2Text ||
+      "Every color theme, flower setup, and schedule is made specially for you.",
+    storyHeading: site.homeStory?.storyHeading || "The Confianza Story",
+    storyText:
+      site.homeStory?.storyText ||
+      site.about?.homepageStory ||
+      "Confianza began in 2018 with one belief — a wedding should sound like the couple, not like a catalogue. What started as a two-person decor team in Warje is now a full-service house planning, designing and executing weddings across India.",
+    missionLabel: site.homeStory?.missionLabel || "Our Mission",
+    missionText:
+      site.homeStory?.missionText ||
+      site.about?.mission ||
+      "To take the weight of planning off a family's shoulders and hand back a celebration they can be fully present for.",
+    visionLabel: site.homeStory?.visionLabel || "Our Vision",
+    visionText:
+      site.homeStory?.visionText ||
+      site.about?.vision ||
+      "To be the most trusted and admired name in personalised luxury weddings across Maharashtra and every landmark destination we travel to.",
+    pillarsHeading: site.homeStory?.pillarsHeading || "Our Three Pillars of Excellence",
+    pillars:
+      Array.isArray(site.homeStory?.pillars) && site.homeStory.pillars.length > 0
+        ? site.homeStory.pillars
+        : Array.isArray(site.about?.values) && site.about.values.length > 0
+        ? site.about.values
+        : [
+            {
+              title: "Authentic Heritage",
+              text: "Respect for sacred Maharashtrian, Marwari, and pan-Indian rituals without superficial modern shortcuts.",
+            },
+            {
+              title: "Calm Execution",
+              text: "Direct founder oversight on-ground ensuring flawless timing with zero last-minute panic.",
+            },
+            {
+              title: "Uncompromising Aesthetic",
+              text: "Spatial styling, royal chandeliers, and imported floral installations tailored exclusively for you.",
+            },
+          ],
+    ctaLabel: site.homeStory?.ctaLabel || "Learn More About Us & Our Team",
+    ctaLink: site.homeStory?.ctaLink || "/about",
+  }));
+
+  // Sync when site context refreshes
+  useEffect(() => {
+    if (site.homeStory) {
+      setFormData((prev) => ({
+        ...prev,
+        ...site.homeStory,
+        pillars:
+          Array.isArray(site.homeStory.pillars) && site.homeStory.pillars.length > 0
+            ? site.homeStory.pillars
+            : prev.pillars,
+      }));
+    }
+  }, [site.homeStory]);
+
+  const handleSave = async (e) => {
+    if (e) e.preventDefault();
+    try {
+      await site.update("homeStory", formData);
+      showSaved("Our Story & Philosophy section updated on MongoDB Atlas successfully!");
+    } catch (err) {
+      console.error("Failed to save home story:", err);
+    }
+  };
+
+  const updateField = (field, val) => {
+    setFormData((prev) => ({ ...prev, [field]: val }));
+  };
+
+  // Pillar management helpers
+  const handlePillarChange = (index, key, val) => {
+    const updated = [...(formData.pillars || [])];
+    updated[index] = { ...updated[index], [key]: val };
+    setFormData((prev) => ({ ...prev, pillars: updated }));
+  };
+
+  const handleAddPillar = () => {
+    const newPillar = {
+      title: "New Excellence Pillar",
+      text: "Describe the custom value, tradition, or service standard Confianza delivers for this celebration.",
+    };
+    setFormData((prev) => ({
+      ...prev,
+      pillars: [...(prev.pillars || []), newPillar],
+    }));
+  };
+
+  const handleDeletePillar = (index) => {
+    const updated = [...(formData.pillars || [])];
+    updated.splice(index, 1);
+    setFormData((prev) => ({ ...prev, pillars: updated }));
+  };
+
+  const SUB_TABS = [
+    { id: "header", label: "Section Header" },
+    { id: "visual", label: "Visual Showcase & Quote" },
+    { id: "features", label: "Quick Feature Badges" },
+    { id: "story", label: "Story & Mission/Vision" },
+    { id: "pillars", label: `Pillars of Excellence (${formData.pillars?.length || 0})` },
+    { id: "cta", label: "CTA Button" },
+  ];
+
+  return (
+    <div className="space-y-6 animate-fade-in">
+      <div className="glass-card rounded-3xl p-6 sm:p-8 border border-border space-y-6">
+        {/* Module Header Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-border/60">
+          <div>
+            <span className="text-[0.68rem] uppercase tracking-[0.25em] text-secondary font-bold block">
+              Homepage Content Module
+            </span>
+            <h3 className="font-display text-2xl text-ink font-bold mt-1">
+              Our Story &amp; Philosophy Manager
+            </h3>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Live dynamic editor for the Homepage brand story, founder quote, visual showcase photo, mission &amp; vision statements, and pillars of excellence.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5">
+            <ModuleRefreshButton site={site} showSaved={showSaved} label="Refresh Story Data" />
+            <button
+              type="button"
+              onClick={handleSave}
+              className="btn-luxe gradient-royal text-primary-foreground text-xs py-2.5 px-6 flex items-center gap-2 cursor-pointer shadow-luxe font-semibold"
+            >
+              <Save className="h-4 w-4 text-secondary" />
+              <span>Save Changes to Database</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Sub-Tabs Navigation */}
+        <div className="flex flex-wrap gap-2 border-b border-border/60 pb-3">
+          {SUB_TABS.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setSubTab(tab.id)}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold transition cursor-pointer ${
+                subTab === tab.id
+                  ? "gradient-royal text-white shadow-xs"
+                  : "bg-card border border-border/70 text-ink/75 hover:bg-black/5 hover:text-primary"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Form Body based on Sub-Tab */}
+        <div className="space-y-6">
+          {/* TAB 1: SECTION HEADER */}
+          {subTab === "header" && (
+            <div className="space-y-4 max-w-3xl">
+              <div>
+                <label className="text-xs font-bold text-ink block mb-1">
+                  Section Eyebrow Badge
+                </label>
+                <input
+                  type="text"
+                  value={formData.eyebrow}
+                  onChange={(e) => updateField("eyebrow", e.target.value)}
+                  placeholder="e.g. Our Story & Philosophy"
+                  className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-xs text-ink focus:border-secondary focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-ink block mb-1">
+                  Main Section Headline
+                </label>
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => updateField("title", e.target.value)}
+                  placeholder="e.g. A Pune Studio Devoted to Weddings That Feel Personal"
+                  className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-xs text-ink focus:border-secondary focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-ink block mb-1">
+                  Section Subtitle / Supporting Intro
+                </label>
+                <textarea
+                  rows={3}
+                  value={formData.subtitle}
+                  onChange={(e) => updateField("subtitle", e.target.value)}
+                  placeholder="e.g. Where real emotions meet beautiful design. We create unforgettable weddings made specially for you."
+                  className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-xs text-ink focus:border-secondary focus:outline-none"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* TAB 2: VISUAL SHOWCASE & QUOTE */}
+          {subTab === "visual" && (
+            <div className="grid lg:grid-cols-12 gap-6 items-start">
+              <div className="lg:col-span-7 space-y-4">
+                <div>
+                  <label className="text-xs font-bold text-ink block mb-1.5">
+                    Showcase Photo (Left Card)
+                  </label>
+                  <ImageUploadField
+                    label="Upload Showcase Image (Cloudinary or Select Preset)"
+                    value={formData.image}
+                    onChange={(url) => updateField("image", url)}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-ink block mb-1">
+                    Establishment Badge (Top of Card)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.badge}
+                    onChange={(e) => updateField("badge", e.target.value)}
+                    placeholder="e.g. Since 2018 • Warje, Pune"
+                    className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-xs text-ink focus:border-secondary focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-ink block mb-1">
+                    Founder Quote
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={formData.quote}
+                    onChange={(e) => updateField("quote", e.target.value)}
+                    placeholder='e.g. "Every love story deserves a stage as breathtaking as the journey itself."'
+                    className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-xs text-ink focus:border-secondary focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-ink block mb-1">
+                    Quote Attribution / Author
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.quoteAuthor}
+                    onChange={(e) => updateField("quoteAuthor", e.target.value)}
+                    placeholder="e.g. — Ashish Wankhede, Founder"
+                    className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-xs text-ink focus:border-secondary focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Preview Box */}
+              <div className="lg:col-span-5 space-y-3">
+                <span className="text-xs font-bold uppercase tracking-wider text-ink flex items-center gap-1.5">
+                  <Eye className="h-4 w-4 text-secondary" />
+                  <span>Card Live Preview</span>
+                </span>
+                <div className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-md">
+                  <div className="h-48 w-full overflow-hidden bg-black/10">
+                    <img
+                      src={formData.image || "/images/hero-1.jpg"}
+                      alt="Preview"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <div className="p-4 bg-card border-t border-border/60">
+                    <span className="text-[0.62rem] uppercase tracking-[0.22em] text-secondary font-bold block mb-1">
+                      {formData.badge}
+                    </span>
+                    <p className="font-display text-sm text-ink italic leading-snug">
+                      {formData.quote}
+                    </p>
+                    <p className="mt-2 text-xs font-semibold text-primary">
+                      {formData.quoteAuthor}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: QUICK FEATURE BADGES */}
+          {subTab === "features" && (
+            <div className="grid md:grid-cols-2 gap-6 max-w-4xl">
+              {/* Feature 1 */}
+              <div className="p-5 rounded-2xl bg-card border border-border/80 space-y-4 shadow-2xs">
+                <div className="flex items-center gap-2 pb-2 border-b border-border/50">
+                  <Compass className="h-5 w-5 text-primary" />
+                  <span className="text-xs font-bold text-ink uppercase tracking-wider">
+                    Feature Badge 1 (Left)
+                  </span>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-ink block mb-1">
+                    Badge Title
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.feature1Title}
+                    onChange={(e) => updateField("feature1Title", e.target.value)}
+                    placeholder="e.g. Pan-India Destination"
+                    className="w-full rounded-xl border border-border bg-background px-4 py-2 text-xs text-ink focus:border-secondary focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-ink block mb-1">
+                    Badge Description
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={formData.feature1Text}
+                    onChange={(e) => updateField("feature1Text", e.target.value)}
+                    placeholder="e.g. From Udaipur palatial courtyards to Goa beachside mandaps."
+                    className="w-full rounded-xl border border-border bg-background px-4 py-2 text-xs text-ink focus:border-secondary focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Feature 2 */}
+              <div className="p-5 rounded-2xl bg-card border border-border/80 space-y-4 shadow-2xs">
+                <div className="flex items-center gap-2 pb-2 border-b border-border/50">
+                  <HeartHandshake className="h-5 w-5 text-secondary" />
+                  <span className="text-xs font-bold text-ink uppercase tracking-wider">
+                    Feature Badge 2 (Right)
+                  </span>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-ink block mb-1">
+                    Badge Title
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.feature2Title}
+                    onChange={(e) => updateField("feature2Title", e.target.value)}
+                    placeholder="e.g. Zero Template Policy"
+                    className="w-full rounded-xl border border-border bg-background px-4 py-2 text-xs text-ink focus:border-secondary focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-ink block mb-1">
+                    Badge Description
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={formData.feature2Text}
+                    onChange={(e) => updateField("feature2Text", e.target.value)}
+                    placeholder="e.g. Every color theme, flower setup, and schedule is made specially for you."
+                    className="w-full rounded-xl border border-border bg-background px-4 py-2 text-xs text-ink focus:border-secondary focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: THE STORY, MISSION & VISION */}
+          {subTab === "story" && (
+            <div className="space-y-5 max-w-3xl">
+              <div>
+                <label className="text-xs font-bold text-ink block mb-1">
+                  Story Card Heading
+                </label>
+                <input
+                  type="text"
+                  value={formData.storyHeading}
+                  onChange={(e) => updateField("storyHeading", e.target.value)}
+                  placeholder="e.g. The Confianza Story"
+                  className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-xs text-ink focus:border-secondary focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-ink block mb-1">
+                  Full Story Paragraph
+                </label>
+                <textarea
+                  rows={4}
+                  value={formData.storyText}
+                  onChange={(e) => updateField("storyText", e.target.value)}
+                  placeholder="Write the founding story and philosophy here..."
+                  className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-xs text-ink focus:border-secondary focus:outline-none leading-relaxed"
+                />
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-4 pt-2">
+                <div className="p-4 rounded-2xl bg-card border border-border/80 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-primary">Mission Section</label>
+                  </div>
+                  <input
+                    type="text"
+                    value={formData.missionLabel}
+                    onChange={(e) => updateField("missionLabel", e.target.value)}
+                    placeholder="Mission Label (e.g. Our Mission)"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-ink focus:outline-none"
+                  />
+                  <textarea
+                    rows={3}
+                    value={formData.missionText}
+                    onChange={(e) => updateField("missionText", e.target.value)}
+                    placeholder="Mission description statement..."
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-ink focus:outline-none"
+                  />
+                </div>
+
+                <div className="p-4 rounded-2xl bg-card border border-border/80 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-secondary">Vision Section</label>
+                  </div>
+                  <input
+                    type="text"
+                    value={formData.visionLabel}
+                    onChange={(e) => updateField("visionLabel", e.target.value)}
+                    placeholder="Vision Label (e.g. Our Vision)"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-ink focus:outline-none"
+                  />
+                  <textarea
+                    rows={3}
+                    value={formData.visionText}
+                    onChange={(e) => updateField("visionText", e.target.value)}
+                    placeholder="Vision description statement..."
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-ink focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: THREE PILLARS OF EXCELLENCE */}
+          {subTab === "pillars" && (
+            <div className="space-y-5 max-w-4xl">
+              <div>
+                <label className="text-xs font-bold text-ink block mb-1">
+                  Pillars Section Heading
+                </label>
+                <input
+                  type="text"
+                  value={formData.pillarsHeading}
+                  onChange={(e) => updateField("pillarsHeading", e.target.value)}
+                  placeholder="e.g. Our Three Pillars of Excellence"
+                  className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-xs text-ink focus:border-secondary focus:outline-none max-w-xl"
+                />
+              </div>
+
+              <div className="flex items-center justify-between pt-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-ink">
+                  Excellence Pillars List
+                </span>
+                <button
+                  type="button"
+                  onClick={handleAddPillar}
+                  className="btn-luxe gradient-gold text-ink text-xs py-1.5 px-4 flex items-center gap-1.5 cursor-pointer font-bold rounded-xl"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  <span>Add New Pillar</span>
+                </button>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {(formData.pillars || []).map((pillar, idx) => (
+                  <div
+                    key={idx}
+                    className="p-4 rounded-2xl bg-card border border-border/80 space-y-3 relative shadow-2xs group"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[0.68rem] uppercase font-bold text-secondary tracking-wider">
+                        Pillar #{idx + 1}
+                      </span>
+                      {formData.pillars.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleDeletePillar(idx)}
+                          className="p-1 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition cursor-pointer"
+                          title="Delete Pillar"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="text-[0.68rem] text-muted-foreground block mb-0.5">
+                        Title
+                      </label>
+                      <input
+                        type="text"
+                        value={pillar.title || ""}
+                        onChange={(e) => handlePillarChange(idx, "title", e.target.value)}
+                        placeholder="Pillar Title"
+                        className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-bold text-ink focus:outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[0.68rem] text-muted-foreground block mb-0.5">
+                        Description
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={pillar.text || ""}
+                        onChange={(e) => handlePillarChange(idx, "text", e.target.value)}
+                        placeholder="Pillar Description"
+                        className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-ink/80 focus:outline-none leading-relaxed"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 6: CTA BUTTON */}
+          {subTab === "cta" && (
+            <div className="max-w-xl space-y-4">
+              <div>
+                <label className="text-xs font-bold text-ink block mb-1">
+                  CTA Button Label
+                </label>
+                <input
+                  type="text"
+                  value={formData.ctaLabel}
+                  onChange={(e) => updateField("ctaLabel", e.target.value)}
+                  placeholder="e.g. Learn More About Us & Our Team"
+                  className="w-full rounded-xl border border-border bg-card px-4 py-2.5 text-xs text-ink focus:border-secondary focus:outline-none"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Bottom Save Action */}
+        <div className="pt-4 border-t border-border/60 flex justify-end">
+          <button
+            type="button"
+            onClick={handleSave}
+            className="btn-luxe gradient-royal text-primary-foreground text-xs py-3 px-8 flex items-center gap-2 cursor-pointer shadow-luxe font-bold"
+          >
+            <Save className="h-4 w-4 text-secondary" />
+            <span>Save All Story &amp; Philosophy Changes</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// -------------------------------------------------------------
 // -------------------------------------------------------------
 // MODULE 5: About Editor (Comprehensive Full CRUD)
 // -------------------------------------------------------------
@@ -2312,6 +2888,7 @@ function AboutEditorModule({ site, showSaved }) {
 
   const subTabs = [
     { id: "hero-banner", label: "About Page Header Banner" },
+    { id: "brand-identity", label: "Brand Identity Image" },
     { id: "founder", label: "Founder's Vision & Address" },
     { id: "team", label: `Team Members (${teamMembers.length})` },
     { id: "vision-mission", label: "Vision & Mission" },
@@ -3686,6 +4263,85 @@ function AboutEditorModule({ site, showSaved }) {
           </div>
         </div>
       )}
+
+      {/* BRAND IDENTITY IMAGE SUB-TAB */}
+      {subTab === "brand-identity" && (
+        <div className="space-y-6 animate-fade-in">
+          <div className="flex justify-between items-center">
+            <div>
+              <h4 className="font-display text-lg text-ink">Brand Identity Image</h4>
+              <p className="text-xs text-muted-foreground">
+                Manage the single full-width Brand Identity showcase image displayed on the About Us page (/about).
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-12 items-start">
+            {/* Form Column */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                saveAbout(aboutData);
+              }}
+              className="lg:col-span-5 space-y-4 rounded-3xl border border-border bg-card p-6 shadow-xs"
+            >
+              <ImageUploadField
+                label="Brand Identity Image"
+                value={aboutData.brandImage || aboutData.brandIdentityImage || "/images/hero-1.jpg"}
+                onChange={(url) =>
+                  setAboutData({
+                    ...aboutData,
+                    brandImage: url,
+                    brandIdentityImage: url,
+                  })
+                }
+              />
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="btn-luxe gradient-royal w-full text-primary-foreground text-xs py-3 rounded-xl shadow-md flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin text-secondary" />
+                      <span>Saving Brand Image...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 text-secondary" />
+                      <span>Save Brand Identity Image</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+
+            {/* Live Preview Column */}
+            <div className="lg:col-span-7 space-y-3 sticky top-6">
+              <div className="flex items-center justify-between px-2">
+                <span className="text-[0.68rem] uppercase tracking-[0.25em] text-primary font-bold flex items-center gap-1.5">
+                  <Eye className="h-3.5 w-3.5 text-secondary" /> Live About Page Image Preview
+                </span>
+                <span className="text-[0.62rem] text-muted-foreground font-mono">
+                  Exact Frontend Replica
+                </span>
+              </div>
+
+              <div className="rounded-2xl sm:rounded-3xl border border-border/80 shadow-luxe bg-card overflow-hidden">
+                <div className="relative w-full h-[360px] sm:h-[480px] overflow-hidden">
+                  <img
+                    src={aboutData.brandImage || aboutData.brandIdentityImage || "/images/hero-1.jpg"}
+                    alt="Brand Identity Preview"
+                    className="w-full h-full object-cover object-center transition-all duration-500"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -3694,178 +4350,262 @@ function AboutEditorModule({ site, showSaved }) {
 // MODULE 6: Services & Packages Editor (6 Sub-Tabs)
 // -------------------------------------------------------------
 function ServicesEditorModule({ site, showSaved }) {
-  const [subTab, setSubTab] = useState("services"); // "services" | "categories" | "packages" | "ceremonies" | "stationery" | "cta"
+  const [subTab, setSubTab] = useState("header"); // "header" | "typeOfServices" | "typeOfEvents" | "packages" | "stationery" | "cta" | "ceremonies"
 
-  // 1. Services State
-  const [services, setServices] = useState(site.services || []);
-  const [editingService, setEditingService] = useState(null);
+  // 0. Services Page Hero Header Banner State
+  const defaultServicesHeader = {
+    badge: "Our Offerings",
+    title: "Complete Wedding & Event Services",
+    subtitle:
+      "Explore our complete range of wedding planning services, custom decor, destination management, and rituals.",
+    bgImage:
+      "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=2000&q=80",
+  };
+
+  const [headerForm, setHeaderForm] = useState({
+    ...defaultServicesHeader,
+    ...(site.servicesHeader || {}),
+  });
+
+  const [isSavingHeader, setIsSavingHeader] = useState(false);
 
   useEffect(() => {
-    if (Array.isArray(site.services)) {
-      const sanitized = site.services.map((s, idx) => ({
-        ...s,
-        category: s.category || (categories && categories[idx % categories.length]?.name) || "Signature Planning & Direction",
-      }));
-      setServices(sanitized);
-    }
-  }, [site.services]);
-
-  const saveServiceList = async (newList) => {
-    setServices(newList);
-    try {
-      await site.update("services", newList);
-      showSaved("Services catalog saved successfully in MongoDB!");
-    } catch (err) {
-      console.error("Failed to save services:", err);
-    }
-  };
-
-  const deleteService = (id) => {
-    if (window.confirm("Are you sure you want to delete this service?")) {
-      saveServiceList(services.filter((s) => s.id !== id && s._id !== id));
-    }
-  };
-
-  const saveServiceModal = (e) => {
-    e.preventDefault();
-    const parsedFeatures = Array.isArray(editingService.features)
-      ? editingService.features
-      : typeof editingService.features === "string"
-      ? editingService.features
-          .split("\n")
-          .map((f) => f.trim())
-          .filter(Boolean)
-      : [];
-
-    const defaultCatName = categories[0]?.name || categories[0]?.label || categories[0]?.id || "Signature Planning & Direction";
-    const serviceData = {
-      ...editingService,
-      category: editingService.category || defaultCatName,
-      badge: editingService.badge?.trim() || "Specialized Craft",
-      features: parsedFeatures,
-    };
-
-    if (editingService.isNew) {
-      const newService = {
-        ...serviceData,
-        id: editingService.id || `service-${Date.now()}`,
-      };
-      delete newService.isNew;
-      saveServiceList([...services, newService]);
-    } else {
-      const targetId = editingService.id;
-      const targetMongoId = editingService._id;
-      const updatedList = services.map((s) => {
-        const isMatch = Boolean(
-          (targetId && s.id === targetId) ||
-          (targetMongoId && (s._id === targetMongoId || s.id === targetMongoId)) ||
-          (targetId && s._id === targetId)
-        );
-        if (isMatch) {
-          const clean = { ...serviceData };
-          delete clean.isNew;
-          return clean;
-        }
-        return s;
+    if (site.servicesHeader) {
+      setHeaderForm({
+        ...defaultServicesHeader,
+        ...site.servicesHeader,
       });
-      saveServiceList(updatedList);
     }
-    setEditingService(null);
+  }, [site.servicesHeader]);
+
+  const saveHeaderSettings = async (e) => {
+    e.preventDefault();
+    setIsSavingHeader(true);
+    try {
+      await site.update("servicesHeader", headerForm);
+      showSaved("Services Page Header updated successfully in database!");
+    } catch (err) {
+      console.error("Failed to save Services Page Header:", err);
+    } finally {
+      setIsSavingHeader(false);
+    }
   };
 
-  // 2. Categories State
-  const defaultCategories = [
-    { id: "planning", name: "Signature Planning & Direction", label: "Signature Planning & Direction", slug: "planning", order: 1 },
-    { id: "decor", name: "Mandap & Spatial Decor", label: "Mandap & Spatial Decor", slug: "decor", order: 2 },
-    { id: "hospitality", name: "Royal Hospitality & Shadows", label: "Royal Hospitality & Shadows", slug: "hospitality", order: 3 },
-    { id: "rituals", name: "Rituals, Artists & F&B", label: "Rituals, Artists & F&B", slug: "rituals", order: 4 },
+  // 1. Type of Services State
+  const defaultTypeOfServices = [
+    {
+      id: "tos-1",
+      title: "Event Management",
+      description:
+        "Complete on-ground execution, timeline monitoring, vendor coordination, and stage queue direction for seamless event flow.",
+      order: 1,
+    },
+    {
+      id: "tos-2",
+      title: "Event Planning",
+      description:
+        "Strategic concept design, comprehensive budgeting, master timeline planning, and milestone tracking.",
+      order: 2,
+    },
+    {
+      id: "tos-3",
+      title: "Decor",
+      description:
+        "Custom 3D spatial design, architectural mandaps, floral installations, thematic stages, and ambient lighting.",
+      order: 3,
+    },
+    {
+      id: "tos-4",
+      title: "Venue",
+      description:
+        "Curated palace, resort, and banquet sourcing with contract negotiation and site layout mapping.",
+      order: 4,
+    },
+    {
+      id: "tos-5",
+      title: "Photograph/Videography",
+      description:
+        "Cinematic wedding films, candid photography, drone coverage, and instant social media edits.",
+      order: 5,
+    },
+    {
+      id: "tos-6",
+      title: "Catering",
+      description:
+        "Gourmet multi-cuisine menu curation, live food stations, regional delicacies, and royal presentation.",
+      order: 6,
+    },
+    {
+      id: "tos-7",
+      title: "Outfits",
+      description:
+        "Designer bridal styling, groom couture curation, family wardrobe alignment, and personal fitting assistance.",
+      order: 7,
+    },
   ];
 
-  const [categories, setCategories] = useState(
-    Array.isArray(site.serviceCategories) && site.serviceCategories.length > 0
-      ? site.serviceCategories
-      : defaultCategories
+  const defaultTypeOfEvents = [
+    {
+      id: "toe-1",
+      title: "Wedding",
+      description:
+        "Grand destination weddings, traditional royal ceremonies, intimate beach weddings, and multi-day celebrations.",
+      order: 1,
+    },
+    {
+      id: "toe-2",
+      title: "Social",
+      description:
+        "Milestone anniversaries, birthday galas, engagement soirees, and baby showers.",
+      order: 2,
+    },
+    {
+      id: "toe-3",
+      title: "Sports",
+      description:
+        "Corporate sports leagues, celebrity matches, tournament opening ceremonies, and athlete hospitality.",
+      order: 3,
+    },
+    {
+      id: "toe-4",
+      title: "Concert",
+      description:
+        "Live music festivals, celebrity artist performances, stage acoustic engineering, and crowd management.",
+      order: 4,
+    },
+    {
+      id: "toe-5",
+      title: "Corporate",
+      description:
+        "Annual conferences, product launches, leadership summits, and award ceremonies.",
+      order: 5,
+    },
+    {
+      id: "toe-6",
+      title: "Social Gathering",
+      description:
+        "Exclusive networking cocktail mixers, community festivals, family reunions, and festive soirees.",
+      order: 6,
+    },
+  ];
+
+  const [typeOfServicesList, setTypeOfServicesList] = useState(
+    Array.isArray(site.typeOfServices) && site.typeOfServices.length > 0
+      ? site.typeOfServices
+      : defaultTypeOfServices
   );
-  const [editingCat, setEditingCat] = useState(null);
+  const [editingServiceItem, setEditingServiceItem] = useState(null);
 
   useEffect(() => {
-    if (Array.isArray(site.serviceCategories) && site.serviceCategories.length > 0) {
-      setCategories(site.serviceCategories);
+    if (Array.isArray(site.typeOfServices) && site.typeOfServices.length > 0) {
+      setTypeOfServicesList(site.typeOfServices);
     }
-  }, [site.serviceCategories]);
+  }, [site.typeOfServices]);
 
-  const saveCategoryList = async (newList) => {
-    setCategories(newList);
+  const saveTypeOfServicesList = async (newList) => {
+    setTypeOfServicesList(newList);
     try {
-      await site.update("serviceCategories", newList);
-      showSaved("Service categories updated successfully in MongoDB!");
+      await site.update("typeOfServices", newList);
+      showSaved("Type of Services saved successfully in database!");
     } catch (err) {
-      console.error("Failed to save service categories:", err);
+      console.error("Failed to save Type of Services:", err);
     }
   };
 
-  const deleteCategory = (id) => {
-    if (window.confirm("Are you sure you want to delete this category?")) {
-      saveCategoryList(categories.filter((c) => c.id !== id && c.name !== id && c.label !== id));
+  const deleteServiceItem = (id) => {
+    if (window.confirm("Are you sure you want to delete this service type?")) {
+      saveTypeOfServicesList(typeOfServicesList.filter((s) => s.id !== id && s._id !== id));
     }
   };
 
-  const toggleCategoryFront = (catId) => {
-    const updated = limitFrontSelection(categories, catId, 3);
-    saveCategoryList(updated);
-  };
-
-  const moveCategory = (idx, direction) => {
+  const moveServiceItem = (idx, direction) => {
     const targetIdx = idx + direction;
-    if (targetIdx < 0 || targetIdx >= categories.length) return;
-    const updated = [...categories];
+    if (targetIdx < 0 || targetIdx >= typeOfServicesList.length) return;
+    const updated = [...typeOfServicesList];
     const temp = updated[idx];
     updated[idx] = updated[targetIdx];
     updated[targetIdx] = temp;
-    saveCategoryList(updated);
+    saveTypeOfServicesList(updated);
   };
 
-  const saveCategoryModal = (e) => {
+  const saveServiceItemModal = (e) => {
     e.preventDefault();
-    const cleanName = (editingCat.name || editingCat.label || "").trim();
-    if (!cleanName) return;
-
-    const autoSlug = cleanName
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-
-    const slug = editingCat.id || autoSlug || `cat-${Date.now()}`;
-
-    const catData = {
-      id: slug,
-      name: cleanName,
-      label: cleanName,
-      slug: autoSlug,
-      showInFront: Boolean(editingCat.showInFront),
-      order: editingCat.order || (editingCat.isNew ? categories.length + 1 : 1),
+    const itemData = {
+      id: editingServiceItem.id || `tos-${Date.now()}`,
+      title: (editingServiceItem.title || "").trim(),
+      description: (editingServiceItem.description || "").trim(),
+      order: editingServiceItem.order || (editingServiceItem.isNew ? typeOfServicesList.length + 1 : 1),
     };
 
-    let updated;
-    if (editingCat.isNew) {
-      updated = [...categories, catData];
+    if (editingServiceItem.isNew) {
+      saveTypeOfServicesList([...typeOfServicesList, itemData]);
     } else {
-      const origName = editingCat._origName || editingCat.name || editingCat.label;
-      const targetId = editingCat.id;
-      updated = categories.map((c) => {
-        if ((targetId && c.id === targetId) || (origName && (c.name === origName || c.label === origName))) {
-          return catData;
-        }
-        return c;
-      });
+      const targetId = editingServiceItem.id || editingServiceItem._id;
+      saveTypeOfServicesList(
+        typeOfServicesList.map((s) => (s.id === targetId || s._id === targetId ? itemData : s))
+      );
     }
+    setEditingServiceItem(null);
+  };
 
-    if (catData.showInFront) {
-      updated = enforceMaxFrontCategories(updated, catData.id, 3);
+  // 2. Type of Events State
+  const [typeOfEventsList, setTypeOfEventsList] = useState(
+    Array.isArray(site.typeOfEvents) && site.typeOfEvents.length > 0
+      ? site.typeOfEvents
+      : defaultTypeOfEvents
+  );
+  const [editingEventItem, setEditingEventItem] = useState(null);
+
+  useEffect(() => {
+    if (Array.isArray(site.typeOfEvents) && site.typeOfEvents.length > 0) {
+      setTypeOfEventsList(site.typeOfEvents);
     }
+  }, [site.typeOfEvents]);
 
-    saveCategoryList(updated);
-    setEditingCat(null);
+  const saveTypeOfEventsList = async (newList) => {
+    setTypeOfEventsList(newList);
+    try {
+      await site.update("typeOfEvents", newList);
+      showSaved("Type of Events saved successfully in database!");
+    } catch (err) {
+      console.error("Failed to save Type of Events:", err);
+    }
+  };
+
+  const deleteEventItem = (id) => {
+    if (window.confirm("Are you sure you want to delete this event type?")) {
+      saveTypeOfEventsList(typeOfEventsList.filter((e) => e.id !== id && e._id !== id));
+    }
+  };
+
+  const moveEventItem = (idx, direction) => {
+    const targetIdx = idx + direction;
+    if (targetIdx < 0 || targetIdx >= typeOfEventsList.length) return;
+    const updated = [...typeOfEventsList];
+    const temp = updated[idx];
+    updated[idx] = updated[targetIdx];
+    updated[targetIdx] = temp;
+    saveTypeOfEventsList(updated);
+  };
+
+  const saveEventItemModal = (e) => {
+    e.preventDefault();
+    const itemData = {
+      id: editingEventItem.id || `toe-${Date.now()}`,
+      title: (editingEventItem.title || "").trim(),
+      description: (editingEventItem.description || "").trim(),
+      order: editingEventItem.order || (editingEventItem.isNew ? typeOfEventsList.length + 1 : 1),
+    };
+
+    if (editingEventItem.isNew) {
+      saveTypeOfEventsList([...typeOfEventsList, itemData]);
+    } else {
+      const targetId = editingEventItem.id || editingEventItem._id;
+      saveTypeOfEventsList(
+        typeOfEventsList.map((ev) => (ev.id === targetId || ev._id === targetId ? itemData : ev))
+      );
+    }
+    setEditingEventItem(null);
   };
 
   // 3. Packages State
@@ -4071,24 +4811,24 @@ function ServicesEditorModule({ site, showSaved }) {
 
   return (
     <div className="space-y-6">
-      {/* Header & 6 Sub-Tab Navigation Bar */}
+      {/* Header & Sub-Tab Navigation Bar */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-border pb-4">
         <div>
           <h3 className="font-display text-2xl text-ink">Services &amp; Packages Manager</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Full dynamic CRUD control over Services, Categories, Packages, Ceremonies, Stationery, and Consultation CTA.
+            Full dynamic CRUD control over Services Header, Type of Services, Type of Events, Packages, Stationery, and Consultation CTA.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
           <ModuleRefreshButton site={site} showSaved={showSaved} label="Refresh Services" />
-          {/* 6 Sub-Tab Pills */}
+          {/* Sub-Tab Pills */}
           <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-2xl bg-card border border-border shadow-xs">
           {[
-            { id: "services", label: `Services (${services.length})`, icon: Briefcase },
-            { id: "categories", label: `Categories (${categories.length})`, icon: Layers },
+            { id: "header", label: "Page Header", icon: Layers },
+            { id: "typeOfServices", label: `Type of Services (${typeOfServicesList.length})`, icon: Briefcase },
+            { id: "typeOfEvents", label: `Type of Events (${typeOfEventsList.length})`, icon: Calendar },
             { id: "packages", label: `Packages (${packages.length})`, icon: DollarSign },
-            { id: "ceremonies", label: `Ceremonies (${ceremonies.length})`, icon: Sparkles },
             { id: "stationery", label: `Stationery (${stationery.length})`, icon: Feather },
             { id: "cta", label: "Consultation CTA", icon: PhoneCall },
           ].map((tab) => {
@@ -4115,292 +4855,164 @@ function ServicesEditorModule({ site, showSaved }) {
       </div>
 
       {/* ------------------------------------------------------------- */}
-      {/* SUB-TAB 1: SERVICES CATALOG */}
+      {/* SUB-TAB 0: SERVICES PAGE HERO BANNER */}
       {/* ------------------------------------------------------------- */}
-      {subTab === "services" && (
+      {subTab === "header" && (
         <div className="space-y-6 animate-fade-in">
           <div className="flex justify-between items-center">
             <div>
-              <h4 className="font-display text-lg text-ink">Services Catalog ({services.length})</h4>
+              <h4 className="font-display text-lg text-ink">Services Page Hero Banner</h4>
               <p className="text-xs text-muted-foreground">
-                Services rendered under "What We Offer".
+                Customize the top hero banner displayed on the public Services page (/services).
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() =>
-                setEditingService({
-                  isNew: true,
-                  title: "",
-                  category: categories[0]?.name || categories[0]?.label || categories[0]?.id || "Signature Planning & Direction",
-                  badge: "Our Service",
-                  description: "",
-                  features: "",
-                  image: "",
-                })
-              }
-              className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-4"
-            >
-              <Plus className="h-4 w-4" />
-              <span>Add New Service</span>
-            </button>
           </div>
 
-          {services.length === 0 ? (
-            <div className="glass-card rounded-3xl p-12 text-center text-muted-foreground border border-border">
-              <Briefcase className="h-10 w-10 mx-auto text-muted-foreground/40 mb-3" />
-              <h4 className="font-display text-lg text-ink font-semibold">0 Services in Catalog</h4>
-              <p className="text-xs text-muted-foreground mt-1">
-                Click "Add New Service" above to add your first wedding planning discipline.
-              </p>
-            </div>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {services.map((s) => (
-                <div
-                  key={s.id || s._id}
-                  className="glass-card rounded-2xl p-4 border border-border flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="flex gap-3">
-                      {s.image ? (
-                        <img
-                          src={s.image}
-                          alt={s.title}
-                          className="h-16 w-16 rounded-xl object-cover shrink-0"
-                        />
-                      ) : (
-                        <div className="h-16 w-16 rounded-xl gradient-royal flex items-center justify-center text-primary-foreground shrink-0">
-                          <Sparkles className="h-6 w-6 text-secondary" />
-                        </div>
-                      )}
-                      <div className="overflow-hidden">
-                        <div className="flex items-center gap-1.5 mb-0.5">
-                          <span className="inline-block text-[0.62rem] font-semibold text-primary uppercase tracking-wider">
-                            {s.badge || "Specialized Craft"}
-                          </span>
-                          {s.category && (
-                            <span className="text-[0.6rem] px-1.5 py-0.2 rounded-md bg-secondary/15 text-secondary font-mono">
-                              {categories.find((c) => c.id === s.category || c.name === s.category || c.label === s.category)?.name ||
-                               categories.find((c) => c.id === s.category || c.name === s.category || c.label === s.category)?.label ||
-                               s.category}
-                            </span>
-                          )}
-                        </div>
-                        <h4 className="font-display text-base font-semibold text-ink truncate">{s.title}</h4>
-                        <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
-                          {s.description}
-                        </p>
-                      </div>
-                    </div>
-
-                    {Array.isArray(s.features) && s.features.length > 0 && (
-                      <div className="mt-3 pt-2.5 border-t border-border/50 space-y-1">
-                        <span className="text-[0.65rem] font-bold uppercase tracking-wider text-muted-foreground block">
-                          Included Highlights ({s.features.length}):
-                        </span>
-                        <ul className="space-y-1 text-xs text-foreground/80">
-                          {s.features.map((feat, fIdx) => (
-                            <li key={fIdx} className="flex items-center gap-1.5 truncate">
-                              <CheckCircle className="h-3 w-3 text-secondary shrink-0" />
-                              <span className="truncate">{feat}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-border flex justify-end gap-2">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setEditingService({
-                          ...s,
-                          isNew: false,
-                          features: Array.isArray(s.features) ? s.features.join("\n") : (s.features || ""),
-                        })
-                      }
-                      className="p-1.5 rounded-lg border border-border hover:bg-muted text-xs cursor-pointer"
-                      title="Edit Service"
-                    >
-                      <Edit2 className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => deleteService(s.id || s._id)}
-                      className="p-1.5 rounded-lg border border-border hover:bg-destructive/10 text-destructive text-xs cursor-pointer"
-                      title="Delete Service"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {editingService && (
-            <div className="fixed inset-0 z-100 flex items-center justify-center bg-[rgba(37,27,49,0.38)] backdrop-blur-md p-4 animate-fade-in">
-              <form
-                onSubmit={saveServiceModal}
-                className="modal-dialog-luxury bg-[#FFFDFB] max-w-lg w-full rounded-3xl p-6 sm:p-8 space-y-4 max-h-[88vh] overflow-y-auto no-scrollbar border border-[#E8E2EE] shadow-luxe"
-              >
-                <div className="flex justify-between items-center border-b border-[#E8E2EE] pb-3.5">
-                  <h4 className="font-display text-xl text-[#2B2138] font-bold">
-                    {editingService.isNew ? "Add New Service" : "Edit Service"}
-                  </h4>
-                  <button
-                    type="button"
-                    onClick={() => setEditingService(null)}
-                    className="p-1.5 rounded-full bg-[#F4F1F7] hover:bg-[#EAE4F0] text-[#2B2138] transition cursor-pointer"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-
-                <div>
-                  <label className="text-xs font-semibold text-[#2B2138] block mb-1">Service Title</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g., Full-Service Luxury Wedding Planning"
-                    value={editingService.title}
-                    onChange={(e) => setEditingService({ ...editingService, title: e.target.value })}
-                    className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs font-semibold text-[#2B2138] block mb-1">Filter Category</label>
-                    <select
-                      value={
-                        editingService.category ||
-                        categories[0]?.name ||
-                        categories[0]?.label ||
-                        categories[0]?.id ||
-                        "Signature Planning & Direction"
-                      }
-                      onChange={(e) => setEditingService({ ...editingService, category: e.target.value })}
-                      className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15 cursor-pointer"
-                    >
-                      {categories.map((c) => {
-                        const cName = c.name || c.label || c.id;
-                        return (
-                          <option key={c.id || cName} value={cName}>
-                            {cName}
-                          </option>
-                        );
-                      })}
-                      {editingService.category &&
-                        !categories.some(
-                          (c) =>
-                            (c.name || c.label || c.id) === editingService.category ||
-                            c.id === editingService.category
-                        ) && (
-                          <option value={editingService.category}>{editingService.category}</option>
-                        )}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-semibold text-[#2B2138] block mb-1">Badge Tag</label>
-                    <input
-                      type="text"
-                      placeholder="e.g., Specialized Craft, VIP Concierge"
-                      value={editingService.badge || ""}
-                      onChange={(e) => setEditingService({ ...editingService, badge: e.target.value })}
-                      className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-xs font-semibold text-[#2B2138] block mb-1">Description</label>
-                  <textarea
-                    rows={3}
-                    required
-                    placeholder="Detailed description of the discipline..."
-                    value={editingService.description}
-                    onChange={(e) =>
-                      setEditingService({ ...editingService, description: e.target.value })
-                    }
-                    className="w-full rounded-xl border border-[#E8E2EE] bg-white p-3 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs font-semibold text-[#2B2138] block mb-1">
-                    Features &amp; Deliverables (One per line)
-                  </label>
-                  <textarea
-                    rows={4}
-                    placeholder={"Dedicated on-site coordinator\nCustom 3D visual preview\nTransparent vendor sheets"}
-                    value={editingService.features || ""}
-                    onChange={(e) =>
-                      setEditingService({ ...editingService, features: e.target.value })
-                    }
-                    className="w-full rounded-xl border border-[#E8E2EE] bg-white p-3 font-mono text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
-                  />
-                  <span className="text-[0.68rem] text-[#7E7688] mt-1 block">
-                    Enter each highlight bullet on a new line. These will render with golden checkmarks on the Services card.
-                  </span>
-                </div>
-
-                <ImageUploadField
-                  label="Service Cover Photo"
-                  value={editingService.image || ""}
-                  onChange={(url) => setEditingService({ ...editingService, image: url })}
+          <div className="grid gap-6 lg:grid-cols-12 items-start">
+            {/* Left Column: Form Controls */}
+            <form
+              onSubmit={saveHeaderSettings}
+              className="lg:col-span-6 space-y-4 rounded-3xl border border-border bg-card p-6 shadow-xs"
+            >
+              <div>
+                <label className="text-xs font-semibold text-ink block mb-1">
+                  Badge / Tagline Text
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={headerForm.badge || ""}
+                  onChange={(e) => setHeaderForm({ ...headerForm, badge: e.target.value })}
+                  className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+                  placeholder="e.g., Our Offerings"
                 />
+              </div>
 
-                <div className="flex justify-end gap-3 pt-3 border-t border-[#E8E2EE]">
-                  <button
-                    type="button"
-                    onClick={() => setEditingService(null)}
-                    className="btn-modal-cancel"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="btn-modal-primary"
-                  >
-                    Save Service
-                  </button>
+              <div>
+                <label className="text-xs font-semibold text-ink block mb-1">
+                  Main Page Heading
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={headerForm.title || ""}
+                  onChange={(e) => setHeaderForm({ ...headerForm, title: e.target.value })}
+                  className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+                  placeholder="e.g., Complete Wedding & Event Services"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-ink block mb-1">
+                  Subtitle / Description
+                </label>
+                <textarea
+                  rows={3}
+                  required
+                  value={headerForm.subtitle || ""}
+                  onChange={(e) => setHeaderForm({ ...headerForm, subtitle: e.target.value })}
+                  className="w-full rounded-xl border border-border bg-background p-3 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+                  placeholder="Explore our complete range of wedding planning services..."
+                />
+              </div>
+
+              <ImageUploadField
+                label="Hero Background Banner Image"
+                value={headerForm.bgImage || "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=2000&q=80"}
+                onChange={(url) => setHeaderForm({ ...headerForm, bgImage: url })}
+              />
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={isSavingHeader}
+                  className="btn-luxe gradient-royal w-full text-primary-foreground text-xs py-3 rounded-xl shadow-md flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
+                >
+                  {isSavingHeader ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin text-secondary" />
+                      <span>Saving Header...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 text-secondary" />
+                      <span>Save Services Page Header</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+
+            {/* Right Column: Live Header Preview */}
+            <div className="lg:col-span-6 space-y-3 sticky top-6">
+              <div className="flex items-center justify-between px-2">
+                <span className="text-[0.68rem] uppercase tracking-[0.25em] text-primary font-bold flex items-center gap-1.5">
+                  <Eye className="h-3.5 w-3.5 text-secondary" /> Live Services Header Preview
+                </span>
+                <span className="text-[0.62rem] text-muted-foreground font-mono">
+                  Exact Frontend Replica
+                </span>
+              </div>
+
+              <div className="relative bg-ink rounded-3xl p-8 sm:p-10 text-background overflow-hidden border border-secondary/30 shadow-2xl text-center">
+                <div className="absolute inset-0 z-0 opacity-25">
+                  <img
+                    src={headerForm.bgImage || "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=2000&q=80"}
+                    alt="Services banner"
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/85 to-ink/50" />
                 </div>
-              </form>
+
+                <div className="relative z-10 space-y-4">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/20 px-3.5 py-1 text-[0.68rem] uppercase tracking-[0.3em] text-secondary font-medium backdrop-blur-md">
+                    <Sparkles className="h-3 w-3 text-secondary" />
+                    <span>{headerForm.badge || "Our Offerings"}</span>
+                  </span>
+
+                  <h1 className="font-display text-2xl sm:text-3xl text-white font-normal leading-tight">
+                    {headerForm.title || "Complete Wedding & Event Services"}
+                  </h1>
+
+                  <div className="rule-gold mx-auto my-3" />
+
+                  <p className="mx-auto max-w-lg text-xs sm:text-sm text-background/80 font-light leading-relaxed">
+                    {headerForm.subtitle ||
+                      "Explore our complete range of wedding planning services, custom decor, destination management, and rituals."}
+                  </p>
+                </div>
+              </div>
             </div>
-          )}
+          </div>
         </div>
       )}
 
       {/* ------------------------------------------------------------- */}
-      {/* SUB-TAB 2: DYNAMIC CATEGORIES MANAGER */}
+      {/* SUB-TAB 1: TYPE OF SERVICES CRUD */}
       {/* ------------------------------------------------------------- */}
-      {subTab === "categories" && (
+      {subTab === "typeOfServices" && (
         <div className="space-y-6 animate-fade-in">
           <div className="flex justify-between items-center">
             <div>
-              <h4 className="font-display text-lg text-ink">Service Filter Categories ({categories.length})</h4>
+              <h4 className="font-display text-lg text-ink">Type of Services ({typeOfServicesList.length})</h4>
               <p className="text-xs text-muted-foreground">
-                Manage the dynamic category filter pills rendered on the public Services page.
+                Card-based services rendered on the Services page and Homepage under "Type of Services".
               </p>
             </div>
             <button
               type="button"
               onClick={() =>
-                setEditingCat({
+                setEditingServiceItem({
                   isNew: true,
-                  id: "",
-                  name: "",
-                  label: "",
+                  title: "",
+                  description: "",
+                  order: typeOfServicesList.length + 1,
                 })
               }
               className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-4"
             >
               <Plus className="h-4 w-4" />
-              <span>Add New Category</span>
+              <span>Add New Service Type</span>
             </button>
           </div>
 
@@ -4410,130 +5022,91 @@ function ServicesEditorModule({ site, showSaved }) {
                 <thead>
                   <tr className="border-b border-border/80 bg-muted/40 text-[0.68rem] uppercase tracking-wider text-muted-foreground font-bold">
                     <th className="py-3 px-4 w-12 text-center">#</th>
-                    <th className="py-3 px-4">Category Name</th>
-                    <th className="py-3 px-4 text-center">Linked Services</th>
-                    <th className="py-3 px-4 text-center">
-                      Front Row Visibility ({categories.filter((c) => Boolean(c.showInFront)).length}/3 Selected)
-                    </th>
+                    <th className="py-3 px-4 w-1/4">Heading / Service Name</th>
+                    <th className="py-3 px-4">Description</th>
                     <th className="py-3 px-4 text-center w-28">Order</th>
                     <th className="py-3 px-4 text-right w-24">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/60">
-                  {categories.map((cat, idx) => {
-                    const cName = cat.name || cat.label || cat.id;
-                    const count = services.filter((s) => {
-                      const sc = (s.category || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
-                      const cid = (cat.id || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
-                      const cnam = (cat.name || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
-                      const clab = (cat.label || "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "").trim();
-                      return Boolean(sc && (sc === cid || sc === cnam || sc === clab));
-                    }).length;
-
-                    return (
-                      <tr key={cat.id || idx} className="hover:bg-muted/30 transition-colors">
-                        <td className="py-3.5 px-4 text-center font-mono text-[0.72rem] text-muted-foreground font-bold">
-                          {String(idx + 1).padStart(2, "0")}
-                        </td>
-                        <td className="py-3.5 px-4">
-                          <span className="font-display font-bold text-ink text-sm block">
-                            {cName}
-                          </span>
-                          <span className="text-[0.68rem] text-muted-foreground font-mono">
-                            slug: {cat.slug || cat.id}
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-4 text-center">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[0.68rem] font-bold bg-primary/10 text-primary">
-                            {count} {count === 1 ? "Service" : "Services"}
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-4 text-center">
+                  {typeOfServicesList.map((item, idx) => (
+                    <tr key={item.id || idx} className="hover:bg-muted/30 transition-colors">
+                      <td className="py-3.5 px-4 text-center font-mono text-[0.72rem] text-muted-foreground font-bold">
+                        {String(idx + 1).padStart(2, "0")}
+                      </td>
+                      <td className="py-3.5 px-4 font-semibold text-ink">
+                        <span className="font-display text-sm block">{item.title}</span>
+                      </td>
+                      <td className="py-3.5 px-4 max-w-md">
+                        <p className="text-xs text-muted-foreground line-clamp-2">{item.description}</p>
+                      </td>
+                      <td className="py-3.5 px-4 text-center">
+                        <div className="inline-flex items-center gap-1">
                           <button
                             type="button"
-                            onClick={() => toggleCategoryFront(cat.id || cat.name || cat.label)}
-                            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition cursor-pointer shadow-xs ${
-                              cat.showInFront
-                                ? "gradient-gold text-ink ring-1 ring-secondary/40 font-bold"
-                                : "bg-muted/70 text-muted-foreground hover:text-foreground hover:bg-muted"
-                            }`}
-                            title="Toggle whether this category appears in the 4 front pills on the Services page"
+                            disabled={idx === 0}
+                            onClick={() => moveServiceItem(idx, -1)}
+                            className="p-1 rounded-md border border-border hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                            title="Move Up"
                           >
-                            <Sparkles className="h-3 w-3" />
-                            <span>{cat.showInFront ? "★ In Front Row" : "In Dropdown"}</span>
+                            <ArrowUp className="h-3.5 w-3.5" />
                           </button>
-                        </td>
-                        <td className="py-3.5 px-4 text-center">
-                          <div className="inline-flex items-center gap-1">
-                            <button
-                              type="button"
-                              disabled={idx === 0}
-                              onClick={() => moveCategory(idx, -1)}
-                              className="p-1 rounded-md border border-border hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
-                              title="Move Up"
-                            >
-                              <ArrowUp className="h-3.5 w-3.5" />
-                            </button>
-                            <button
-                              type="button"
-                              disabled={idx === categories.length - 1}
-                              onClick={() => moveCategory(idx, 1)}
-                              className="p-1 rounded-md border border-border hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
-                              title="Move Down"
-                            >
-                              <ArrowDown className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
-                        </td>
-                        <td className="py-3.5 px-4 text-right">
-                          <div className="inline-flex items-center justify-end gap-1.5">
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setEditingCat({
-                                  ...cat,
-                                  name: cat.name || cat.label || "",
-                                  label: cat.label || cat.name || "",
-                                  showInFront: Boolean(cat.showInFront),
-                                  _origName: cat.name || cat.label,
-                                })
-                              }
-                              className="p-1.5 rounded-lg border border-border hover:bg-muted text-primary cursor-pointer"
-                              title="Edit Category"
-                            >
-                              <Edit2 className="h-3.5 w-3.5" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => deleteCategory(cat.id || cat.name || cat.label)}
-                              className="p-1.5 rounded-lg border border-border hover:bg-destructive/10 text-destructive cursor-pointer"
-                              title="Delete Category"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                          <button
+                            type="button"
+                            disabled={idx === typeOfServicesList.length - 1}
+                            onClick={() => moveServiceItem(idx, 1)}
+                            className="p-1 rounded-md border border-border hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                            title="Move Down"
+                          >
+                            <ArrowDown className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-4 text-right">
+                        <div className="inline-flex items-center justify-end gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setEditingServiceItem({
+                                ...item,
+                                isNew: false,
+                              })
+                            }
+                            className="p-1.5 rounded-lg border border-border hover:bg-muted text-primary cursor-pointer"
+                            title="Edit Service Type"
+                          >
+                            <Edit2 className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => deleteServiceItem(item.id || item._id)}
+                            className="p-1.5 rounded-lg border border-border hover:bg-destructive/10 text-destructive cursor-pointer"
+                            title="Delete Service Type"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
           </div>
 
-          {editingCat && (
+          {editingServiceItem && (
             <div className="fixed inset-0 z-100 flex items-center justify-center bg-[rgba(37,27,49,0.38)] backdrop-blur-md p-4 animate-fade-in">
               <form
-                onSubmit={saveCategoryModal}
-                className="modal-dialog-luxury bg-[#FFFDFB] max-w-md w-full rounded-3xl p-6 sm:p-8 space-y-4 max-h-[88vh] overflow-y-auto no-scrollbar border border-[#E8E2EE] shadow-luxe"
+                onSubmit={saveServiceItemModal}
+                className="modal-dialog-luxury bg-[#FFFDFB] max-w-lg w-full rounded-3xl p-6 sm:p-8 space-y-4 max-h-[88vh] overflow-y-auto no-scrollbar border border-[#E8E2EE] shadow-luxe"
               >
                 <div className="flex justify-between items-center border-b border-[#E8E2EE] pb-3.5">
-                  <h4 className="font-display text-lg text-[#2B2138] font-bold">
-                    {editingCat.isNew ? "Add Filter Category" : "Edit Filter Category"}
+                  <h4 className="font-display text-xl text-[#2B2138] font-bold">
+                    {editingServiceItem.isNew ? "Add New Service Type" : "Edit Service Type"}
                   </h4>
                   <button
                     type="button"
-                    onClick={() => setEditingCat(null)}
+                    onClick={() => setEditingServiceItem(null)}
                     className="p-1.5 rounded-full bg-[#F4F1F7] hover:bg-[#EAE4F0] text-[#2B2138] transition cursor-pointer"
                   >
                     <X className="h-4 w-4" />
@@ -4541,49 +5114,40 @@ function ServicesEditorModule({ site, showSaved }) {
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-[#2B2138] block mb-1">Category Name / Label</label>
+                  <label className="text-xs font-semibold text-[#2B2138] block mb-1">Heading / Service Name</label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Signature Planning & Direction"
-                    value={editingCat.name ?? editingCat.label ?? ""}
-                    onChange={(e) =>
-                      setEditingCat({
-                        ...editingCat,
-                        name: e.target.value,
-                        label: e.target.value,
-                      })
-                    }
+                    placeholder="e.g., Event Management, Decor, Outfits"
+                    value={editingServiceItem.title}
+                    onChange={(e) => setEditingServiceItem({ ...editingServiceItem, title: e.target.value })}
                     className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                   />
-                  <p className="text-[0.68rem] text-[#7E7688] mt-1.5">
-                    Filter pills on the public <span className="font-semibold text-[#6A439E]">Services page</span> will update immediately.
-                  </p>
                 </div>
 
-                <label className="flex items-center gap-2.5 p-3 rounded-xl border border-[#E8E2EE] bg-white cursor-pointer hover:bg-[#F4F1F7]/60 transition">
-                  <input
-                    type="checkbox"
-                    checked={Boolean(editingCat.showInFront)}
+                <div>
+                  <label className="text-xs font-semibold text-[#2B2138] block mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    rows={5}
+                    required
+                    placeholder="Enter description for this service type..."
+                    value={editingServiceItem.description}
                     onChange={(e) =>
-                      setEditingCat({ ...editingCat, showInFront: e.target.checked })
+                      setEditingServiceItem({ ...editingServiceItem, description: e.target.value })
                     }
-                    className="rounded border-[#E8E2EE] text-[#6A439E] focus:ring-[#6A439E] h-4 w-4 cursor-pointer"
+                    className="w-full rounded-xl border border-[#E8E2EE] bg-white p-3 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
                   />
-                  <div>
-                    <span className="text-xs font-semibold text-[#2B2138] block">
-                      Show in Front Row (Public Page Pill)
-                    </span>
-                    <span className="text-[0.68rem] text-[#7E7688] block">
-                      Top 3 categories marked "Show in Front" appear directly as pills; others appear in the "More Services" dropdown.
-                    </span>
-                  </div>
-                </label>
+                  <span className="text-[0.68rem] text-[#7E7688] mt-1 block">
+                    Card displays a line-clamped preview automatically to keep uniform heights, and clicking the Eye button opens the full description in a popup.
+                  </span>
+                </div>
 
                 <div className="flex justify-end gap-3 pt-3 border-t border-[#E8E2EE]">
                   <button
                     type="button"
-                    onClick={() => setEditingCat(null)}
+                    onClick={() => setEditingServiceItem(null)}
                     className="btn-modal-cancel"
                   >
                     Cancel
@@ -4592,7 +5156,185 @@ function ServicesEditorModule({ site, showSaved }) {
                     type="submit"
                     className="btn-modal-primary"
                   >
-                    Save Category
+                    Save Service Type
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* SUB-TAB 2: TYPE OF EVENTS CRUD */}
+      {/* ------------------------------------------------------------- */}
+      {subTab === "typeOfEvents" && (
+        <div className="space-y-6 animate-fade-in">
+          <div className="flex justify-between items-center">
+            <div>
+              <h4 className="font-display text-lg text-ink">Type of Events ({typeOfEventsList.length})</h4>
+              <p className="text-xs text-muted-foreground">
+                Card-based events rendered on the Services page and Homepage under "Type of Events".
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                setEditingEventItem({
+                  isNew: true,
+                  title: "",
+                  description: "",
+                  order: typeOfEventsList.length + 1,
+                })
+              }
+              className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-4"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Add New Event Type</span>
+            </button>
+          </div>
+
+          <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-xs">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="border-b border-border/80 bg-muted/40 text-[0.68rem] uppercase tracking-wider text-muted-foreground font-bold">
+                    <th className="py-3 px-4 w-12 text-center">#</th>
+                    <th className="py-3 px-4 w-1/4">Heading / Event Name</th>
+                    <th className="py-3 px-4">Description</th>
+                    <th className="py-3 px-4 text-center w-28">Order</th>
+                    <th className="py-3 px-4 text-right w-24">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/60">
+                  {typeOfEventsList.map((item, idx) => (
+                    <tr key={item.id || idx} className="hover:bg-muted/30 transition-colors">
+                      <td className="py-3.5 px-4 text-center font-mono text-[0.72rem] text-muted-foreground font-bold">
+                        {String(idx + 1).padStart(2, "0")}
+                      </td>
+                      <td className="py-3.5 px-4 font-semibold text-ink">
+                        <span className="font-display text-sm block">{item.title}</span>
+                      </td>
+                      <td className="py-3.5 px-4 max-w-md">
+                        <p className="text-xs text-muted-foreground line-clamp-2">{item.description}</p>
+                      </td>
+                      <td className="py-3.5 px-4 text-center">
+                        <div className="inline-flex items-center gap-1">
+                          <button
+                            type="button"
+                            disabled={idx === 0}
+                            onClick={() => moveEventItem(idx, -1)}
+                            className="p-1 rounded-md border border-border hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                            title="Move Up"
+                          >
+                            <ArrowUp className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={idx === typeOfEventsList.length - 1}
+                            onClick={() => moveEventItem(idx, 1)}
+                            className="p-1 rounded-md border border-border hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                            title="Move Down"
+                          >
+                            <ArrowDown className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-4 text-right">
+                        <div className="inline-flex items-center justify-end gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setEditingEventItem({
+                                ...item,
+                                isNew: false,
+                              })
+                            }
+                            className="p-1.5 rounded-lg border border-border hover:bg-muted text-primary cursor-pointer"
+                            title="Edit Event Type"
+                          >
+                            <Edit2 className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => deleteEventItem(item.id || item._id)}
+                            className="p-1.5 rounded-lg border border-border hover:bg-destructive/10 text-destructive cursor-pointer"
+                            title="Delete Event Type"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {editingEventItem && (
+            <div className="fixed inset-0 z-100 flex items-center justify-center bg-[rgba(37,27,49,0.38)] backdrop-blur-md p-4 animate-fade-in">
+              <form
+                onSubmit={saveEventItemModal}
+                className="modal-dialog-luxury bg-[#FFFDFB] max-w-lg w-full rounded-3xl p-6 sm:p-8 space-y-4 max-h-[88vh] overflow-y-auto no-scrollbar border border-[#E8E2EE] shadow-luxe"
+              >
+                <div className="flex justify-between items-center border-b border-[#E8E2EE] pb-3.5">
+                  <h4 className="font-display text-xl text-[#2B2138] font-bold">
+                    {editingEventItem.isNew ? "Add New Event Type" : "Edit Event Type"}
+                  </h4>
+                  <button
+                    type="button"
+                    onClick={() => setEditingEventItem(null)}
+                    className="p-1.5 rounded-full bg-[#F4F1F7] hover:bg-[#EAE4F0] text-[#2B2138] transition cursor-pointer"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-[#2B2138] block mb-1">Heading / Event Name</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g., Wedding, Corporate, Concert, Sports"
+                    value={editingEventItem.title}
+                    onChange={(e) => setEditingEventItem({ ...editingEventItem, title: e.target.value })}
+                    className="w-full rounded-xl border border-[#E8E2EE] bg-white px-3.5 py-2.5 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-[#2B2138] block mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    rows={5}
+                    required
+                    placeholder="Enter description for this event type..."
+                    value={editingEventItem.description}
+                    onChange={(e) =>
+                      setEditingEventItem({ ...editingEventItem, description: e.target.value })
+                    }
+                    className="w-full rounded-xl border border-[#E8E2EE] bg-white p-3 text-xs text-[#2B2138] placeholder:text-[#7E7688]/60 focus:outline-none focus:border-[#6A439E] focus:ring-2 focus:ring-[#6A439E]/15"
+                  />
+                  <span className="text-[0.68rem] text-[#7E7688] mt-1 block">
+                    Card displays a line-clamped preview automatically to keep uniform heights, and clicking the Eye button opens the full description in a popup.
+                  </span>
+                </div>
+
+                <div className="flex justify-end gap-3 pt-3 border-t border-[#E8E2EE]">
+                  <button
+                    type="button"
+                    onClick={() => setEditingEventItem(null)}
+                    className="btn-modal-cancel"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn-modal-primary"
+                  >
+                    Save Event Type
                   </button>
                 </div>
               </form>
@@ -5459,11 +6201,11 @@ function PortfolioEditorModule({ site, showSaved }) {
     stats: ["500+ Weddings", "15+ Cities Across India", "100% On-Time Cue Execution"],
   });
 
-  // 4. Section heading state (Moments of Grandeur)
+  // 4. Section heading state (Moments of Joy & Celebration)
   const [sectionData, setSectionData] = useState(site.portfolioSection || {
-    eyebrow: "Our Signature Works",
-    title: "Moments of Grandeur & Intimacy",
-    subtitle: "Explore a curated portfolio of mandaps, opulent ballrooms, sunny haldi courtyards, and destination weddings executed across India.",
+    eyebrow: "Our Works",
+    title: "Moments of Joy & Celebration",
+    subtitle: "Explore our portfolio of mandaps, reception stages, cheerful haldi events, and destination weddings across India.",
   });
 
   // 5. Gratitude / Testimonials state
@@ -5678,7 +6420,7 @@ function PortfolioEditorModule({ site, showSaved }) {
       </div>
 
       {/* ------------------------------------------------------------- */}
-      {/* 1. SIGNATURE WORKS & MOMENTS OF GRANDEUR CATALOG SUB-TAB */}
+      {/* 1. PORTFOLIO WORKS CATALOG SUB-TAB */}
       {/* ------------------------------------------------------------- */}
       {subTab === "portfolio-works" && (
         <div className="space-y-6 animate-fade-in">
@@ -5691,7 +6433,7 @@ function PortfolioEditorModule({ site, showSaved }) {
                   <span>Section Header Customizer</span>
                 </div>
                 <h3 className="font-display text-xl text-ink font-bold mt-1">
-                  Our Work Section
+                  Our Works Section
                 </h3>
               </div>
               <button
@@ -5722,7 +6464,7 @@ function PortfolioEditorModule({ site, showSaved }) {
                   value={sectionData.eyebrow || ""}
                   onChange={(e) => setSectionData({ ...sectionData, eyebrow: e.target.value })}
                   className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs"
-                  placeholder="e.g. Our Work"
+                  placeholder="e.g. Our Works"
                 />
               </div>
               <div>
@@ -6596,7 +7338,7 @@ function PortfolioEditorModule({ site, showSaved }) {
                   value={testimonialsHeader.title || ""}
                   onChange={(e) => setTestimonialsHeader({ ...testimonialsHeader, title: e.target.value })}
                   className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-semibold"
-                  placeholder="e.g. Stories of Love, Captured Forever"
+                  placeholder="e.g. Real Stories from Happy Families"
                 />
               </div>
             </div>
@@ -7069,7 +7811,7 @@ function PortfolioEditorModule({ site, showSaved }) {
                   value={ctaData.headline || ""}
                   onChange={(e) => setCtaData({ ...ctaData, headline: e.target.value })}
                   className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-semibold"
-                  placeholder="Want Your Wedding to Be Our Next Masterpiece?"
+                  placeholder="Let’s Plan Your Dream Wedding"
                 />
               </div>
             </div>
@@ -7081,7 +7823,7 @@ function PortfolioEditorModule({ site, showSaved }) {
                 value={ctaData.subtitle || ""}
                 onChange={(e) => setCtaData({ ...ctaData, subtitle: e.target.value })}
                 className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs leading-relaxed"
-                placeholder="Connect directly with Ashish Wankhede and Rutik Pund to review your venue options..."
+                placeholder="Talk directly with Ashish Wankhede and Rutik Pund. We will help you pick a venue, show you 3D decor designs, and handle every detail from start to finish."
               />
             </div>
 
@@ -7189,14 +7931,14 @@ function PortfolioEditorModule({ site, showSaved }) {
                 </span>
 
                 <h3 className="font-display text-lg sm:text-xl text-white font-normal leading-snug">
-                  {ctaData.headline || "Want Your Wedding to Be Our Next Masterpiece?"}
+                  {ctaData.headline || "Let’s Plan Your Dream Wedding"}
                 </h3>
 
                 <div className="rule-gold mx-auto my-2" />
 
                 <p className="text-xs text-background/85 font-light leading-relaxed max-w-md mx-auto">
                   {ctaData.subtitle ||
-                    "Connect directly with Ashish Wankhede and Rutik Pund to review your venue options, custom 3D decor concepts, and complete management timeline."}
+                    "Talk directly with Ashish Wankhede and Rutik Pund. We will help you pick a venue, show you 3D decor designs, and handle every detail from start to finish."}
                 </p>
 
                 {/* Consultation Perks Chips */}
@@ -7297,7 +8039,7 @@ function GalleryEditorModule({ site, showSaved }) {
   const defaultCategories = [
     { id: "all", name: "All Archives", slug: "all", order: 1 },
     { id: "mandap", name: "Mandap Architecture", slug: "mandap", order: 2 },
-    { id: "reception", name: "Opulent Receptions", slug: "reception", order: 3 },
+    { id: "reception", name: "Grand Receptions", slug: "reception", order: 3 },
     { id: "haldi-sangeet", name: "Haldi & Sangeet", slug: "haldi-sangeet", order: 4 },
     { id: "bridal-entries", name: "Bridal Entries & Portraits", slug: "bridal-entries", order: 5 },
     { id: "destination", name: "Destination Venues", slug: "destination", order: 6 },

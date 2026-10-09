@@ -18,10 +18,10 @@ const SiteContentSchema = new Schema(
     key: { type: String, required: true, unique: true, default: "confianza_main" },
     settings: {
       brand: {
-        name: { type: String, default: "Confianza Event's and Entertainment" },
+        name: { type: String, default: "Confianza Events & Entertainment" },
         short: { type: String, default: "Confianza" },
         initials: { type: String, default: "C" },
-        tagline: { type: String, default: "Where Weddings Become Stories" },
+        tagline: { type: String, default: "" },
         logo: { type: String, default: "/logo.png" },
       },
       seo: {
@@ -60,6 +60,36 @@ const SiteContentSchema = new Schema(
           label: { type: String },
         },
       ],
+    },
+    homeStory: {
+      eyebrow: { type: String, default: "Our Story & Philosophy" },
+      title: { type: String, default: "A Pune Studio Devoted to Weddings That Feel Personal" },
+      subtitle: { type: String, default: "Where real emotions meet beautiful design. We create unforgettable weddings made specially for you." },
+      badge: { type: String, default: "Since 2018 • Warje, Pune" },
+      quote: { type: String, default: "Every love story deserves a stage as breathtaking as the journey itself." },
+      quoteAuthor: { type: String, default: "— Ashish Wankhede, Founder" },
+      image: { type: String, default: "/images/hero-1.jpg" },
+      feature1Title: { type: String, default: "Pan-India Destination" },
+      feature1Text: { type: String, default: "From Udaipur palatial courtyards to Goa beachside mandaps." },
+      feature1Icon: { type: String, default: "Compass" },
+      feature2Title: { type: String, default: "Zero Template Policy" },
+      feature2Text: { type: String, default: "Every color theme, flower setup, and schedule is made specially for you." },
+      feature2Icon: { type: String, default: "HeartHandshake" },
+      storyHeading: { type: String, default: "The Confianza Story" },
+      storyText: { type: String, default: "Confianza began in 2018 with one belief — a wedding should sound like the couple, not like a catalogue. What started as a two-person decor team in Warje is now a full-service house planning, designing and executing weddings across India." },
+      missionLabel: { type: String, default: "Our Mission" },
+      missionText: { type: String, default: "To take the weight of planning off a family's shoulders and hand back a celebration they can be fully present for." },
+      visionLabel: { type: String, default: "Our Vision" },
+      visionText: { type: String, default: "To be the most trusted and admired name in personalised luxury weddings across Maharashtra and every landmark destination we travel to." },
+      pillarsHeading: { type: String, default: "Our Three Pillars of Excellence" },
+      pillars: [
+        {
+          title: { type: String },
+          text: { type: String },
+        },
+      ],
+      ctaLabel: { type: String, default: "Learn More About Us & Our Team" },
+      ctaLink: { type: String, default: "/about" },
     },
     about: {
       heading: { type: String, default: "Where Weddings Become Stories" },
@@ -247,24 +277,24 @@ const SiteContentSchema = new Schema(
       ],
     },
     portfolioHeader: {
-      badge: { type: String, default: "500+ Stories & Counting" },
-      eyebrow: { type: String, default: "OUR SIGNATURE WORKS" },
-      title: { type: String, default: "The Wedding Portfolio" },
+      badge: { type: String, default: "500+ Happy Weddings" },
+      eyebrow: { type: String, default: "OUR WORKS" },
+      title: { type: String, default: "Our Works" },
       subtitle: {
         type: String,
         default:
-          "A curated gallery of our mandap concepts, floral installations, destination beach setups, and grand reception stages created across India.",
+          "Explore photos of our mandap decor, flower setups, beach weddings, and grand reception stages created across India.",
       },
       image: { type: String, default: "/images/hero-2.jpg" },
       stats: [{ type: String }],
     },
     portfolioSection: {
-      eyebrow: { type: String, default: "Our Signature Works" },
-      title: { type: String, default: "Moments of Grandeur & Intimacy" },
+      eyebrow: { type: String, default: "Our Works" },
+      title: { type: String, default: "Memorable Moments, Big and Small" },
       subtitle: {
         type: String,
         default:
-          "Explore a curated portfolio of mandaps, opulent ballrooms, sunny haldi courtyards, and destination weddings executed across India.",
+          "Look through photos of our past weddings, from colorful haldi setups and grand stages to beautiful destination celebrations planned by Ashish Wankhede and Rutik Pund.",
       },
     },
     portfolioCategories: [
@@ -276,14 +306,14 @@ const SiteContentSchema = new Schema(
       },
     ],
     portfolioCta: {
-      eyebrow: { type: String, default: "WHERE WEDDINGS BECOME STORIES" },
-      headline: { type: String, default: "Want Your Wedding to Be Our Next Masterpiece?" },
+      eyebrow: { type: String, default: "LET'S PLAN YOUR SPECIAL DAY" },
+      headline: { type: String, default: "Let’s Plan Your Dream Wedding" },
       subtitle: {
         type: String,
         default:
-          "Connect directly with Ashish Wankhede and Rutik Pund to review your venue options, custom 3D decor concepts, and complete management timeline.",
+          "Talk directly with Ashish Wankhede and Rutik Pund. We will help you pick a venue, show you 3D decor designs, and handle every detail from start to finish.",
       },
-      buttonText: { type: String, default: "Book Your Free Consultation" },
+      buttonText: { type: String, default: "Book Free Consultation" },
       buttonLink: { type: String, default: "/contact" },
       notice: { type: String, default: "Free Consultation • No Obligation" },
       perks: [
@@ -293,11 +323,11 @@ const SiteContentSchema = new Schema(
     testimonialsHeader: {
       badge: { type: String, default: "Couples & Families" },
       eyebrow: { type: String, default: "Words of Gratitude" },
-      title: { type: String, default: "Stories of Love, Captured Forever" },
+      title: { type: String, default: "Real Stories from Happy Families" },
       subtitle: {
         type: String,
         default:
-          "Read how our couples and their families experienced the ease, beauty, and grandeur of a Confianza managed wedding.",
+          "See what couples and their families say about trusting Confianza to design and manage their special day.",
       },
       image: { type: String, default: "https://res.cloudinary.com/tridevsosync/image/upload/v1790838224/confianza_portfolio/portfolio_hero_banner.jpg" },
       stats: [{ type: String }],

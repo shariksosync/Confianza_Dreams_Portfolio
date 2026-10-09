@@ -84,14 +84,30 @@ export default function PortfolioSection({ isStandalone = false }) {
       <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
         <SectionHeading
           eyebrow={
-            portfolioSection?.eyebrow === "Our Signature Works" || !portfolioSection?.eyebrow
-              ? "Our Work"
+            portfolioSection?.eyebrow === "Our Signature Works" ||
+            portfolioSection?.eyebrow === "Our Work" ||
+            !portfolioSection?.eyebrow
+              ? "Our Works"
               : portfolioSection.eyebrow
           }
-          title={portfolioSection?.title || "Our Wedding Celebrations & Decor"}
+          title={
+            portfolioSection?.title === "Our Wedding Celebrations & Decor" ||
+            portfolioSection?.title === "Moments of Grandeur & Intimacy" ||
+            portfolioSection?.title === "Moments of Joy & Celebration" ||
+            !portfolioSection?.title
+              ? "Memorable Moments, Big and Small"
+              : portfolioSection.title
+          }
           subtitle={
-            portfolioSection?.subtitle ||
-            "Explore our collection of mandaps, reception stages, colorful haldi setups, and destination weddings across India."
+            portfolioSection?.subtitle ===
+              "Explore a curated portfolio of mandaps, opulent ballrooms, sunny haldi courtyards, and destination weddings executed by Ashish Wankhede & Rutik Pund." ||
+            portfolioSection?.subtitle ===
+              "Explore our collection of mandaps, reception stages, colorful haldi setups, and destination weddings across India." ||
+            portfolioSection?.subtitle ===
+              "Explore our portfolio of mandap setups, reception stages, cheerful haldi events, and destination weddings across India." ||
+            !portfolioSection?.subtitle
+              ? "Look through photos of our past weddings, from colorful haldi setups and grand stages to beautiful destination celebrations planned by Ashish Wankhede and Rutik Pund."
+              : portfolioSection.subtitle
           }
         />
 
@@ -101,7 +117,7 @@ export default function PortfolioSection({ isStandalone = false }) {
             <Sparkles className="h-10 w-10 mx-auto text-secondary/60 mb-3" />
             <h3 className="font-display text-xl text-ink font-semibold">No Portfolio Works Added Yet</h3>
             <p className="text-xs text-muted-foreground mt-1 max-w-md mx-auto">
-              Wedding stories and spatial decor projects added in the Admin Panel will appear here live.
+              Wedding stories and decor projects added in the Admin Panel will appear here live.
             </p>
           </div>
         ) : (
@@ -119,7 +135,7 @@ export default function PortfolioSection({ isStandalone = false }) {
                 />
               </div>
 
-              {/* 4 Front Category Filter Pills + Luxury Dropdown */}
+              {/* Category Filter Pills + Dropdown */}
               <CategoryFilterBar
                 items={allItems}
                 categories={
@@ -139,63 +155,60 @@ export default function PortfolioSection({ isStandalone = false }) {
                   setSelectedCategory(cat);
                   setVisibleCount(isStandalone ? 12 : 8);
                 }}
-                allLabel="All Work"
+                allLabel="All Works"
                 maxFrontCategories={3}
                 dropdownLabel="More Categories"
               />
             </div>
 
-            {/* Portfolio Masonry / Responsive Grid */}
+            {/* Portfolio Grid - 100% Clean Image, Zero Overlays */}
             <div className="mt-8 sm:mt-12 grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 transition-all duration-300">
               {displayedItems.map((item, idx) => (
                 <div
                   key={item.id || idx}
                   onClick={() => setLightboxIndex(idx)}
-                  className="group relative cursor-pointer overflow-hidden rounded-2xl sm:rounded-3xl border border-border/80 bg-card shadow-soft transition-all duration-500 hover:-translate-y-2 hover:shadow-luxe flex flex-col"
+                  className="group relative cursor-pointer overflow-hidden rounded-2xl sm:rounded-3xl border border-border/80 bg-card shadow-soft transition-all duration-500 hover:-translate-y-1.5 hover:shadow-luxe flex flex-col"
                 >
-                  <div className="relative h-64 sm:h-72 lg:h-80 w-full overflow-hidden bg-ink/5">
+                  {/* Top Image Container - Zero Overlays */}
+                  <div className="relative h-56 sm:h-64 lg:h-72 w-full overflow-hidden bg-ink/5">
                     <img
                       src={item.image || "/images/hero-1.jpg"}
                       alt={item.title}
-                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                       loading="lazy"
                       onError={(e) => {
                         e.currentTarget.src = "/images/hero-1.jpg";
                       }}
                     />
-                    {/* Overlay on hover */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-ink/95 via-ink/40 to-transparent opacity-80 transition-opacity duration-300 group-hover:opacity-95" />
+                  </div>
 
-                    {/* Category badge */}
-                    <div className="absolute top-3.5 left-3.5 sm:top-4 sm:left-4">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-ink/60 px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.65rem] uppercase tracking-wider text-secondary backdrop-blur-md border border-white/10">
-                        <Sparkles className="h-2.5 w-2.5 text-secondary" />
-                        <span>{item.category}</span>
-                      </span>
-                    </div>
+                  {/* Card Content Below Image */}
+                  <div className="p-4 sm:p-5 flex flex-col flex-1 bg-card">
+                    {item.category && (
+                      <div className="mb-2">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-[0.65rem] uppercase tracking-wider text-primary font-semibold">
+                          <Sparkles className="h-2.5 w-2.5 text-secondary" />
+                          <span>{item.category}</span>
+                        </span>
+                      </div>
+                    )}
 
-                    {/* Zoom Icon Button */}
-                    <div className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 grid h-8 w-8 sm:h-9 sm:w-9 place-items-center rounded-full bg-white/20 text-white backdrop-blur-md opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                      <Eye className="h-4 w-4" />
-                    </div>
+                    <h3 className="font-display text-base sm:text-lg font-semibold text-ink leading-snug group-hover:text-primary transition-colors">
+                      {item.title}
+                    </h3>
 
-                    {/* Bottom info */}
-                    <div className="absolute bottom-0 inset-x-0 p-4 sm:p-5 text-background">
-                      <h3 className="font-display text-base sm:text-lg leading-snug text-background transition-colors group-hover:text-gold-gradient">
-                        {item.title}
-                      </h3>
-                      {item.location && (
-                        <div className="mt-1 flex items-center gap-1.5 text-xs text-champagne/80 font-light">
-                          <MapPin className="h-3 w-3 text-secondary shrink-0" />
-                          <span className="truncate">{item.location}</span>
-                        </div>
-                      )}
-                      {item.description && (
-                        <p className="mt-1 text-[0.7rem] sm:text-[0.72rem] text-background/70 font-light line-clamp-2">
-                          {item.description}
-                        </p>
-                      )}
-                    </div>
+                    {item.location && (
+                      <div className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+                        <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+                        <span className="truncate">{item.location}</span>
+                      </div>
+                    )}
+
+                    {item.description && (
+                      <p className="mt-2 text-xs text-muted-foreground leading-relaxed line-clamp-2 sm:line-clamp-3 font-normal">
+                        {item.description}
+                      </p>
+                    )}
                   </div>
                 </div>
               ))}
@@ -214,7 +227,7 @@ export default function PortfolioSection({ isStandalone = false }) {
                 </h3>
                 <p className="text-xs sm:text-sm text-muted-foreground mt-2 leading-relaxed">
                   {allItems.length === 0
-                    ? "Wedding stories and spatial decor projects added in the Admin Panel will appear here live."
+                    ? "Wedding stories and decor projects added in the Admin Panel will appear here live."
                     : `No portfolio celebrations match "${searchQuery || selectedCategory}".`}
                 </p>
                 {allItems.length > 0 && (
@@ -249,7 +262,7 @@ export default function PortfolioSection({ isStandalone = false }) {
                   href="/portfolio"
                   className="btn-luxe gradient-royal text-primary-foreground shadow-luxe font-semibold py-3 px-6 sm:py-3.5 sm:px-8 text-xs uppercase tracking-wider inline-flex items-center justify-center gap-2 hover:scale-105 transition w-full sm:w-auto"
                 >
-                  <span>See All Our Work</span>
+                  <span>See All Our Works</span>
                   <ArrowRight className="h-4 w-4 shrink-0" />
                 </Link>
               )}

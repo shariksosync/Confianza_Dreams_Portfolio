@@ -1,0 +1,54 @@
+import { MongoClient } from "mongodb";
+
+type MongoCache = {
+  clientPromises?: Map<string, Promise<MongoClient>>;
+};
+
+const globalForMongo = globalThis as typeof globalThis & MongoCache;
+
+// Extract database name from MONGODB_URI
+export function getDatabaseName(): string {
+  const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/confianza_db";
+  const lastSegment = uri.split("/").pop() || "";
+  const withoutQuery = lastSegment.split("?")[0];
+  const dbName = withoutQuery.trim();
+  return dbName || "confianza_db";
+}
+
+export async function getMongoClient(uri?: string) {
+  const targetUri = uri || process.env.MONGODB_URI || "mongodb://localhost:27017/confianza_db";
+
+  if (!globalForMongo.clientPromises) {
+    globalForMongo.clientPromises = new Map();
+  }
+
+  const existing = globalForMongo.clientPromises.get(targetUri);
+  if (existing) {
+    return existing;
+  }
+
+  const clientPromise = (async () => {
+    const client = new MongoClient(targetUri, {
+      // Keep pool small per Vercel serverless instance to avoid Atlas connection spikes
+      maxPoolSize: 1,
+      minPoolSize: 0,
+      serverSelectionTimeoutMS: 20_000,
+      connectTimeoutMS: 20_000,
+    });
+
+    await client.connect();
+    return client;
+  })().catch((error) => {
+    globalForMongo.clientPromises?.delete(targetUri);
+    throw error;
+  });
+
+  globalForMongo.clientPromises.set(targetUri, clientPromise);
+  return clientPromise;
+}
+
+export async function getDatabase() {
+  const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/confianza_db";
+  const client = await getMongoClient(uri);
+  return client.db(getDatabaseName());
+}

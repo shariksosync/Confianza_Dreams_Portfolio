@@ -32,11 +32,11 @@ export async function connectDB() {
   if (!cached!.promise) {
     const opts: mongoose.ConnectOptions = {
       bufferCommands: false,
-      serverSelectionTimeoutMS: 8000,
-      connectTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 20000,
+      connectTimeoutMS: 20000,
       socketTimeoutMS: 30000,
-      maxPoolSize: 10,
-      minPoolSize: 2,
+      maxPoolSize: 1,
+      minPoolSize: 0,
       family: 4, // Use IPv4, skip slow IPv6 DNS lookups
     };
 

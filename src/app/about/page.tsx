@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles, Phone } from "lucide-react";
 import SiteLayout from "@/layouts/SiteLayout";
 import FounderFeatureSection from "@/components/about/FounderFeatureSection";
 import TeamSection from "@/components/home/TeamSection";
@@ -11,7 +11,6 @@ import VisionMissionSection from "@/components/about/VisionMissionSection";
 import WhyConfianzaSection from "@/components/about/WhyConfianzaSection";
 import CoreValuesSection from "@/components/about/CoreValuesSection";
 import HowWeWorkSection from "@/components/about/HowWeWorkSection";
-import PartnerMarqueeSection from "@/components/home/PartnerMarqueeSection";
 import { useSite } from "@/context/SiteContext";
 
 export default function AboutPage() {
@@ -71,9 +70,6 @@ export default function AboutPage() {
       {/* 9. Our 10 Core Management Verticals */}
       <ManagementVerticalsSection />
 
-      {/* Hospitality Partners Marquee */}
-      <PartnerMarqueeSection />
-
       {/* Bottom Consultation Booking CTA */}
       <section className="relative bg-ink py-14 sm:py-20 text-background overflow-hidden text-center border-t border-white/10">
         <div className="relative z-10 mx-auto max-w-3xl px-4 sm:px-6">
@@ -88,13 +84,13 @@ export default function AboutPage() {
             Schedule an in-person meeting at our Pune office or connect with us over a call to discuss your dates and ideas.
           </p>
           <div className="flex justify-center">
-            <Link
-              href="/contact"
-              className="btn-luxe gradient-gold text-ink font-semibold shadow-luxe py-3 px-6 sm:px-8 text-xs uppercase tracking-wider flex items-center justify-center gap-2 w-full sm:w-auto"
+            <a
+              href="tel:7057357240"
+              className="btn-luxe gradient-gold text-ink font-semibold shadow-luxe py-3 px-6 sm:px-8 text-xs uppercase tracking-wider flex items-center justify-center gap-2 w-full sm:w-auto cursor-pointer"
             >
-              <span>Book Consultation With Ashish</span>
-              <ArrowRight className="h-4 w-4 shrink-0" />
-            </Link>
+              <Phone className="h-4 w-4 shrink-0" />
+              <span>call for enquiry</span>
+            </a>
           </div>
         </div>
       </section>

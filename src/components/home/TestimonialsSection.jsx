@@ -20,11 +20,27 @@ export default function TestimonialsSection({ showOnlyPortfolio = true }) {
     <section id="testimonials" className="section-pad relative bg-background overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
         <SectionHeading
-          eyebrow={testimonialsHeader?.eyebrow || "Client Reviews"}
-          title={testimonialsHeader?.title || "Real Reviews from Real Couples"}
+          eyebrow={testimonialsHeader?.eyebrow || "Words of Gratitude"}
+          title={
+            testimonialsHeader?.title === "Real Reviews from Real Couples" ||
+            testimonialsHeader?.title === "Stories of Love, Captured Forever" ||
+            testimonialsHeader?.title === "What Couples & Families Say" ||
+            !testimonialsHeader?.title
+              ? "Real Stories from Happy Families"
+              : testimonialsHeader.title
+          }
           subtitle={
-            testimonialsHeader?.subtitle ||
-            "Read how couples and their families enjoyed stress-free, beautiful weddings managed by Confianza."
+            testimonialsHeader?.subtitle ===
+              "Read first-hand accounts of couples and families who entrusted their most sacred wedding milestones to Confianza's aesthetic vision and care." ||
+            testimonialsHeader?.subtitle ===
+              "Read how couples and their families loved their wedding celebrations planned and decorated by our team." ||
+            testimonialsHeader?.subtitle ===
+              "Read how our couples and their families experienced the ease, beauty, and joy of a Confianza managed wedding." ||
+            testimonialsHeader?.subtitle ===
+              "Read honest feedback and reviews from couples and families whose weddings we planned." ||
+            !testimonialsHeader?.subtitle
+              ? "See what couples and their families say about trusting Confianza to design and manage their special day."
+              : testimonialsHeader.subtitle
           }
         />
 

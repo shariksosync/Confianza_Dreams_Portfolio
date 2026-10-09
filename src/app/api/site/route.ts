@@ -11,8 +11,6 @@ import Faq from "@/models/Faq";
 import Blog from "@/models/Blog";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
-export const fetchCache = "force-no-store";
 
 export async function GET(req: Request) {
   try {
@@ -32,6 +30,13 @@ export async function GET(req: Request) {
       ]);
 
     const base: any = siteDoc || {};
+    const settings = { ...(base.settings || {}) };
+    if (settings.brand) {
+      settings.brand = { ...settings.brand };
+      if (!settings.brand.logo || settings.brand.logo.includes("brand_logo_gold") || settings.brand.logo.includes("confianza_brand")) {
+        settings.brand.logo = "/logo.png";
+      }
+    }
     const rawTestimonials = testimonials || [];
     const approvedTestimonials = rawTestimonials.filter(
       (t: any) => t.status === "approved" || !t.status
@@ -41,8 +46,9 @@ export async function GET(req: Request) {
     ).length;
 
     const aggregated = {
-      settings: base.settings || {},
+      settings: settings,
       hero: base.hero || {},
+      homeStory: base.homeStory || {},
       about: base.about || {},
       contact: base.contact || {},
       stats: base.stats || [],
@@ -80,18 +86,22 @@ export async function GET(req: Request) {
       blogs: blogs || [],
     };
 
-    return NextResponse.json(
-      { success: true, data: aggregated, cached: false },
-      {
-        headers: {
-          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
-          "Pragma": "no-cache",
-          "Expires": "0",
-          "Surrogate-Control": "no-store",
+    const isFresh = req.url.includes("fresh=true");
+    const cacheHeaders = isFresh
+      ? {
+          "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
           "CDN-Cache-Control": "no-store",
           "Vercel-CDN-Cache-Control": "no-store",
-        },
-      }
+        }
+      : {
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=600",
+          "CDN-Cache-Control": "public, s-maxage=60, stale-while-revalidate=600",
+          "Vercel-CDN-Cache-Control": "public, s-maxage=60, stale-while-revalidate=600",
+        };
+
+    return NextResponse.json(
+      { success: true, data: aggregated, cached: !isFresh },
+      { headers: cacheHeaders }
     );
   } catch (error: any) {
     console.error("GET /api/site error:", error);

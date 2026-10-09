@@ -5,10 +5,10 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 const initialEmptyState = {
   settings: {
     brand: {
-      name: "Confianza Event's and Entertainment",
+      name: "Confianza Events & Entertainment",
       short: "Confianza",
       initials: "C",
-      tagline: "Where Weddings Become Stories",
+      tagline: "",
       logo: "/logo.png",
     },
     seo: {
@@ -26,7 +26,7 @@ const initialEmptyState = {
       { id: "partners", label: "Preferred Venues Marquee", enabled: true },
       { id: "about", label: "About Confianza", enabled: true },
       { id: "services", label: "Our Services", enabled: true },
-      { id: "portfolio", label: "Our Work / Portfolio", enabled: true },
+      { id: "portfolio", label: "Our Works / Portfolio", enabled: true },
       { id: "beforeAfter", label: "Venue Transformations (Before / After)", enabled: true },
       { id: "process", label: "The 4-Step Journey", enabled: true },
       { id: "testimonials", label: "Love Stories & Testimonials", enabled: true },
@@ -40,19 +40,165 @@ const initialEmptyState = {
     subtitle: "",
     primaryCta: { label: "Book Consultation", href: "/contact" },
     secondaryCta: { label: "View Portfolio", href: "/portfolio" },
-    images: [],
+    images: [
+      "https://res.cloudinary.com/tridevsosync/image/upload/v1790881509/confianza_heroes/home_hero_1.jpg",
+      "https://res.cloudinary.com/tridevsosync/image/upload/v1790881510/confianza_heroes/home_hero_2.jpg",
+      "https://res.cloudinary.com/tridevsosync/image/upload/v1790881511/confianza_heroes/home_hero_3.jpg",
+    ],
     floatingStats: [],
+  },
+  homeStory: {
+    eyebrow: "Our Story & Philosophy",
+    title: "A Pune Studio Devoted to Weddings That Feel Personal",
+    subtitle: "Where real emotions meet beautiful design. We create unforgettable weddings made specially for you.",
+    badge: "Since 2018 • Warje, Pune",
+    quote: '"Every love story deserves a stage as breathtaking as the journey itself."',
+    quoteAuthor: "— Ashish Wankhede, Founder",
+    image: "/images/hero-1.jpg",
+    feature1Title: "Pan-India Destination",
+    feature1Text: "From Udaipur palatial courtyards to Goa beachside mandaps.",
+    feature1Icon: "Compass",
+    feature2Title: "Zero Template Policy",
+    feature2Text: "Every color theme, flower setup, and schedule is made specially for you.",
+    feature2Icon: "HeartHandshake",
+    storyHeading: "The Confianza Story",
+    storyText: "Confianza began in 2018 with one belief — a wedding should sound like the couple, not like a catalogue. What started as a two-person decor team in Warje is now a full-service house planning, designing and executing weddings across India.",
+    missionLabel: "Our Mission",
+    missionText: "To take the weight of planning off a family's shoulders and hand back a celebration they can be fully present for.",
+    visionLabel: "Our Vision",
+    visionText: "To be the most trusted and admired name in personalised luxury weddings across Maharashtra and every landmark destination we travel to.",
+    pillarsHeading: "Our Three Pillars of Excellence",
+    pillars: [
+      {
+        title: "Authentic Heritage",
+        text: "Respect for sacred Maharashtrian, Marwari, and pan-Indian rituals without superficial modern shortcuts.",
+      },
+      {
+        title: "Calm Execution",
+        text: "Direct founder oversight on-ground ensuring flawless timing with zero last-minute panic.",
+      },
+      {
+        title: "Uncompromising Aesthetic",
+        text: "Spatial styling, royal chandeliers, and imported floral installations tailored exclusively for you.",
+      },
+    ],
+    ctaLabel: "Learn More About Us & Our Team",
+    ctaLink: "/about",
   },
   about: {
     heading: "",
     story: "",
     mission: "",
     vision: "",
+    brandImage: "/images/hero-1.jpg",
     values: [],
     timeline: [],
   },
   services: [],
   serviceCategories: [],
+  servicesHeader: {
+    badge: "Complete Wedding Planning & Decor",
+    eyebrow: "COMPLETE WEDDING PLANNING & DECOR",
+    title: "Our Wedding Services",
+    subtitle:
+      "From first design ideas to smooth execution on your big day, every service is delivered with care and quality.",
+    image: "/images/hero-1.jpg",
+  },
+  typeOfServices: [
+    {
+      id: "tos-1",
+      title: "Event Management",
+      description:
+        "Our complete event management ensures every part of your celebration runs smoothly. We manage on-ground setup, stage schedules, sound systems, guest hospitality, vendor coordination, and team management so your family can enjoy every moment stress-free.",
+      order: 1,
+    },
+    {
+      id: "tos-2",
+      title: "Event Planning",
+      description:
+        "Good planning is the foundation of a memorable wedding. We create detailed event schedules, manage budgets, negotiate with vendors, and design creative themes to make your celebration special from start to finish.",
+      order: 2,
+    },
+    {
+      id: "tos-3",
+      title: "Decor",
+      description:
+        "We transform event spaces into beautiful environments. From realistic 3D designs to on-ground setup, our team creates custom mandaps, entry gates, table centerpieces, mood lighting, and grand stage backdrops.",
+      order: 3,
+    },
+    {
+      id: "tos-4",
+      title: "Venue",
+      description:
+        "Finding the right venue sets the perfect mood for your celebration. We help you explore and book top heritage palaces, beachside resorts, private lawns, and luxury banquet halls at the best rates.",
+      order: 4,
+    },
+    {
+      id: "tos-5",
+      title: "Photograph/Videography",
+      description:
+        "Capture your most precious wedding memories with beautiful photos and videos. Our team records candid emotions, traditional ceremonies, drone views, and highlight reels for your family to cherish forever.",
+      order: 5,
+    },
+    {
+      id: "tos-6",
+      title: "Catering",
+      description:
+        "Delight your guests with delicious food and drinks. We organize customized menus featuring traditional regional dishes, live food counters, fresh beverage bars, and warm hospitality.",
+      order: 6,
+    },
+    {
+      id: "tos-7",
+      title: "Outfits",
+      description:
+        "Look your best for every function. Our styling team helps you with wedding dress selection, matching colors across ceremonies, jewelry pairing, and on-day outfit assistance.",
+      order: 7,
+    },
+  ],
+  typeOfEvents: [
+    {
+      id: "toe-1",
+      title: "Wedding",
+      description:
+        "From traditional wedding pheras under beautiful mandaps to grand multi-day destination weddings, we manage every ceremony and tradition smoothly with care.",
+      order: 1,
+    },
+    {
+      id: "toe-2",
+      title: "Social",
+      description:
+        "Celebrate life's meaningful milestones with style and warmth. We design memorable family events with themed decor, great food, lively entertainment, and smooth hosting.",
+      order: 2,
+    },
+    {
+      id: "toe-3",
+      title: "Sports",
+      description:
+        "Energetic sports events delivered with precision. We manage ground branding, audio and scoreboards, prize distributions, and guest management.",
+      order: 3,
+    },
+    {
+      id: "toe-4",
+      title: "Concert",
+      description:
+        "Exciting live shows with high-quality sound, concert lighting, stage setups, artist management, and smooth crowd entry.",
+      order: 4,
+    },
+    {
+      id: "toe-5",
+      title: "Corporate",
+      description:
+        "Professional event management for your business. We deliver modern audio-visual setups, stage designs, executive hospitality, and corporate award functions.",
+      order: 5,
+    },
+    {
+      id: "toe-6",
+      title: "Social Gathering",
+      description:
+        "Bring friends and families together in welcoming settings. We arrange delicious food, warm lighting, fun games, and photo booths for get-togethers of all sizes.",
+      order: 6,
+    },
+  ],
   ceremonies: [],
   stationery: [],
   servicesCta: {
@@ -74,18 +220,18 @@ const initialEmptyState = {
   portfolio: [],
   portfolioHeader: {
     badge: "500+ Happy Weddings",
-    eyebrow: "OUR WORK",
-    title: "Our Work",
+    eyebrow: "OUR WORKS",
+    title: "Our Works",
     subtitle:
       "A photo gallery of our mandap setups, flower decor, beach weddings, and grand reception stages across India.",
     image: "/images/hero-2.jpg",
     stats: ["500+ Weddings", "15+ Cities Across India", "100% On-Time Events"],
   },
   portfolioSection: {
-    eyebrow: "Our Work",
-    title: "Moments of Joy & Celebration",
+    eyebrow: "Our Works",
+    title: "Memorable Moments, Big and Small",
     subtitle:
-      "Explore our portfolio of mandap setups, reception stages, cheerful haldi events, and destination weddings across India.",
+      "Look through photos of our past weddings, from colorful haldi setups and grand stages to beautiful destination celebrations planned by Ashish Wankhede and Rutik Pund.",
   },
   portfolioCategories: [
     { id: "destination", name: "Destination Weddings", slug: "destination", order: 1 },
@@ -98,17 +244,17 @@ const initialEmptyState = {
   ],
   portfolioCta: {
     eyebrow: "LET'S PLAN YOUR SPECIAL DAY",
-    headline: "Ready to Plan Your Dream Wedding?",
+    headline: "Let’s Plan Your Dream Wedding",
     subtitle:
-      "Connect directly with founders Ashish Wankhede and Rutik Pund to discuss your venue options, custom 3D decor ideas, and event timeline.",
+      "Talk directly with Ashish Wankhede and Rutik Pund. We will help you pick a venue, show you 3D decor designs, and handle every detail from start to finish.",
     buttonText: "Book Free Consultation",
     buttonLink: "/contact",
-    notice: "Free Consultation • No Obligation",
+    notice: "100% Free Consultation • No Obligation",
     perks: [
-      "1-on-1 Planning Meeting",
-      "Talk Directly with Founders (Ashish & Rutik)",
-      "Realistic 3D Decor Previews",
-      "Clear & Honest Cost Estimates",
+      "1-on-1 Planning Meeting with Founders (Ashish & Rutik)",
+      "Realistic 3D Decor Previews Before Your Event",
+      "Clear, Honest & Transparent Cost Estimates",
+      "Complete Day-by-Day Event Plan",
     ],
   },
   gallery: [],
@@ -203,10 +349,10 @@ const initialEmptyState = {
   testimonialsPendingCount: 0,
   testimonialsHeader: {
     badge: "Couples & Families",
-    eyebrow: "Client Reviews",
-    title: "What Couples & Families Say",
+    eyebrow: "Words of Gratitude",
+    title: "Real Stories from Happy Families",
     subtitle:
-      "Read honest feedback and reviews from couples and families whose weddings we planned.",
+      "See what couples and their families say about trusting Confianza to design and manage their special day.",
     image: "https://res.cloudinary.com/tridevsosync/image/upload/v1790838224/confianza_portfolio/portfolio_hero_banner.jpg",
     stats: [
       "5.0 Average Couple Rating ★",
@@ -329,21 +475,47 @@ export function SiteProvider({ children }) {
 
   const [refreshing, setRefreshing] = useState(false);
 
-  // Fetch live site data (with fresh dynamic timestamp)
+  // Fetch live site data (CDN-cached for visitors, bypassable with ?fresh=true for admin)
   const refreshData = useCallback(async (opts = {}) => {
     try {
       setRefreshing(true);
-      const url = `/api/site?t=${Date.now()}${opts.fresh ? "&fresh=true" : ""}`;
-      const siteRes = await fetch(url, { cache: "no-store" });
+      const url = opts.fresh ? `/api/site?fresh=true&t=${Date.now()}` : `/api/site`;
+      const siteRes = await fetch(url, opts.fresh ? { cache: "no-store" } : undefined);
 
       if (siteRes.ok) {
         const siteJson = await siteRes.json();
         if (siteJson.success && siteJson.data) {
+          const rawSettings = siteJson.data.settings || {};
+          const brand = { ...(rawSettings.brand || {}) };
+          if (!brand.logo || brand.logo.includes("brand_logo_gold") || brand.logo.includes("confianza_brand")) {
+            brand.logo = "/logo.png";
+          }
+          const cleanSettings = { ...rawSettings, brand };
+
           setData((prev) => ({
             ...prev,
             ...siteJson.data,
-            settings: { ...prev.settings, ...(siteJson.data.settings || {}) },
+            settings: { ...prev.settings, ...cleanSettings },
+            homeStory: { ...initialEmptyState.homeStory, ...(siteJson.data.homeStory || {}) },
             contact: { ...prev.contact, ...(siteJson.data.contact || {}) },
+            servicesHeader:
+              siteJson.data.servicesHeader ||
+              siteJson.data.settings?.servicesHeader ||
+              prev.servicesHeader,
+            typeOfServices:
+              Array.isArray(siteJson.data.typeOfServices) && siteJson.data.typeOfServices.length > 0
+                ? siteJson.data.typeOfServices
+                : Array.isArray(siteJson.data.settings?.typeOfServices) &&
+                  siteJson.data.settings.typeOfServices.length > 0
+                ? siteJson.data.settings.typeOfServices
+                : prev.typeOfServices,
+            typeOfEvents:
+              Array.isArray(siteJson.data.typeOfEvents) && siteJson.data.typeOfEvents.length > 0
+                ? siteJson.data.typeOfEvents
+                : Array.isArray(siteJson.data.settings?.typeOfEvents) &&
+                  siteJson.data.settings.typeOfEvents.length > 0
+                ? siteJson.data.settings.typeOfEvents
+                : prev.typeOfEvents,
           }));
         }
       }
@@ -413,12 +585,22 @@ export function SiteProvider({ children }) {
   /** Update slice in MongoDB and update local state optimistically */
   const update = useCallback(async (key, value) => {
     let nextVal;
+    let nextSettings;
     setData((prev) => {
       nextVal = typeof value === "function" ? value(prev[key]) : value;
       const updatedData = {
         ...prev,
         [key]: nextVal,
       };
+
+      // Keep settings sub-document in sync for robust persistence through SiteContent.settings
+      if (key === "typeOfServices" || key === "typeOfEvents" || key === "servicesHeader") {
+        updatedData.settings = {
+          ...updatedData.settings,
+          [key]: nextVal,
+        };
+        nextSettings = updatedData.settings;
+      }
 
       // Keep both testimonials arrays in sync
       if (key === "testimonials" && Array.isArray(nextVal)) {
@@ -437,6 +619,19 @@ export function SiteProvider({ children }) {
         body: JSON.stringify({ key, value: nextVal }),
       });
       const resJson = await res.json();
+
+      // If updating custom slices, also persist inside settings for guaranteed retrieval across API calls
+      if (nextSettings && (key === "typeOfServices" || key === "typeOfEvents" || key === "servicesHeader")) {
+        try {
+          await fetch("/api/site", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ key: "settings", value: nextSettings }),
+          });
+        } catch (settingsErr) {
+          console.warn("Background settings sync error:", settingsErr);
+        }
+      }
 
       // Trigger background synchronization so all components reflect authoritative server state
       setTimeout(() => {

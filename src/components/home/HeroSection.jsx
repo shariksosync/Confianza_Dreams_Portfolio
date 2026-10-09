@@ -5,9 +5,9 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useSite } from "../../context/SiteContext";
 
 const DEFAULT_SLIDES = [
-  "/images/hero-1.jpg",
-  "/images/hero-2.jpg",
-  "/images/hero-3.jpg",
+  "https://res.cloudinary.com/tridevsosync/image/upload/v1790881509/confianza_heroes/home_hero_1.jpg",
+  "https://res.cloudinary.com/tridevsosync/image/upload/v1790881510/confianza_heroes/home_hero_2.jpg",
+  "https://res.cloudinary.com/tridevsosync/image/upload/v1790881511/confianza_heroes/home_hero_3.jpg",
 ];
 
 export default function HeroSection() {

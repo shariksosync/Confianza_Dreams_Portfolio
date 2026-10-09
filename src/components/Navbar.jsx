@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Phone, MessageCircle } from "lucide-react";
 
 import { useSite } from "../context/SiteContext";
 import EnquiryModal from "./EnquiryModal";
@@ -18,7 +18,7 @@ const LINKS = [
   { to: "/contact", label: "Contact Us" },
 ];
 
-/** Modern luxury navbar styled like reference with prominent large logo, active pill tabs, and glowing Enquire Now button. */
+/** Modern luxury navbar styled with dedicated desktop and mobile layouts. */
 export default function Navbar() {
   const { settings, contact } = useSite();
   const [scrolled, setScrolled] = useState(false);
@@ -33,52 +33,61 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Sleek dark bar with backdrop blur matching reference
+  // Sleek #fefefe bar with backdrop blur
   const headerClass = scrolled
-    ? "bg-ink/95 backdrop-blur-2xl border-b border-white/15 shadow-2xl py-2 sm:py-2.5"
-    : "bg-ink/90 backdrop-blur-xl border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.5)] py-2.5 sm:py-3.5";
+    ? "bg-[#fefefe]/98 backdrop-blur-2xl border-b border-border/80 shadow-md py-2 sm:py-2.5"
+    : "bg-[#fefefe] backdrop-blur-xl border-b border-border/60 shadow-xs py-2.5 sm:py-3.5";
 
   const phoneNumberDisplay = contact?.phone
     ? (contact.phone.startsWith("+") ? contact.phone : `+91 ${contact.phone}`)
     : "+91 7057357240";
 
+  const brandName =
+    settings?.brand?.name &&
+    settings.brand.name !== "Confianza Events" &&
+    settings.brand.name !== "Confianza"
+      ? settings.brand.name
+      : "Confianza Events & Entertainment";
+
   return (
     <>
       <header className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${headerClass}`}>
-        <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-          {/* Brand Logo & Title - Prominent Large Logo Badge */}
+        {/* ======================================================== */}
+        {/* 1. DESKTOP NAVBAR (100% Preserved & Untouched for xl+)   */}
+        {/* ======================================================== */}
+        <nav className="mx-auto hidden xl:flex w-full max-w-[1700px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 2xl:px-12">
+          {/* Brand Logo & Title - 100% Borderless & Frameless Logo */}
           <Link
             href="/"
-            className="flex items-center gap-3.5 shrink-0 whitespace-nowrap group"
-            aria-label="Confianza home"
+            className="flex items-center gap-3 sm:gap-3.5 shrink-0 whitespace-nowrap group"
+            aria-label="Confianza Events & Entertainment home"
           >
-            {/* Big Circular Logo Container */}
-            <div className="relative h-15 w-15 sm:h-18 sm:w-18 lg:h-20 lg:w-20 shrink-0 rounded-full overflow-hidden bg-white p-1.5 ring-2 ring-secondary/90 shadow-[0_0_24px_rgba(201,162,39,0.4)] transition-transform duration-300 group-hover:scale-105 flex items-center justify-center">
+            {/* Clean Frameless Logo Container - Enlarged for Clear Text Legibility */}
+            <div className="relative h-14 w-auto sm:h-16 lg:h-18 xl:h-20 shrink-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
               <img
-                src="/logo.png"
-                alt="Confianza Logo"
-                className="h-full w-full object-contain"
+                src={settings?.brand?.logo || "/logo.png"}
+                alt="Confianza Events & Entertainment Logo"
+                className="h-full w-auto object-contain select-none"
               />
             </div>
 
-            {/* Brand Title & Subtitle */}
+            {/* Brand Title & Dynamic Tagline */}
             <div className="shrink-0 leading-tight">
-              <div className="flex items-baseline gap-1.5">
-                <span className="font-display text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-white drop-shadow-sm">
-                  Confianza
-                </span>
-                <span className="font-display text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-secondary drop-shadow-sm">
-                  Events
+              <div className="flex flex-wrap items-baseline gap-1.5">
+                <span className="font-display text-lg sm:text-xl lg:text-2xl font-bold tracking-tight text-ink">
+                  {brandName}
                 </span>
               </div>
-              <span className="block text-[0.6rem] sm:text-[0.66rem] lg:text-[0.72rem] uppercase tracking-[0.24em] text-champagne/90 font-medium mt-0.5">
-                ART • SKILL • SOUL
-              </span>
+              {settings?.brand?.tagline ? (
+                <span className="block text-[0.58rem] sm:text-[0.62rem] lg:text-[0.68rem] uppercase tracking-[0.24em] text-muted-foreground font-semibold mt-0.5">
+                  {settings.brand.tagline}
+                </span>
+              ) : null}
             </div>
           </Link>
 
           {/* Center Navigation Links with Pill Active State */}
-          <ul className="hidden xl:flex items-center gap-1.5 2xl:gap-2 shrink-0 bg-white/5 rounded-full p-1.5 border border-white/10 backdrop-blur-md">
+          <ul className="flex items-center gap-1.5 2xl:gap-2 shrink-0 bg-black/[0.03] rounded-full p-1.5 border border-black/[0.06] backdrop-blur-md">
             {LINKS.map((l) => {
               const isActive = l.to === "/" ? pathname === "/" : pathname?.startsWith(l.to);
               return (
@@ -87,8 +96,8 @@ export default function Navbar() {
                     href={l.to}
                     className={`text-xs 2xl:text-sm font-medium tracking-wide transition-all duration-200 px-4 py-1.5 rounded-full block whitespace-nowrap ${
                       isActive
-                        ? "gradient-royal text-white font-semibold shadow-[0_2px_14px_rgba(109,76,155,0.5)] ring-1 ring-white/25"
-                        : "text-white/85 hover:text-secondary hover:bg-white/10"
+                        ? "gradient-royal text-white font-semibold shadow-xs"
+                        : "text-ink/80 hover:text-primary hover:bg-black/5"
                     }`}
                   >
                     {l.label}
@@ -98,34 +107,71 @@ export default function Navbar() {
             })}
           </ul>
 
-          {/* Right Actions: Phone Number glowing button (Opens Modal) + Mobile Hamburger */}
+          {/* Right Actions: Phone Number Button (Opens Modal) */}
           <div className="flex items-center gap-3 shrink-0">
-            {/* Glowing • Phone Number Pill Button (Opens Modal) */}
             <button
               type="button"
               onClick={() => setEnquiryOpen(true)}
-              className="hidden lg:inline-flex items-center gap-2 rounded-full gradient-gold text-ink font-bold text-xs sm:text-[0.82rem] tracking-wider uppercase px-5 sm:px-6 py-2.5 shadow-[0_0_24px_rgba(201,162,39,0.5)] hover:shadow-[0_0_35px_rgba(201,162,39,0.8)] hover:scale-105 active:scale-95 transition-all duration-300 shrink-0 whitespace-nowrap cursor-pointer ring-1 ring-white/40"
+              className="inline-flex items-center gap-2 rounded-full gradient-gold text-ink font-bold text-xs sm:text-[0.82rem] tracking-wider uppercase px-5 sm:px-6 py-2.5 shadow-md hover:scale-105 active:scale-95 transition-all duration-300 shrink-0 whitespace-nowrap cursor-pointer ring-1 ring-border/40"
             >
               <span className="h-2 w-2 rounded-full bg-ink animate-pulse" />
               <span>{phoneNumberDisplay}</span>
             </button>
+          </div>
+        </nav>
 
-            {/* Mobile Menu Hamburger */}
+        {/* ======================================================== */}
+        {/* 2. DEDICATED MOBILE NAVBAR (Engineered for Mobile/Tablet) */}
+        {/* ======================================================== */}
+        <div className="flex xl:hidden items-center justify-between px-3 sm:px-5 w-full gap-3">
+          {/* Mobile Brand Section - Full Width for Brand Name */}
+          <Link
+            href="/"
+            className="flex items-center gap-2.5 min-w-0 flex-1 group py-0.5"
+            aria-label="Confianza Events & Entertainment home"
+            onClick={() => setOpen(false)}
+          >
+            {/* Mobile Transparent Logo */}
+            <div className="relative h-11 w-auto sm:h-12 shrink-0 flex items-center justify-center">
+              <img
+                src={settings?.brand?.logo || "/logo.png"}
+                alt="Confianza Events & Entertainment Logo"
+                className="h-full w-auto object-contain select-none"
+              />
+            </div>
+
+            {/* Mobile Brand Name & Tagline - Full Visibility */}
+            <div className="min-w-0 flex-1 leading-tight">
+              <span className="font-display text-xs xs:text-sm sm:text-base font-bold text-ink tracking-tight block">
+                {brandName}
+              </span>
+              {settings?.brand?.tagline ? (
+                <span className="text-[0.52rem] sm:text-[0.58rem] uppercase tracking-wider text-muted-foreground font-semibold block mt-0.5 truncate">
+                  {settings.brand.tagline}
+                </span>
+              ) : null}
+            </div>
+          </Link>
+
+          {/* Mobile Right Controls: Hamburger Menu Toggle */}
+          <div className="flex items-center shrink-0">
             <button
               type="button"
-              aria-label="Open menu"
+              aria-label="Toggle menu"
               aria-expanded={open}
               onClick={() => setOpen((v) => !v)}
-              className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/25 bg-white/10 text-white xl:hidden transition"
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-border bg-black/5 text-ink hover:bg-black/10 active:scale-95 transition cursor-pointer"
             >
               {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
-        </nav>
+        </div>
 
-        {/* Mobile menu dropdown */}
+        {/* ======================================================== */}
+        {/* 3. MOBILE MENU DROPDOWN DRAWER                           */}
+        {/* ======================================================== */}
         {open && (
-          <div className="animate-slide-up mx-3 sm:mx-6 mt-3 rounded-3xl p-6 xl:hidden bg-ink/95 text-background border border-white/15 shadow-2xl backdrop-blur-2xl">
+          <div className="animate-slide-up mx-3 sm:mx-6 mt-3 rounded-3xl p-5 sm:p-6 xl:hidden bg-[#fefefe] text-foreground border border-border shadow-2xl backdrop-blur-2xl">
             <ul className="flex flex-col gap-1.5">
               {LINKS.map((l) => {
                 const isActive = l.to === "/" ? pathname === "/" : pathname?.startsWith(l.to);
@@ -136,8 +182,8 @@ export default function Navbar() {
                       onClick={() => setOpen(false)}
                       className={`block rounded-xl px-4 py-2.5 text-sm uppercase tracking-[0.14em] transition font-medium ${
                         isActive
-                          ? "gradient-royal text-white font-bold shadow-md ring-1 ring-white/20"
-                          : "text-white/90 hover:bg-white/10 hover:text-secondary"
+                          ? "gradient-royal text-white font-bold shadow-md"
+                          : "text-ink hover:bg-black/5 hover:text-primary"
                       }`}
                     >
                       {l.label}
@@ -154,15 +200,30 @@ export default function Navbar() {
                 setOpen(false);
                 setEnquiryOpen(true);
               }}
-              className="gradient-gold mt-5 w-full text-ink font-bold text-xs sm:text-sm py-3 px-4 rounded-full shadow-[0_0_20px_rgba(201,162,39,0.4)] flex items-center justify-center gap-2 tracking-wider uppercase cursor-pointer"
+              className="gradient-gold mt-5 w-full text-ink font-bold text-xs sm:text-sm py-3 px-4 rounded-full shadow-md flex items-center justify-center gap-2 tracking-wider uppercase cursor-pointer active:scale-98 transition"
             >
               <span className="h-2 w-2 rounded-full bg-ink animate-pulse" />
               <span>{phoneNumberDisplay}</span>
             </button>
 
-            <p className="mt-4 text-center text-xs text-champagne/80 font-light">
-              {settings?.brand?.tagline}
-            </p>
+            {contact?.whatsapp && (
+              <a
+                href={`https://wa.me/${contact.whatsapp}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setOpen(false)}
+                className="mt-2.5 w-full bg-emerald-600/15 hover:bg-emerald-600/25 text-emerald-700 border border-emerald-500/30 text-xs sm:text-sm py-2.5 px-4 rounded-full flex items-center justify-center gap-2 font-semibold tracking-wide transition cursor-pointer"
+              >
+                <MessageCircle className="h-4 w-4 text-emerald-600" />
+                <span>Chat on WhatsApp</span>
+              </a>
+            )}
+
+            {settings?.brand?.tagline ? (
+              <p className="mt-4 text-center text-xs text-muted-foreground font-light">
+                {settings.brand.tagline}
+              </p>
+            ) : null}
           </div>
         )}
       </header>

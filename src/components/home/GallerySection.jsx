@@ -69,7 +69,7 @@ export default function GallerySection({ isStandalone = false }) {
       <div className="mx-auto max-w-7xl px-3.5 sm:px-6 lg:px-8">
         <SectionHeading
           eyebrow="Photo Gallery"
-          title="Moments of Grandeur & Celebration"
+          title="Moments of Joy & Celebration"
           subtitle="Explore photos of our mandap decor, grand reception stages, colorful haldi ceremonies, and destination weddings."
         />
 
@@ -147,36 +147,10 @@ export default function GallerySection({ isStandalone = false }) {
                 <div className="relative overflow-hidden bg-muted/40">
                   <img
                     src={item.image}
-                    alt={item.caption || "Confianza Luxury Wedding Decor"}
-                    className="w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    alt={item.caption || item.title || "Confianza Wedding Decor"}
+                    className="w-full object-cover transition-transform duration-700 group-hover:scale-105 select-none"
                     loading="lazy"
                   />
-
-                  {/* Top Category Tag Badge */}
-                  {item.category && (
-                    <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-10">
-                      <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-ink/75 backdrop-blur-md text-[0.58rem] sm:text-[0.62rem] uppercase tracking-wider font-semibold text-champagne border border-white/15 shadow-xs">
-                        {item.category}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Bottom Hover Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-ink/95 via-ink/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex flex-col justify-end p-3.5 sm:p-5">
-                    {item.location && (
-                      <div className="flex items-center gap-1 text-[0.62rem] sm:text-[0.68rem] text-secondary font-medium tracking-wide">
-                        <MapPin className="h-3 w-3 text-secondary" />
-                        <span>{item.location}</span>
-                      </div>
-                    )}
-                    <h4 className="mt-0.5 font-display text-xs sm:text-base text-background font-normal leading-snug">
-                      {item.caption}
-                    </h4>
-                    <div className="mt-2 sm:mt-3 flex items-center gap-1.5 text-[0.68rem] sm:text-xs text-champagne font-medium">
-                      <Eye className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                      <span>Click to expand view</span>
-                    </div>
-                  </div>
                 </div>
               </div>
             ))}

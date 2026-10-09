@@ -26,7 +26,6 @@ import {
 } from "lucide-react";
 import SiteLayout from "@/layouts/SiteLayout";
 import SectionHeading from "@/components/ui/SectionHeading";
-import PartnerMarqueeSection from "@/components/home/PartnerMarqueeSection";
 import ImageUploadField from "@/components/ImageUploadField";
 import CategoryFilterBar from "@/components/ui/CategoryFilterBar";
 import { useSite } from "@/context/SiteContext";
@@ -719,9 +718,6 @@ export default function TestimonialsPage() {
           </div>
         </div>
       </section>
-
-      {/* 5. Partner Marquee */}
-      <PartnerMarqueeSection />
 
       {/* 6. Review Submission FAQ Accordion */}
       <section className="section-pad bg-background">
