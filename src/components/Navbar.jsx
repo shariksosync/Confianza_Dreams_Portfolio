@@ -55,15 +55,15 @@ export default function Navbar() {
         {/* ======================================================== */}
         {/* 1. DESKTOP NAVBAR (100% Preserved & Untouched for xl+)   */}
         {/* ======================================================== */}
-        <nav className="mx-auto hidden xl:flex w-full max-w-[1700px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 2xl:px-12">
-          {/* Brand Logo & Title - 100% Borderless & Frameless Logo */}
+        <nav className="mx-auto hidden xl:flex w-full max-w-[1700px] items-center justify-between gap-3 2xl:gap-4 px-4 sm:px-5 lg:px-6 2xl:px-10">
+          {/* Brand Logo & Title - Compact & Balanced */}
           <Link
             href="/"
-            className="flex items-center gap-3 sm:gap-3.5 shrink-0 whitespace-nowrap group"
+            className="flex items-center gap-2.5 2xl:gap-3 shrink-0 whitespace-nowrap group"
             aria-label="Confianza Events & Entertainment home"
           >
-            {/* Clean Frameless Logo Container - Enlarged for Clear Text Legibility */}
-            <div className="relative h-14 w-auto sm:h-16 lg:h-18 xl:h-20 shrink-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+            {/* Clean Frameless Logo Container */}
+            <div className="relative h-14 w-auto sm:h-16 xl:h-16 2xl:h-14 shrink-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
               <img
                 src={settings?.brand?.logo || "/logo.png"}
                 alt="Confianza Events & Entertainment Logo"
@@ -73,13 +73,13 @@ export default function Navbar() {
 
             {/* Brand Title & Dynamic Tagline */}
             <div className="shrink-0 leading-tight">
-              <div className="flex flex-wrap items-baseline gap-1.5">
-                <span className="font-display text-lg sm:text-xl lg:text-2xl font-bold tracking-tight text-ink">
+              <div className="flex flex-wrap items-baseline gap-1">
+                <span className="font-display text-base xl:text-[1.05rem] 2xl:text-xl font-bold tracking-tight text-ink">
                   {brandName}
                 </span>
               </div>
               {settings?.brand?.tagline ? (
-                <span className="block text-[0.58rem] sm:text-[0.62rem] lg:text-[0.68rem] uppercase tracking-[0.24em] text-muted-foreground font-semibold mt-0.5">
+                <span className="block text-[0.52rem] xl:text-[0.56rem] 2xl:text-[0.62rem] uppercase tracking-[0.2em] text-muted-foreground font-semibold mt-0.5">
                   {settings.brand.tagline}
                 </span>
               ) : null}
@@ -87,14 +87,14 @@ export default function Navbar() {
           </Link>
 
           {/* Center Navigation Links with Pill Active State */}
-          <ul className="flex items-center gap-1.5 2xl:gap-2 shrink-0 bg-black/[0.03] rounded-full p-1.5 border border-black/[0.06] backdrop-blur-md">
+          <ul className="flex items-center gap-1 xl:gap-1.5 2xl:gap-2 shrink-0 bg-black/[0.03] rounded-full p-1 2xl:p-1.5 border border-black/[0.06] backdrop-blur-md">
             {LINKS.map((l) => {
               const isActive = l.to === "/" ? pathname === "/" : pathname?.startsWith(l.to);
               return (
                 <li key={l.to}>
                   <Link
                     href={l.to}
-                    className={`text-xs 2xl:text-sm font-medium tracking-wide transition-all duration-200 px-4 py-1.5 rounded-full block whitespace-nowrap ${
+                    className={`text-xs 2xl:text-sm font-medium tracking-wide transition-all duration-200 px-3 2xl:px-4 py-1.5 rounded-full block whitespace-nowrap ${
                       isActive
                         ? "gradient-royal text-white font-semibold shadow-xs"
                         : "text-ink/80 hover:text-primary hover:bg-black/5"
@@ -108,10 +108,10 @@ export default function Navbar() {
           </ul>
 
           {/* Right Actions: Phone Number Button (Direct Call) */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2.5 2xl:gap-3 shrink-0">
             <a
               href={`tel:${contact?.phone ? (contact.phone.startsWith("+") ? contact.phone : `+91${contact.phone}`) : "+917057357240"}`}
-              className="inline-flex items-center gap-2 rounded-full gradient-gold text-ink font-bold text-xs sm:text-[0.82rem] tracking-wider uppercase px-5 sm:px-6 py-2.5 shadow-md hover:scale-105 active:scale-95 transition-all duration-300 shrink-0 whitespace-nowrap cursor-pointer ring-1 ring-border/40"
+              className="inline-flex items-center gap-2 rounded-full gradient-gold text-ink font-bold text-xs 2xl:text-[0.82rem] tracking-wider uppercase px-4 xl:px-4.5 2xl:px-6 py-2 2xl:py-2.5 shadow-md hover:scale-105 active:scale-95 transition-all duration-300 shrink-0 whitespace-nowrap cursor-pointer ring-1 ring-border/40"
             >
               <span className="h-2 w-2 rounded-full bg-ink animate-pulse" />
               <span>{phoneNumberDisplay}</span>
