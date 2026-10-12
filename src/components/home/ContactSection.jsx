@@ -410,6 +410,17 @@ export default function ContactSection({ isStandalone = false }) {
                       </>
                     )}
                   </button>
+
+                  <div className="pt-2 text-center">
+                    <span className="text-[0.68rem] text-muted-foreground uppercase tracking-wider block mb-2 font-medium">— OR CALL DIRECTLY FOR INSTANT CONSULTATION —</span>
+                    <a
+                      href={`tel:${contact.phone || "7057357240"}`}
+                      className="btn-luxe gradient-gold w-full text-ink font-bold shadow-md py-3 px-4 text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer text-center"
+                    >
+                      <Phone className="h-4 w-4 shrink-0" />
+                      <span>Direct Call (+91 {contact.phone || "7057357240"})</span>
+                    </a>
+                  </div>
                 </form>
               )}
             </div>

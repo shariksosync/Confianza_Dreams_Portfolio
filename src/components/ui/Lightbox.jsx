@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { X, ChevronLeft, ChevronRight, MapPin, Sparkles, ArrowRight } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, MapPin, Sparkles, ArrowRight, Phone } from "lucide-react";
 
 /** Accessible image popup with previous / next navigation, side details panel, and mobile swipe gestures. */
 export default function Lightbox({ items, index, onClose, onPrev, onNext }) {
@@ -157,13 +157,13 @@ export default function Lightbox({ items, index, onClose, onPrev, onNext }) {
 
           {/* Footer Actions & Switcher */}
           <div className="pt-4 mt-4 border-t border-border/60 space-y-3">
-            <Link
-              href={`/contact?service=${encodeURIComponent(itemTitle)}`}
-              className="btn-luxe gradient-royal text-primary-foreground text-xs py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 font-semibold shadow-sm w-full hover:scale-[1.02] transition-transform"
+            <a
+              href="tel:+917057357240"
+              className="btn-luxe gradient-royal text-primary-foreground text-xs py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 font-semibold shadow-sm w-full hover:scale-[1.02] transition-transform cursor-pointer"
             >
-              <span>Inquire About This Setup</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
+              <Phone className="h-3.5 w-3.5" />
+              <span>Inquire About This Setup (+91 7057357240)</span>
+            </a>
 
             <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
               <button

@@ -385,13 +385,13 @@ export default function TestimonialsPage() {
               <span>Share Your Story</span>
             </button>
 
-            <Link
-              href="/contact"
-              className="btn-luxe bg-white/10 text-white border border-white/25 hover:bg-white/20 text-xs py-2.5 sm:py-3 px-6 sm:px-7 uppercase tracking-wider font-semibold transition flex items-center justify-center gap-2 w-full sm:w-auto"
+            <a
+              href={`tel:+91${contact?.phone || "7057357240"}`}
+              className="btn-luxe bg-white/10 text-white border border-white/25 hover:bg-white/20 text-xs py-2.5 sm:py-3 px-6 sm:px-7 uppercase tracking-wider font-semibold transition flex items-center justify-center gap-2 w-full sm:w-auto cursor-pointer"
             >
+              <Phone className="h-4 w-4 shrink-0 text-secondary" />
               <span>Book A Consultation</span>
-              <ArrowRight className="h-4 w-4 shrink-0" />
-            </Link>
+            </a>
           </div>
 
           {/* Dynamic Trust Metric Tags */}
@@ -790,12 +790,13 @@ export default function TestimonialsPage() {
               <span>{cta.buttonText || "Submit Your Love Story"}</span>
             </button>
 
-            <Link
-              href="/contact"
-              className="btn-luxe bg-white/10 text-white border border-white/25 hover:bg-white/20 text-xs py-2.5 sm:py-3 px-6 sm:px-8 uppercase tracking-wider font-semibold flex items-center justify-center gap-2 w-full sm:w-auto"
+            <a
+              href={`tel:+91${contact?.phone || "7057357240"}`}
+              className="btn-luxe bg-white/10 text-white border border-white/25 hover:bg-white/20 text-xs py-2.5 sm:py-3 px-6 sm:px-8 uppercase tracking-wider font-semibold flex items-center justify-center gap-2 w-full sm:w-auto cursor-pointer"
             >
+              <Phone className="h-4 w-4 shrink-0 text-secondary" />
               <span>{cta.secondaryButtonText || "Book A Consultation"}</span>
-            </Link>
+            </a>
           </div>
 
           {/* Direct Founders Contact Strip */}

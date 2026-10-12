@@ -35,7 +35,7 @@ export default function Footer() {
                 : "Confianza Events & Entertainment"}
             </span>
           </div>
-          <p className="mt-4 text-xs sm:text-sm leading-relaxed text-ink/70 max-w-sm">
+          <p className="mt-4 text-xs sm:text-sm leading-relaxed text-[#374151] max-w-sm">
             {settings?.brand?.tagline ? `${settings.brand.tagline}. ` : ""}Complete wedding planning, decor, and event management from Pune to any destination across India.
           </p>
           <div className="mt-5 flex gap-2.5">
@@ -48,7 +48,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noreferrer"
                   aria-label={s.label}
-                  className="grid h-9 w-9 sm:h-10 sm:w-10 place-items-center rounded-full border border-ink/15 transition hover:border-primary hover:text-primary hover:bg-primary/5 text-ink/75"
+                  className="grid h-9 w-9 sm:h-10 sm:w-10 place-items-center rounded-full border border-ink/15 transition hover:border-primary hover:text-primary hover:bg-primary/5 text-[#374151]"
                 >
                   <Icon className="h-4 w-4" />
                 </a>
@@ -72,7 +72,7 @@ export default function Footer() {
               { to: "/contact", label: "Contact Us" },
             ].map((l) => (
               <li key={l.to}>
-                <Link href={l.to} className="transition hover:text-primary text-ink/75">
+                <Link href={l.to} className="transition hover:text-primary text-[#374151]">
                   {l.label}
                 </Link>
               </li>
@@ -93,7 +93,7 @@ export default function Footer() {
               { to: "/services", label: "Event Management" },
             ].map((c) => (
               <li key={c.label}>
-                <Link href={c.to} className="transition hover:text-primary text-ink/75 whitespace-nowrap block">
+                <Link href={c.to} className="transition hover:text-primary text-[#374151] whitespace-nowrap block">
                   {c.label}
                 </Link>
               </li>
@@ -107,13 +107,13 @@ export default function Footer() {
           <ul className="mt-4 space-y-3 text-xs sm:text-sm">
             <li className="flex items-center gap-2.5">
               <Phone className="h-4 w-4 shrink-0 text-primary" />
-              <div className="flex items-center gap-1.5 flex-wrap text-ink/85 font-medium transition text-xs sm:text-sm">
+              <div className="flex items-center gap-1.5 flex-wrap text-[#374151] font-medium transition text-xs sm:text-sm">
                 <a href={`tel:${primaryPhone}`} className="hover:text-primary transition whitespace-nowrap">
                   {primaryPhone}
                 </a>
                 {secondaryPhone && (
                   <>
-                    <span className="text-ink/30">/</span>
+                    <span className="text-[#374151]/40">/</span>
                     <a href={`tel:${secondaryPhone}`} className="hover:text-primary transition whitespace-nowrap">
                       {secondaryPhone}
                     </a>
@@ -125,7 +125,7 @@ export default function Footer() {
               <Mail className="h-4 w-4 shrink-0 text-primary" />
               <a
                 href={`mailto:${emailAddress}`}
-                className="hover:text-primary text-ink/85 font-medium transition text-xs sm:text-sm whitespace-nowrap block truncate"
+                className="hover:text-primary text-[#374151] font-medium transition text-xs sm:text-sm whitespace-nowrap block truncate"
                 title={emailAddress}
               >
                 {emailAddress}
@@ -133,7 +133,7 @@ export default function Footer() {
             </li>
             <li className="flex items-start gap-2.5">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-              <span className="text-ink/75 text-xs leading-relaxed break-words">
+              <span className="text-[#374151] text-xs leading-relaxed break-words">
                 {contact?.address?.line1}, {contact?.address?.line2}, {contact?.address?.city} {contact?.address?.pincode}
               </span>
             </li>
@@ -142,11 +142,11 @@ export default function Footer() {
           <h4 className="mt-6 text-[0.65rem] sm:text-[0.7rem] uppercase tracking-[0.25em] text-primary font-bold">
             Business Hours
           </h4>
-          <ul className="mt-2.5 space-y-1.5 text-xs text-ink/75">
+          <ul className="mt-2.5 space-y-1.5 text-xs text-[#374151]">
             {(contact?.hours || []).map((h) => (
               <li key={h.day} className="flex justify-between gap-2 border-b border-black/5 pb-1 last:border-0">
-                <span className="font-medium text-ink/85">{h.day}</span>
-                <span className="text-ink/65 font-semibold">{h.time}</span>
+                <span className="font-medium text-[#374151]">{h.day}</span>
+                <span className="text-[#374151] font-semibold">{h.time}</span>
               </li>
             ))}
           </ul>
@@ -154,11 +154,11 @@ export default function Footer() {
       </div>
 
       <div className="border-t border-ink/10">
-        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 sm:px-6 py-4 sm:py-5 text-xs text-ink/60 sm:flex-row sm:items-center sm:justify-between lg:px-10">
+        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 sm:px-6 py-4 sm:py-5 text-xs text-[#374151] sm:flex-row sm:items-center sm:justify-between lg:px-10">
           <p>
             © {year} {contact?.business || "Confianza Events & Entertainment"}. All rights reserved.
           </p>
-          <p className="text-ink/40">
+          <p className="text-[#4B5563]">
             Crafted with Passion • Pune, Maharashtra
           </p>
         </div>

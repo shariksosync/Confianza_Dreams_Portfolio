@@ -179,13 +179,13 @@ export default function BlogSection({ isStandalone = false }) {
               <span className="text-xs text-[#7E7688]">
                 Confianza Events and Entertainment
               </span>
-              <Link
-                href="/contact"
+              <a
+                href="tel:+917057357240"
                 onClick={() => setSelectedArticle(null)}
-                className="btn-modal-primary"
+                className="btn-modal-primary cursor-pointer"
               >
-                Book a Consultation
-              </Link>
+                Call for Consultation (+91 7057357240)
+              </a>
             </div>
           </div>
         </div>

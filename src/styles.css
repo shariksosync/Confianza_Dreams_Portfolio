@@ -82,7 +82,7 @@
   --accent: oklch(0.968 0.006 320);
   --accent-foreground: oklch(0.402 0.028 305);
   --muted: oklch(0.968 0.006 320);
-  --muted-foreground: oklch(0.55 0.02 305);
+  --muted-foreground: #374151;
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0.005 300);
   --border: oklch(0.912 0.012 310);
@@ -136,7 +136,7 @@
   --accent: oklch(0.3 0.045 305);
   --accent-foreground: oklch(0.95 0.008 305);
   --muted: oklch(0.3 0.045 305);
-  --muted-foreground: oklch(0.75 0.02 305);
+  --muted-foreground: #9CA3AF;
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 16%);
   --pearl: oklch(0.3 0.045 305);
@@ -170,6 +170,35 @@
   h4 {
     font-family: var(--font-display);
     letter-spacing: -0.01em;
+  }
+
+  /* 
+   * Strict Rule: For small text only use Dark gray color across each and every page.
+   */
+  .text-muted-foreground {
+    color: #374151 !important;
+  }
+
+  :where(p, span, li, dd, dt, label, small, time, caption, figcaption).text-xs:not([class*="text-white"]):not([class*="text-primary"]):not([class*="text-secondary"]):not([class*="text-gold"]):not([class*="text-champagne"]):not([class*="text-destructive"]):not([class*="text-emerald"]):not([class*="text-background"]):not([class*="gradient-"]):not([class*="btn-"]):not([class*="badge"]),
+  :where(p, span, li, dd, dt, label, small, time, caption, figcaption).text-sm:not([class*="text-white"]):not([class*="text-primary"]):not([class*="text-secondary"]):not([class*="text-gold"]):not([class*="text-champagne"]):not([class*="text-destructive"]):not([class*="text-emerald"]):not([class*="text-background"]):not([class*="gradient-"]):not([class*="btn-"]):not([class*="badge"]),
+  :where(p, span, li, dd, dt, label, small, time, caption, figcaption)[class*="text-[0."]:not([class*="text-white"]):not([class*="text-primary"]):not([class*="text-secondary"]):not([class*="text-gold"]):not([class*="text-champagne"]):not([class*="text-destructive"]):not([class*="text-emerald"]):not([class*="text-background"]):not([class*="gradient-"]):not([class*="btn-"]):not([class*="badge"]) {
+    color: #374151;
+  }
+
+  /* Preserve legibility on dark banners and dark theme */
+  .bg-ink :where(p, span, li, small).text-xs,
+  .bg-ink :where(p, span, li, small).text-sm,
+  [class*="bg-ink"] :where(p, span, li, small).text-xs,
+  [class*="bg-ink"] :where(p, span, li, small).text-sm,
+  [class*="bg-[#1A1322]"] :where(p, span, li, small).text-xs,
+  [class*="bg-[#1A1322]"] :where(p, span, li, small).text-sm,
+  .dark :where(p, span, li, small).text-xs,
+  .dark :where(p, span, li, small).text-sm {
+    color: inherit;
+  }
+
+  .dark .text-muted-foreground {
+    color: #9CA3AF !important;
   }
 }
 

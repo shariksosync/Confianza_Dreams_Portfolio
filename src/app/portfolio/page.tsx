@@ -145,13 +145,13 @@ export default function PortfolioPage() {
 
           {/* Action Buttons */}
           <div className="flex flex-wrap items-center justify-center gap-4">
-            <Link
-              href={cta.buttonLink || "/contact"}
-              className="btn-luxe gradient-gold text-ink font-bold shadow-luxe py-3 px-8 text-xs tracking-wider uppercase flex items-center gap-2"
+            <a
+              href={`tel:${contact?.phone ? (contact.phone.startsWith("+") ? contact.phone : `+91${contact.phone}`) : "+917057357240"}`}
+              className="btn-luxe gradient-gold text-ink font-bold shadow-luxe py-3 px-8 text-xs tracking-wider uppercase flex items-center justify-center gap-2 cursor-pointer"
             >
+              <Phone className="h-4 w-4 shrink-0" />
               <span>{cta.buttonText || "Book Free Consultation"}</span>
-              <ArrowRight className="h-4 w-4" />
-            </Link>
+            </a>
 
             {contact?.phone && (
               <a

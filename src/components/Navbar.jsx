@@ -107,16 +107,15 @@ export default function Navbar() {
             })}
           </ul>
 
-          {/* Right Actions: Phone Number Button (Opens Modal) */}
+          {/* Right Actions: Phone Number Button (Direct Call) */}
           <div className="flex items-center gap-3 shrink-0">
-            <button
-              type="button"
-              onClick={() => setEnquiryOpen(true)}
+            <a
+              href={`tel:${contact?.phone ? (contact.phone.startsWith("+") ? contact.phone : `+91${contact.phone}`) : "+917057357240"}`}
               className="inline-flex items-center gap-2 rounded-full gradient-gold text-ink font-bold text-xs sm:text-[0.82rem] tracking-wider uppercase px-5 sm:px-6 py-2.5 shadow-md hover:scale-105 active:scale-95 transition-all duration-300 shrink-0 whitespace-nowrap cursor-pointer ring-1 ring-border/40"
             >
               <span className="h-2 w-2 rounded-full bg-ink animate-pulse" />
               <span>{phoneNumberDisplay}</span>
-            </button>
+            </a>
           </div>
         </nav>
 
@@ -193,18 +192,15 @@ export default function Navbar() {
               })}
             </ul>
 
-            {/* Mobile Phone Number Button (Opens Modal) */}
-            <button
-              type="button"
-              onClick={() => {
-                setOpen(false);
-                setEnquiryOpen(true);
-              }}
+            {/* Mobile Phone Number Button (Direct Call) */}
+            <a
+              href={`tel:${contact?.phone ? (contact.phone.startsWith("+") ? contact.phone : `+91${contact.phone}`) : "+917057357240"}`}
+              onClick={() => setOpen(false)}
               className="gradient-gold mt-5 w-full text-ink font-bold text-xs sm:text-sm py-3 px-4 rounded-full shadow-md flex items-center justify-center gap-2 tracking-wider uppercase cursor-pointer active:scale-98 transition"
             >
               <span className="h-2 w-2 rounded-full bg-ink animate-pulse" />
               <span>{phoneNumberDisplay}</span>
-            </button>
+            </a>
 
             {contact?.whatsapp && (
               <a

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Check, Sparkles, ArrowRight } from "lucide-react";
+import { Check, Sparkles, ArrowRight, Phone } from "lucide-react";
 import { useSite } from "../../context/SiteContext";
 import SectionHeading from "../ui/SectionHeading";
 
@@ -126,17 +126,17 @@ export default function PackagesSection() {
               </div>
 
               <div className="mt-5 sm:mt-8 pt-2 sm:pt-4">
-                <Link
-                  href={`/contact?package=${encodeURIComponent(pkg.name)}`}
-                  className={`btn-luxe w-full text-[0.7rem] sm:text-xs font-semibold py-2.5 sm:py-3 px-3 sm:px-4 flex items-center justify-center gap-1.5 sm:gap-2 text-center whitespace-normal leading-snug tracking-wider uppercase ${
+                <a
+                  href="tel:+917057357240"
+                  className={`btn-luxe w-full text-[0.7rem] sm:text-xs font-semibold py-2.5 sm:py-3 px-3 sm:px-4 flex items-center justify-center gap-1.5 sm:gap-2 text-center whitespace-normal leading-snug tracking-wider uppercase cursor-pointer ${
                     pkg.featured
                       ? "gradient-gold text-ink shadow-luxe"
                       : "gradient-royal text-primary-foreground shadow-sm"
                   }`}
                 >
-                  <span className="break-words">Select {pkg.name}</span>
-                  <ArrowRight className="h-3.5 w-3.5 shrink-0" />
-                </Link>
+                  <Phone className="h-3.5 w-3.5 shrink-0" />
+                  <span className="break-words">Inquire About {pkg.name}</span>
+                </a>
               </div>
             </div>
           ))}

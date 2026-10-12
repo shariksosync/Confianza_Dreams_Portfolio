@@ -137,13 +137,13 @@ export default function GalleryPage() {
 
           {/* Actions */}
           <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto">
-            <Link
-              href={cta.buttonLink || "/contact"}
-              className="btn-luxe gradient-gold text-ink font-bold text-xs py-3 px-6 sm:px-8 shadow-luxe flex items-center justify-center gap-2 w-full sm:w-auto text-center"
+            <a
+              href={`tel:+91${contact?.phone || "7057357240"}`}
+              className="btn-luxe gradient-gold text-ink font-bold text-xs py-3 px-6 sm:px-8 shadow-luxe flex items-center justify-center gap-2 w-full sm:w-auto text-center cursor-pointer"
             >
-              <Calendar className="h-4 w-4" />
+              <Phone className="h-4 w-4 shrink-0" />
               <span>{cta.buttonText || "Book Free Consultation"}</span>
-            </Link>
+            </a>
 
             <a
               href={`tel:+91${contact?.phone || "7057357240"}`}

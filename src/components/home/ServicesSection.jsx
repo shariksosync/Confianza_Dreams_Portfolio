@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Sparkles, Eye, X, ChevronRight } from "lucide-react";
+import { ArrowRight, Sparkles, Eye, X, ChevronRight, Phone } from "lucide-react";
 import { useSite } from "../../context/SiteContext";
 import SectionHeading from "../ui/SectionHeading";
 
@@ -104,7 +104,7 @@ const defaultTypeOfEvents = [
 ];
 
 export default function ServicesSection() {
-  const { typeOfServices, typeOfEvents } = useSite();
+  const { typeOfServices, typeOfEvents, contact } = useSite();
   const [activeTab, setActiveTab] = useState("services");
   const [selectedDetailItem, setSelectedDetailItem] = useState(null);
 
@@ -194,13 +194,13 @@ export default function ServicesSection() {
 
               {/* Bottom Inquire Action */}
               <div className="mt-5 pt-3.5 border-t border-border/50 flex items-center justify-end">
-                <Link
-                  href={`/contact?service=${encodeURIComponent(item.title)}`}
-                  className="inline-flex items-center gap-1 text-[0.7rem] sm:text-xs font-bold uppercase tracking-wider text-secondary hover:text-primary transition-colors"
+                <a
+                  href={`tel:${contact?.phone ? (contact.phone.startsWith("+") ? contact.phone : `+91${contact.phone}`) : "+917057357240"}`}
+                  className="inline-flex items-center gap-1.5 text-[0.7rem] sm:text-xs font-bold uppercase tracking-wider text-secondary hover:text-primary transition-colors cursor-pointer"
                 >
                   <span>Inquire</span>
-                  <ArrowRight className="h-3 w-3" />
-                </Link>
+                  <Phone className="h-3 w-3" />
+                </a>
               </div>
             </div>
           ))}
@@ -270,13 +270,13 @@ export default function ServicesSection() {
 
                   {/* Bottom Inquire Action */}
                   <div className="mt-5 pt-3.5 border-t border-border/50 flex items-center justify-end">
-                    <Link
-                      href={`/contact?service=${encodeURIComponent(event.title)}`}
-                      className="inline-flex items-center gap-1 text-[0.7rem] sm:text-xs font-bold uppercase tracking-wider text-secondary hover:text-primary transition-colors"
+                    <a
+                      href={`tel:${contact?.phone ? (contact.phone.startsWith("+") ? contact.phone : `+91${contact.phone}`) : "+917057357240"}`}
+                      className="inline-flex items-center gap-1.5 text-[0.7rem] sm:text-xs font-bold uppercase tracking-wider text-secondary hover:text-primary transition-colors cursor-pointer"
                     >
                       <span>Inquire</span>
-                      <ArrowRight className="h-3 w-3" />
-                    </Link>
+                      <Phone className="h-3 w-3" />
+                    </a>
                   </div>
                 </div>
               ))}
@@ -325,13 +325,13 @@ export default function ServicesSection() {
                 Close
               </button>
 
-              <Link
-                href={`/contact?service=${encodeURIComponent(selectedDetailItem.title)}`}
-                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5 font-semibold flex items-center gap-1.5 shadow-sm"
+              <a
+                href={`tel:${contact?.phone ? (contact.phone.startsWith("+") ? contact.phone : `+91${contact.phone}`) : "+917057357240"}`}
+                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5 font-semibold flex items-center gap-1.5 shadow-sm cursor-pointer"
               >
-                <span>Inquire About This {selectedDetailItem.itemType || "Service"}</span>
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
+                <Phone className="h-3.5 w-3.5" />
+                <span>Call to Inquire About This {selectedDetailItem.itemType || "Service"}</span>
+              </a>
             </div>
           </div>
         </div>

@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import SiteLayout from "@/layouts/SiteLayout";
 import SectionHeading from "@/components/ui/SectionHeading";
-import PackagesSection from "@/components/home/PackagesSection";
 import ProcessSection from "@/components/home/ProcessSection";
 import { useSite } from "@/context/SiteContext";
 
@@ -274,13 +273,13 @@ export default function ServicesPage() {
 
                 {/* Card Footer Actions */}
                 <div className="mt-6 pt-4 border-t border-border/50 flex items-center justify-end">
-                  <Link
-                    href={`/contact?service=${encodeURIComponent(item.title)}`}
-                    className="inline-flex items-center gap-1 text-[0.72rem] sm:text-xs font-bold uppercase tracking-wider text-secondary hover:text-primary transition-colors"
+                  <a
+                    href={`tel:${contact?.phone ? (contact.phone.startsWith("+") ? contact.phone : `+91${contact.phone}`) : "+917057357240"}`}
+                    className="inline-flex items-center gap-1.5 text-[0.72rem] sm:text-xs font-bold uppercase tracking-wider text-secondary hover:text-primary transition-colors cursor-pointer"
                   >
                     <span>Inquire</span>
-                    <ArrowRight className="h-3 w-3" />
-                  </Link>
+                    <Phone className="h-3 w-3" />
+                  </a>
                 </div>
               </div>
             ))}
@@ -339,13 +338,13 @@ export default function ServicesPage() {
 
                     {/* Card Footer Actions */}
                     <div className="mt-6 pt-4 border-t border-border/50 flex items-center justify-end">
-                      <Link
-                        href={`/contact?service=${encodeURIComponent(event.title)}`}
-                        className="inline-flex items-center gap-1 text-[0.72rem] sm:text-xs font-bold uppercase tracking-wider text-secondary hover:text-primary transition-colors"
+                      <a
+                        href={`tel:${contact?.phone ? (contact.phone.startsWith("+") ? contact.phone : `+91${contact.phone}`) : "+917057357240"}`}
+                        className="inline-flex items-center gap-1.5 text-[0.72rem] sm:text-xs font-bold uppercase tracking-wider text-secondary hover:text-primary transition-colors cursor-pointer"
                       >
                         <span>Inquire</span>
-                        <ArrowRight className="h-3 w-3" />
-                      </Link>
+                        <Phone className="h-3 w-3" />
+                      </a>
                     </div>
                   </div>
                 ))}
@@ -414,13 +413,10 @@ export default function ServicesPage() {
         </section>
       )}
 
-      {/* 4. Wedding Packages Comparison */}
-      <PackagesSection />
-
-      {/* 5. 5-Step Process */}
+      {/* 4. 5-Step Process */}
       <ProcessSection />
 
-      {/* 6. Dynamic Consultation CTA Banner */}
+      {/* 5. Dynamic Consultation CTA Banner */}
       <section className="bg-ink py-14 sm:py-20 text-center text-background relative overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-15">
           <img
@@ -464,13 +460,13 @@ export default function ServicesPage() {
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 max-w-md sm:max-w-none mx-auto">
-            <Link
-              href={cta.buttonLink || "/contact"}
-              className="btn-luxe gradient-gold text-ink font-bold shadow-luxe py-3 px-6 sm:px-8 text-xs tracking-wider uppercase w-full sm:w-auto flex items-center justify-center gap-2"
+            <a
+              href={`tel:${contact?.phone ? (contact.phone.startsWith("+") ? contact.phone : `+91${contact.phone}`) : "+917057357240"}`}
+              className="btn-luxe gradient-gold text-ink font-bold shadow-luxe py-3 px-6 sm:px-8 text-xs tracking-wider uppercase w-full sm:w-auto flex items-center justify-center gap-2 cursor-pointer"
             >
+              <Phone className="h-4 w-4 shrink-0" />
               <span>{cta.buttonText || "Book Your Free Consultation"}</span>
-              <ArrowRight className="h-4 w-4 shrink-0" />
-            </Link>
+            </a>
 
             {contact?.phone && (
               <a
@@ -534,13 +530,13 @@ export default function ServicesPage() {
                 Close
               </button>
 
-              <Link
-                href={`/contact?service=${encodeURIComponent(selectedDetailItem.title)}`}
-                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5 font-semibold flex items-center gap-1.5 shadow-sm"
+              <a
+                href={`tel:${contact?.phone ? (contact.phone.startsWith("+") ? contact.phone : `+91${contact.phone}`) : "+917057357240"}`}
+                className="btn-luxe gradient-royal text-primary-foreground text-xs py-2 px-5 font-semibold flex items-center gap-1.5 shadow-sm cursor-pointer"
               >
-                <span>Inquire About This {selectedDetailItem.itemType || "Service"}</span>
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
+                <Phone className="h-3.5 w-3.5" />
+                <span>Call to Inquire About This {selectedDetailItem.itemType || "Service"}</span>
+              </a>
             </div>
           </div>
         </div>

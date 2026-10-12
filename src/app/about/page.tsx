@@ -6,7 +6,6 @@ import SiteLayout from "@/layouts/SiteLayout";
 import FounderFeatureSection from "@/components/about/FounderFeatureSection";
 import TeamSection from "@/components/home/TeamSection";
 import ManagementVerticalsSection from "@/components/about/ManagementVerticalsSection";
-import LogoRepresentationSection from "@/components/about/LogoRepresentationSection";
 import VisionMissionSection from "@/components/about/VisionMissionSection";
 import WhyConfianzaSection from "@/components/about/WhyConfianzaSection";
 import CoreValuesSection from "@/components/about/CoreValuesSection";
@@ -52,10 +51,7 @@ export default function AboutPage() {
       {/* 3. Meet Our Visionaries & Coordinators */}
       <TeamSection />
 
-      {/* 4. The Story Behind Our Emblem */}
-      <LogoRepresentationSection />
-
-      {/* 5. Our Vision & Our Mission */}
+      {/* 4. Our Vision & Our Mission */}
       <VisionMissionSection />
 
       {/* 6. Why Confianza Events & Entertainment */}

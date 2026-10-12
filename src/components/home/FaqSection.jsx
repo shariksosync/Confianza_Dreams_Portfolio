@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronDown, HelpCircle, MessageCircle } from "lucide-react";
+import { ChevronDown, HelpCircle, MessageCircle, Phone } from "lucide-react";
 import { useSite } from "../../context/SiteContext";
 import SectionHeading from "../ui/SectionHeading";
 
@@ -88,12 +88,13 @@ export default function FaqSection() {
               <MessageCircle className="h-4 w-4 shrink-0" />
               <span>WhatsApp Us</span>
             </a>
-            <Link
-              href="/contact"
-              className="btn-luxe gradient-royal text-primary-foreground text-xs font-semibold py-2.5 px-4 flex items-center justify-center w-full sm:w-auto text-center"
+            <a
+              href={`tel:${contact?.phone ? (contact.phone.startsWith("+") ? contact.phone : `+91${contact.phone}`) : "+917057357240"}`}
+              className="btn-luxe gradient-royal text-primary-foreground text-xs font-semibold py-2.5 px-4 flex items-center justify-center gap-1.5 w-full sm:w-auto text-center cursor-pointer"
             >
-              Contact Form
-            </Link>
+              <Phone className="h-4 w-4 shrink-0" />
+              <span>Direct Call</span>
+            </a>
           </div>
         </div>
       </div>

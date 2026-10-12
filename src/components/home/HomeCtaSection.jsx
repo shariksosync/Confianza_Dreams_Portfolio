@@ -75,14 +75,13 @@ export default function HomeCtaSection() {
 
           {/* Interactive CTAs */}
           <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto">
-            <button
-              type="button"
-              onClick={() => setModalOpen(true)}
+            <a
+              href={`tel:${phone}`}
               className="btn-luxe gradient-royal text-primary-foreground shadow-luxe font-semibold py-3 px-6 sm:py-3.5 sm:px-8 text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer transition hover:scale-105 w-full sm:w-auto"
             >
+              <Phone className="h-4 w-4 shrink-0" />
               <span>Book Free Consultation</span>
-              <ArrowRight className="h-4 w-4 shrink-0" />
-            </button>
+            </a>
 
             <a
               href={`tel:${phone}`}
@@ -115,13 +114,15 @@ export default function HomeCtaSection() {
               <span>Open Daily: 10:00 AM – 9:00 PM</span>
             </div>
             <span className="hidden sm:inline text-white/20">•</span>
-            <Link
-              href="/contact"
+            <a
+              href="https://maps.google.com/?q=Warje+Jakat+Naka,+Pune,+Maharashtra+411052"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-secondary hover:underline font-medium flex items-center gap-1"
             >
-              <span>View Full Studio &amp; Maps</span>
+              <span>View Studio On Google Maps</span>
               <ArrowRight className="h-3 w-3 shrink-0" />
-            </Link>
+            </a>
           </div>
         </div>
       </section>

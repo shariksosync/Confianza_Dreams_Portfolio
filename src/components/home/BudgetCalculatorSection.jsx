@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Calculator, Sparkles, Check, ArrowRight, Info } from "lucide-react";
+import { Calculator, Sparkles, Check, ArrowRight, Info, Phone } from "lucide-react";
 import SectionHeading from "../ui/SectionHeading";
 
 export default function BudgetCalculatorSection() {
@@ -261,13 +261,13 @@ export default function BudgetCalculatorSection() {
               </p>
             </div>
 
-            <Link
-              href="/contact"
-              className="btn-luxe gradient-royal w-full text-primary-foreground text-xs font-semibold shadow-luxe text-center"
+            <a
+              href="tel:+917057357240"
+              className="btn-luxe gradient-royal w-full text-primary-foreground text-xs font-semibold shadow-luxe text-center flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>Talk to Ashish About This Estimate</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
+              <Phone className="h-3.5 w-3.5" />
+              <span>Talk to Ashish About This Estimate (+91 7057357240)</span>
+            </a>
           </div>
         </div>
       </div>
