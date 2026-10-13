@@ -2654,6 +2654,8 @@ function AboutEditorModule({ site, showSaved }) {
   const [aboutData, setAboutData] = useState(() => ({
     heading: site.about?.heading || "Where Weddings Become Stories",
     story: site.about?.story || "At Confianza, we're the romantic and elegant wedding experts who bring love stories to life with passion and precision. For us, your event is no less than our own.",
+    brandImage: site.about?.brandImage || site.about?.brandIdentityImage || "https://res.cloudinary.com/tridevsosync/image/upload/v1791533413/confianza_events/o7afgfqbzmoju31zki1x.jpg",
+    brandIdentityImage: site.about?.brandIdentityImage || site.about?.brandImage || "https://res.cloudinary.com/tridevsosync/image/upload/v1791533413/confianza_events/o7afgfqbzmoju31zki1x.jpg",
     headerBanner: {
       badge: site.about?.headerBanner?.badge || "Since 2018 • Warje, Pune",
       title: site.about?.headerBanner?.title || site.about?.heading || "Where Weddings Become Stories",
@@ -2793,6 +2795,16 @@ function AboutEditorModule({ site, showSaved }) {
       setAboutData((prev) => ({
         ...prev,
         ...site.about,
+        brandImage:
+          site.about?.brandImage ||
+          site.about?.brandIdentityImage ||
+          prev.brandImage ||
+          "https://res.cloudinary.com/tridevsosync/image/upload/v1791533413/confianza_events/o7afgfqbzmoju31zki1x.jpg",
+        brandIdentityImage:
+          site.about?.brandIdentityImage ||
+          site.about?.brandImage ||
+          prev.brandIdentityImage ||
+          "https://res.cloudinary.com/tridevsosync/image/upload/v1791533413/confianza_events/o7afgfqbzmoju31zki1x.jpg",
         headerBanner: {
           badge: site.about?.headerBanner?.badge || "Since 2018 • Warje, Pune",
           title: site.about?.headerBanner?.title || site.about?.heading || "Where Weddings Become Stories",
@@ -4762,7 +4774,7 @@ function ServicesEditorModule({ site, showSaved }) {
     headline: "Ready to Begin Curating Your Wedding?",
     subtitle:
       "Book a private 60–90 minute consultation with Ashish Wankhede in Warje, Pune, or via virtual video call.",
-    buttonText: "Book Your Free Consultation",
+    buttonText: "Call For Enquiry",
     buttonLink: "/contact",
     notice: "Free Consultation • No Commitment Required",
     perks: [
@@ -6066,7 +6078,7 @@ function ServicesEditorModule({ site, showSaved }) {
                 value={ctaForm.buttonText || ""}
                 onChange={(e) => setCtaForm({ ...ctaForm, buttonText: e.target.value })}
                 className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
-                placeholder="e.g. Book Your Free Consultation"
+                placeholder="e.g. Call For Enquiry"
               />
             </div>
 
@@ -6222,7 +6234,7 @@ function PortfolioEditorModule({ site, showSaved }) {
     eyebrow: "LET'S PLAN YOUR SPECIAL DAY",
     headline: "Ready to Plan Your Dream Wedding?",
     subtitle: "Connect directly with founders Ashish Wankhede and Rutik Pund to discuss your venue options, custom 3D decor ideas, and event timeline.",
-    buttonText: "Book Free Consultation",
+    buttonText: "Call For Enquiry",
     buttonLink: "/contact",
     notice: "Free Consultation • No Obligation",
     perks: [
@@ -7835,7 +7847,7 @@ function PortfolioEditorModule({ site, showSaved }) {
                   value={ctaData.buttonText || ""}
                   onChange={(e) => setCtaData({ ...ctaData, buttonText: e.target.value })}
                   className="w-full rounded-xl border border-border bg-card px-3.5 py-2 text-xs"
-                  placeholder="Book Your Free Consultation"
+                  placeholder="Call For Enquiry"
                 />
               </div>
 
@@ -7959,7 +7971,7 @@ function PortfolioEditorModule({ site, showSaved }) {
                 {/* Simulated Action Buttons */}
                 <div className="pt-3 flex flex-wrap items-center justify-center gap-2">
                   <div className="btn-luxe gradient-gold text-ink font-bold py-2 px-4 text-[0.7rem] tracking-wider uppercase flex items-center gap-1.5 shadow-md">
-                    <span>{ctaData.buttonText || "Book Your Free Consultation"}</span>
+                    <span>{ctaData.buttonText || "Call For Enquiry"}</span>
                   </div>
                   <div className="btn-luxe bg-white/10 text-white border border-white/20 py-2 px-3 text-[0.7rem] font-semibold flex items-center gap-1.5">
                     <Phone className="h-3 w-3 text-secondary" />
@@ -8136,7 +8148,7 @@ function GalleryEditorModule({ site, showSaved }) {
     headline: "Let Us Plan Your Dream Wedding",
     subtitle:
       "Connect directly with founders Ashish Wankhede and Rutik Pund in Warje, Pune to plan your wedding decor.",
-    buttonText: "Book Free Consultation",
+    buttonText: "Call For Enquiry",
     buttonLink: "/contact",
     notice: "Free 1-on-1 Consultation • Direct Founder Interaction",
     perks: [

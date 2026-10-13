@@ -46,7 +46,7 @@ const SiteContentSchema = new Schema(
       headline: { type: String, default: "Where Weddings Become Stories" },
       subtitle: { type: String, default: "From the first consultation to the final celebration, Confianza crafts personalised, flawlessly executed weddings that your guests will talk about for years." },
       primaryCta: {
-        label: { type: String, default: "Book Consultation" },
+        label: { type: String, default: "Call For Enquiry" },
         href: { type: String, default: "/contact" },
       },
       secondaryCta: {
@@ -94,6 +94,14 @@ const SiteContentSchema = new Schema(
     about: {
       heading: { type: String, default: "Where Weddings Become Stories" },
       story: { type: String },
+      brandImage: {
+        type: String,
+        default: "https://res.cloudinary.com/tridevsosync/image/upload/v1791533413/confianza_events/o7afgfqbzmoju31zki1x.jpg",
+      },
+      brandIdentityImage: {
+        type: String,
+        default: "https://res.cloudinary.com/tridevsosync/image/upload/v1791533413/confianza_events/o7afgfqbzmoju31zki1x.jpg",
+      },
       headerBanner: {
         badge: { type: String, default: "Since 2018 • Warje, Pune" },
         title: { type: String, default: "Where Weddings Become Stories" },
@@ -269,7 +277,7 @@ const SiteContentSchema = new Schema(
         default:
           "Book a private 60–90 minute consultation with Ashish Wankhede in Warje, Pune, or via virtual video call.",
       },
-      buttonText: { type: String, default: "Book Your Free Consultation" },
+      buttonText: { type: String, default: "Call For Enquiry" },
       buttonLink: { type: String, default: "/contact" },
       notice: { type: String, default: "Free Consultation • No Commitment Required" },
       perks: [
@@ -313,7 +321,7 @@ const SiteContentSchema = new Schema(
         default:
           "Talk directly with Ashish Wankhede and Rutik Pund. We will help you pick a venue, show you 3D decor designs, and handle every detail from start to finish.",
       },
-      buttonText: { type: String, default: "Book Free Consultation" },
+      buttonText: { type: String, default: "Call For Enquiry" },
       buttonLink: { type: String, default: "/contact" },
       notice: { type: String, default: "Free Consultation • No Obligation" },
       perks: [
@@ -361,7 +369,7 @@ const SiteContentSchema = new Schema(
       headline: { type: String, default: "Were You A Confianza Couple or Guest?" },
       subtitle: { type: String, default: "We would love to hear your memories, photos, and heartfelt reflections of your celebration." },
       buttonText: { type: String, default: "Submit Your Review" },
-      secondaryButtonText: { type: String, default: "Book A Consultation" },
+      secondaryButtonText: { type: String, default: "Call For Enquiry" },
     },
     galleryHeader: {
       badge: { type: String, default: "Curated Visual Archive" },
@@ -413,7 +421,7 @@ const SiteContentSchema = new Schema(
         default:
           "Connect directly with founders Ashish Wankhede and Rutik Pund in Warje, Pune to design your bespoke 3D CAD wedding decor.",
       },
-      buttonText: { type: String, default: "Book Your Free Consultation" },
+      buttonText: { type: String, default: "Call For Enquiry" },
       buttonLink: { type: String, default: "/contact" },
       notice: { type: String, default: "Free 1-on-1 Consultation • Direct Founder Interaction" },
       perks: [{ type: String }],

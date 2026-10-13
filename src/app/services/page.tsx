@@ -158,7 +158,7 @@ export default function ServicesPage() {
     headline: "Ready to Plan Your Wedding?",
     subtitle:
       "Book a free 60–90 minute consultation with Ashish Wankhede in Warje, Pune, or via video call.",
-    buttonText: "Book Free Consultation",
+    buttonText: "Call For Enquiry",
     buttonLink: "/contact",
     notice: "Free Consultation • No Commitment Required",
     perks: [
@@ -465,7 +465,11 @@ export default function ServicesPage() {
               className="btn-luxe gradient-gold text-ink font-bold shadow-luxe py-3 px-6 sm:px-8 text-xs tracking-wider uppercase w-full sm:w-auto flex items-center justify-center gap-2 cursor-pointer"
             >
               <Phone className="h-4 w-4 shrink-0" />
-              <span>{cta.buttonText || "Book Your Free Consultation"}</span>
+              <span>
+                {(!cta.buttonText || cta.buttonText.toLowerCase().includes("consultation") || cta.buttonText.toLowerCase().includes("book"))
+                  ? "Call For Enquiry"
+                  : cta.buttonText}
+              </span>
             </a>
 
             {contact?.phone && (

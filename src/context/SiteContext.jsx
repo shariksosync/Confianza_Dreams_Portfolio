@@ -38,7 +38,7 @@ const initialEmptyState = {
     eyebrow: "",
     headline: "",
     subtitle: "",
-    primaryCta: { label: "Book Consultation", href: "/contact" },
+    primaryCta: { label: "Call For Enquiry", href: "/contact" },
     secondaryCta: { label: "View Portfolio", href: "/portfolio" },
     images: [
       "https://res.cloudinary.com/tridevsosync/image/upload/v1790881509/confianza_heroes/home_hero_1.jpg",
@@ -90,7 +90,8 @@ const initialEmptyState = {
     story: "",
     mission: "",
     vision: "",
-    brandImage: "/images/hero-1.jpg",
+    brandImage: "https://res.cloudinary.com/tridevsosync/image/upload/v1791533413/confianza_events/o7afgfqbzmoju31zki1x.jpg",
+    brandIdentityImage: "https://res.cloudinary.com/tridevsosync/image/upload/v1791533413/confianza_events/o7afgfqbzmoju31zki1x.jpg",
     values: [],
     timeline: [],
   },
@@ -206,7 +207,7 @@ const initialEmptyState = {
     headline: "Ready to Plan Your Wedding?",
     subtitle:
       "Book a free 60–90 minute consultation with Ashish Wankhede in Warje, Pune, or via video call.",
-    buttonText: "Book Free Consultation",
+    buttonText: "Call For Enquiry",
     buttonLink: "/contact",
     notice: "Free Consultation • No Commitment Required",
     perks: [
@@ -247,7 +248,7 @@ const initialEmptyState = {
     headline: "Let’s Plan Your Dream Wedding",
     subtitle:
       "Talk directly with Ashish Wankhede and Rutik Pund. We will help you pick a venue, show you 3D decor designs, and handle every detail from start to finish.",
-    buttonText: "Book Free Consultation",
+    buttonText: "Call For Enquiry",
     buttonLink: "/contact",
     notice: "100% Free Consultation • No Obligation",
     perks: [
@@ -324,7 +325,7 @@ const initialEmptyState = {
     headline: "Let Us Plan Your Dream Wedding",
     subtitle:
       "Connect directly with founders Ashish Wankhede and Rutik Pund in Warje, Pune to plan your wedding decor.",
-    buttonText: "Book Free Consultation",
+    buttonText: "Call For Enquiry",
     buttonLink: "/contact",
     notice: "Free 1-on-1 Consultation • Direct Founder Interaction",
     perks: [
@@ -426,7 +427,7 @@ const initialEmptyState = {
     headline: "Did We Plan Your Wedding?",
     subtitle: "We would love to hear your feedback, memories, and experience with our team.",
     buttonText: "Submit Your Review",
-    secondaryButtonText: "Book A Consultation",
+    secondaryButtonText: "Call For Enquiry",
   },
   blogs: [],
   faq: [],
@@ -479,8 +480,8 @@ export function SiteProvider({ children }) {
   const refreshData = useCallback(async (opts = {}) => {
     try {
       setRefreshing(true);
-      const url = opts.fresh ? `/api/site?fresh=true&t=${Date.now()}` : `/api/site`;
-      const siteRes = await fetch(url, opts.fresh ? { cache: "no-store" } : undefined);
+      const url = opts.fresh ? `/api/site?fresh=true&t=${Date.now()}` : `/api/site?t=${Date.now()}`;
+      const siteRes = await fetch(url, { cache: "no-store" });
 
       if (siteRes.ok) {
         const siteJson = await siteRes.json();
@@ -495,6 +496,20 @@ export function SiteProvider({ children }) {
           setData((prev) => ({
             ...prev,
             ...siteJson.data,
+            about: {
+              ...prev.about,
+              ...(siteJson.data.about || {}),
+              brandImage:
+                siteJson.data.about?.brandImage ||
+                siteJson.data.about?.brandIdentityImage ||
+                prev.about?.brandImage ||
+                "https://res.cloudinary.com/tridevsosync/image/upload/v1791533413/confianza_events/o7afgfqbzmoju31zki1x.jpg",
+              brandIdentityImage:
+                siteJson.data.about?.brandIdentityImage ||
+                siteJson.data.about?.brandImage ||
+                prev.about?.brandIdentityImage ||
+                "https://res.cloudinary.com/tridevsosync/image/upload/v1791533413/confianza_events/o7afgfqbzmoju31zki1x.jpg",
+            },
             settings: { ...prev.settings, ...cleanSettings },
             homeStory: { ...initialEmptyState.homeStory, ...(siteJson.data.homeStory || {}) },
             contact: { ...prev.contact, ...(siteJson.data.contact || {}) },

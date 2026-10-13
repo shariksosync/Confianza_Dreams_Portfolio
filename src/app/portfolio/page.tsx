@@ -25,7 +25,7 @@ export default function PortfolioPage() {
     headline: "Let’s Plan Your Dream Wedding",
     subtitle:
       "Talk directly with Ashish Wankhede and Rutik Pund. We will help you pick a venue, show you 3D decor designs, and handle every detail from start to finish.",
-    buttonText: "Book Free Consultation",
+    buttonText: "Call For Enquiry",
     buttonLink: "/contact",
     notice: "100% Free Consultation • No Obligation",
     perks: [
@@ -150,7 +150,11 @@ export default function PortfolioPage() {
               className="btn-luxe gradient-gold text-ink font-bold shadow-luxe py-3 px-8 text-xs tracking-wider uppercase flex items-center justify-center gap-2 cursor-pointer"
             >
               <Phone className="h-4 w-4 shrink-0" />
-              <span>{cta.buttonText || "Book Free Consultation"}</span>
+              <span>
+                {(!cta.buttonText || cta.buttonText.toLowerCase().includes("consultation") || cta.buttonText.toLowerCase().includes("book"))
+                  ? "Call For Enquiry"
+                  : cta.buttonText}
+              </span>
             </a>
 
             {contact?.phone && (
