@@ -80,7 +80,7 @@ export default function HomeCtaSection() {
               className="btn-luxe gradient-royal text-primary-foreground shadow-luxe font-semibold py-3 px-6 sm:py-3.5 sm:px-8 text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer transition hover:scale-105 w-full sm:w-auto"
             >
               <Phone className="h-4 w-4 shrink-0" />
-              <span>Book Free Consultation</span>
+              <span>Call For Enquiry</span>
             </a>
 
             <a

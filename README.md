@@ -406,7 +406,7 @@ No backend
 
 Location
 
-Google Maps Embed
+Google Maps Embed finally
 
 Address
 

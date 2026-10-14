@@ -5,6 +5,7 @@ import { ArrowRight, Sparkles, Phone } from "lucide-react";
 import SiteLayout from "@/layouts/SiteLayout";
 import FounderFeatureSection from "@/components/about/FounderFeatureSection";
 import TeamSection from "@/components/home/TeamSection";
+import LogoRepresentationSection from "@/components/about/LogoRepresentationSection";
 import ManagementVerticalsSection from "@/components/about/ManagementVerticalsSection";
 import VisionMissionSection from "@/components/about/VisionMissionSection";
 import WhyConfianzaSection from "@/components/about/WhyConfianzaSection";
@@ -51,7 +52,10 @@ export default function AboutPage() {
       {/* 3. Meet Our Visionaries & Coordinators */}
       <TeamSection />
 
-      {/* 4. Our Vision & Our Mission */}
+      {/* 4. Brand Identity Showcase Image */}
+      <LogoRepresentationSection />
+
+      {/* 5. Our Vision & Our Mission */}
       <VisionMissionSection />
 
       {/* 6. Why Confianza Events & Entertainment */}
@@ -85,7 +89,7 @@ export default function AboutPage() {
               className="btn-luxe gradient-gold text-ink font-semibold shadow-luxe py-3 px-6 sm:px-8 text-xs uppercase tracking-wider flex items-center justify-center gap-2 w-full sm:w-auto cursor-pointer"
             >
               <Phone className="h-4 w-4 shrink-0" />
-              <span>call for enquiry</span>
+              <span>Call For Enquiry</span>
             </a>
           </div>
         </div>

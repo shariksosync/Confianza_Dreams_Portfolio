@@ -169,7 +169,7 @@ export default function TestimonialsPage() {
     subtitle:
       "We would love to hear your feedback, memories, and experience with our team.",
     buttonText: "Submit Your Review",
-    secondaryButtonText: "Book A Consultation",
+    secondaryButtonText: "Call For Enquiry",
   };
 
   // State
@@ -390,7 +390,7 @@ export default function TestimonialsPage() {
               className="btn-luxe bg-white/10 text-white border border-white/25 hover:bg-white/20 text-xs py-2.5 sm:py-3 px-6 sm:px-7 uppercase tracking-wider font-semibold transition flex items-center justify-center gap-2 w-full sm:w-auto cursor-pointer"
             >
               <Phone className="h-4 w-4 shrink-0 text-secondary" />
-              <span>Book A Consultation</span>
+              <span>Call For Enquiry</span>
             </a>
           </div>
 
@@ -795,7 +795,11 @@ export default function TestimonialsPage() {
               className="btn-luxe bg-white/10 text-white border border-white/25 hover:bg-white/20 text-xs py-2.5 sm:py-3 px-6 sm:px-8 uppercase tracking-wider font-semibold flex items-center justify-center gap-2 w-full sm:w-auto cursor-pointer"
             >
               <Phone className="h-4 w-4 shrink-0 text-secondary" />
-              <span>{cta.secondaryButtonText || "Book A Consultation"}</span>
+              <span>
+                {(!cta.secondaryButtonText || cta.secondaryButtonText.toLowerCase().includes("consultation") || cta.secondaryButtonText.toLowerCase().includes("book"))
+                  ? "Call For Enquiry"
+                  : cta.secondaryButtonText}
+              </span>
             </a>
           </div>
 

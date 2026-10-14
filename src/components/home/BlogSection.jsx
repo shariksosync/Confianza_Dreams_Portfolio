@@ -184,7 +184,7 @@ export default function BlogSection({ isStandalone = false }) {
                 onClick={() => setSelectedArticle(null)}
                 className="btn-modal-primary cursor-pointer"
               >
-                Call for Consultation (+91 7057357240)
+                Call For Enquiry (+91 7057357240)
               </a>
             </div>
           </div>

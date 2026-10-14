@@ -142,7 +142,11 @@ export default function GalleryPage() {
               className="btn-luxe gradient-gold text-ink font-bold text-xs py-3 px-6 sm:px-8 shadow-luxe flex items-center justify-center gap-2 w-full sm:w-auto text-center cursor-pointer"
             >
               <Phone className="h-4 w-4 shrink-0" />
-              <span>{cta.buttonText || "Book Free Consultation"}</span>
+              <span>
+                {(!cta.buttonText || cta.buttonText.toLowerCase().includes("consultation") || cta.buttonText.toLowerCase().includes("book"))
+                  ? "Call For Enquiry"
+                  : cta.buttonText}
+              </span>
             </a>
 
             <a
