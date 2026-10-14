@@ -329,7 +329,7 @@ const SiteContentSchema = new Schema(
         default:
           "See what couples and their families say about trusting Confianza to design and manage their special day.",
       },
-      image: { type: String, default: "https://res.cloudinary.com/tridevsosync/image/upload/v1790838224/confianza_portfolio/portfolio_hero_banner.jpg" },
+      image: { type: String, default: "https://res.cloudinary.com/kipl0jjw/image/upload/v1791962068/confianza_portfolio/portfolio_hero_banner.jpg" },
       stats: [{ type: String }],
     },
     testimonialsCategories: [
@@ -372,7 +372,7 @@ const SiteContentSchema = new Schema(
         default:
           "Immerse yourself in close-up details of floral centerpieces, bridal entries, fairy-lit courtyards, and grand lavender stages.",
       },
-      image: { type: String, default: "https://res.cloudinary.com/tridevsosync/image/upload/v1790838224/confianza_heroes/gallery_hero_banner.jpg" },
+      image: { type: String, default: "https://res.cloudinary.com/kipl0jjw/image/upload/v1790838224/confianza_heroes/gallery_hero_banner.jpg" },
       stats: [{ type: String }],
     },
     galleryCategories: [

@@ -16,7 +16,7 @@ export default function GalleryPage() {
 
   const heroImage =
     header.image ||
-    "https://res.cloudinary.com/tridevsosync/image/upload/v1790881511/confianza_heroes/gallery_hero_banner.jpg";
+    "https://res.cloudinary.com/kipl0jjw/image/upload/v1791962052/confianza_heroes/gallery_hero_banner.jpg";
 
   const statsList =
     Array.isArray(header.stats) && header.stats.length > 0

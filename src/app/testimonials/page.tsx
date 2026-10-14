@@ -74,7 +74,7 @@ export default function TestimonialsPage() {
     subtitle:
       "Read honest feedback and reviews from couples and families whose weddings we planned.",
     image:
-      "https://res.cloudinary.com/tridevsosync/image/upload/v1790838224/confianza_portfolio/portfolio_hero_banner.jpg",
+      "https://res.cloudinary.com/kipl0jjw/image/upload/v1791962068/confianza_portfolio/portfolio_hero_banner.jpg",
     stats: [
       "5.0 Average Couple Rating ★",
       "500+ Happy Weddings Across India",
@@ -350,7 +350,7 @@ export default function TestimonialsPage() {
       <section className="relative bg-ink pt-28 pb-14 sm:pt-36 sm:pb-20 lg:pt-44 lg:pb-24 text-background overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-25">
           <img
-            src={header.image || "https://res.cloudinary.com/tridevsosync/image/upload/v1790838224/confianza_portfolio/portfolio_hero_banner.jpg"}
+            src={header.image || "https://res.cloudinary.com/kipl0jjw/image/upload/v1791962068/confianza_portfolio/portfolio_hero_banner.jpg"}
             alt="Confianza Couple Stories"
             className="h-full w-full object-cover"
           />
@@ -574,12 +574,12 @@ export default function TestimonialsPage() {
                       <div className="flex items-center gap-3 sm:gap-3.5">
                         <div className="relative">
                           <img
-                            src={rev.image || "https://res.cloudinary.com/tridevsosync/image/upload/v1790838237/confianza_portfolio/testimonial_ananya_rohit_roy.jpg"}
+                            src={rev.image || "https://res.cloudinary.com/kipl0jjw/image/upload/v1791962075/confianza_portfolio/testimonial_ananya_rohit_roy.jpg"}
                             alt={rev.name}
                             className="h-11 w-11 sm:h-13 sm:w-13 rounded-full object-cover ring-2 ring-secondary/60 shadow-sm"
                             onError={(e) => {
                               e.currentTarget.src =
-                                "https://res.cloudinary.com/tridevsosync/image/upload/v1790838237/confianza_portfolio/testimonial_ananya_rohit_roy.jpg";
+                                "https://res.cloudinary.com/kipl0jjw/image/upload/v1791962075/confianza_portfolio/testimonial_ananya_rohit_roy.jpg";
                             }}
                           />
                           {hasVideo && (

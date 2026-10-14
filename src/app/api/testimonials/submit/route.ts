@@ -44,7 +44,7 @@ export async function POST(req: Request) {
       name: name.trim(),
       partnerName: partnerName ? partnerName.trim() : "",
       relationship: relationship || "Bride & Groom",
-      image: image || "https://res.cloudinary.com/tridevsosync/image/upload/v1790838237/confianza_portfolio/testimonial_ananya_rohit_roy.jpg",
+      image: image || "https://res.cloudinary.com/kipl0jjw/image/upload/v1791962075/confianza_portfolio/testimonial_ananya_rohit_roy.jpg",
       videoUrl: videoUrl ? videoUrl.trim() : "",
       rating: numRating,
       category: category || "Royal & Destination Weddings",

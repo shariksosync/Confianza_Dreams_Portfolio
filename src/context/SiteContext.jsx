@@ -41,9 +41,9 @@ const initialEmptyState = {
     primaryCta: { label: "Book Consultation", href: "/contact" },
     secondaryCta: { label: "View Portfolio", href: "/portfolio" },
     images: [
-      "https://res.cloudinary.com/tridevsosync/image/upload/v1790881509/confianza_heroes/home_hero_1.jpg",
-      "https://res.cloudinary.com/tridevsosync/image/upload/v1790881510/confianza_heroes/home_hero_2.jpg",
-      "https://res.cloudinary.com/tridevsosync/image/upload/v1790881511/confianza_heroes/home_hero_3.jpg",
+      "https://res.cloudinary.com/kipl0jjw/image/upload/v1791962054/confianza_heroes/home_hero_1.jpg",
+      "https://res.cloudinary.com/kipl0jjw/image/upload/v1791962055/confianza_heroes/home_hero_2.jpg",
+      "https://res.cloudinary.com/kipl0jjw/image/upload/v1791962056/confianza_heroes/home_hero_3.jpg",
     ],
     floatingStats: [],
   },
@@ -264,7 +264,7 @@ const initialEmptyState = {
     title: "Wedding Photo Gallery",
     subtitle:
       "Photos of our mandap decor, flower arrangements, bridal entries, and grand wedding stages.",
-    image: "https://res.cloudinary.com/tridevsosync/image/upload/v1790881511/confianza_heroes/gallery_hero_banner.jpg",
+    image: "https://res.cloudinary.com/kipl0jjw/image/upload/v1791962052/confianza_heroes/gallery_hero_banner.jpg",
     stats: [
       "500+ Happy Weddings Across India",
       "15+ Cities Across India",
@@ -353,7 +353,7 @@ const initialEmptyState = {
     title: "Real Stories from Happy Families",
     subtitle:
       "See what couples and their families say about trusting Confianza to design and manage their special day.",
-    image: "https://res.cloudinary.com/tridevsosync/image/upload/v1790838224/confianza_portfolio/portfolio_hero_banner.jpg",
+    image: "https://res.cloudinary.com/kipl0jjw/image/upload/v1791962068/confianza_portfolio/portfolio_hero_banner.jpg",
     stats: [
       "5.0 Average Couple Rating ★",
       "500+ Happy Weddings Across India",

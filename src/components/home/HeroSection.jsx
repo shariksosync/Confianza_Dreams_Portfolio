@@ -5,9 +5,9 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useSite } from "../../context/SiteContext";
 
 const DEFAULT_SLIDES = [
-  "https://res.cloudinary.com/tridevsosync/image/upload/v1790881509/confianza_heroes/home_hero_1.jpg",
-  "https://res.cloudinary.com/tridevsosync/image/upload/v1790881510/confianza_heroes/home_hero_2.jpg",
-  "https://res.cloudinary.com/tridevsosync/image/upload/v1790881511/confianza_heroes/home_hero_3.jpg",
+  "https://res.cloudinary.com/kipl0jjw/image/upload/v1791962054/confianza_heroes/home_hero_1.jpg",
+  "https://res.cloudinary.com/kipl0jjw/image/upload/v1791962055/confianza_heroes/home_hero_2.jpg",
+  "https://res.cloudinary.com/kipl0jjw/image/upload/v1791962056/confianza_heroes/home_hero_3.jpg",
 ];
 
 export default function HeroSection() {

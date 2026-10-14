@@ -8,7 +8,7 @@ const globalForMongo = globalThis as typeof globalThis & MongoCache;
 
 // Extract database name from MONGODB_URI
 export function getDatabaseName(): string {
-  const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/confianza_db";
+  const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/confianza";
   const lastSegment = uri.split("/").pop() || "";
   const withoutQuery = lastSegment.split("?")[0];
   const dbName = withoutQuery.trim();
@@ -16,7 +16,7 @@ export function getDatabaseName(): string {
 }
 
 export async function getMongoClient(uri?: string) {
-  const targetUri = uri || process.env.MONGODB_URI || "mongodb://localhost:27017/confianza_db";
+  const targetUri = uri || process.env.MONGODB_URI || "mongodb://localhost:27017/confianza";
 
   if (!globalForMongo.clientPromises) {
     globalForMongo.clientPromises = new Map();
@@ -48,7 +48,7 @@ export async function getMongoClient(uri?: string) {
 }
 
 export async function getDatabase() {
-  const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/confianza_db";
+  const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/confianza";
   const client = await getMongoClient(uri);
   return client.db(getDatabaseName());
 }

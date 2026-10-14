@@ -26,7 +26,7 @@ const TestimonialSchema = new Schema<ITestimonial>(
     name: { type: String, required: true },
     partnerName: { type: String, default: "" },
     relationship: { type: String, default: "Bride & Groom" },
-    image: { type: String, default: "https://res.cloudinary.com/tridevsosync/image/upload/v1790838237/confianza_portfolio/testimonial_ananya_rohit_roy.jpg" },
+    image: { type: String, default: "https://res.cloudinary.com/kipl0jjw/image/upload/v1791962075/confianza_portfolio/testimonial_ananya_rohit_roy.jpg" },
     videoUrl: { type: String, default: "" },
     rating: { type: Number, default: 5, min: 0, max: 5 },
     category: { type: String, default: "Royal & Destination Weddings" },

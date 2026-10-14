@@ -8060,7 +8060,7 @@ function GalleryEditorModule({ site, showSaved }) {
     title: "Wedding Photo Gallery",
     subtitle:
       "Photos of our mandap decor, flower arrangements, bridal entries, and grand wedding stages.",
-    image: "https://res.cloudinary.com/tridevsosync/image/upload/v1790881511/confianza_heroes/gallery_hero_banner.jpg",
+    image: "https://res.cloudinary.com/kipl0jjw/image/upload/v1791962052/confianza_heroes/gallery_hero_banner.jpg",
     stats: [
       "500+ Happy Weddings Across India",
       "15+ Cities Across India",
@@ -9645,7 +9645,7 @@ function TestimonialsEditorModule({ site, showSaved }) {
       "Read honest feedback and reviews from couples and families whose weddings we planned.",
     image:
       site.testimonialsHeader?.image ||
-      "https://res.cloudinary.com/tridevsosync/image/upload/v1790838224/confianza_portfolio/portfolio_hero_banner.jpg",
+      "https://res.cloudinary.com/kipl0jjw/image/upload/v1791962068/confianza_portfolio/portfolio_hero_banner.jpg",
     stats: site.testimonialsHeader?.stats || [
       "5.0 Average Couple Rating ★",
       "500+ Happy Weddings Across India",
@@ -9985,11 +9985,11 @@ function TestimonialsEditorModule({ site, showSaved }) {
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-3 border-b border-border">
                       <div className="flex items-center gap-3.5">
                         <img
-                          src={rev.image || "https://res.cloudinary.com/tridevsosync/image/upload/v1790838237/confianza_portfolio/testimonial_ananya_rohit_roy.jpg"}
+                          src={rev.image || "https://res.cloudinary.com/kipl0jjw/image/upload/v1791962075/confianza_portfolio/testimonial_ananya_rohit_roy.jpg"}
                           alt={rev.name}
                           className="h-14 w-14 rounded-full object-cover ring-2 ring-secondary shadow-sm"
                           onError={(e) => {
-                            e.currentTarget.src = "https://res.cloudinary.com/tridevsosync/image/upload/v1790838237/confianza_portfolio/testimonial_ananya_rohit_roy.jpg";
+                            e.currentTarget.src = "https://res.cloudinary.com/kipl0jjw/image/upload/v1791962075/confianza_portfolio/testimonial_ananya_rohit_roy.jpg";
                           }}
                         />
                         <div>
@@ -10118,7 +10118,7 @@ function TestimonialsEditorModule({ site, showSaved }) {
                     date: "2026",
                     rating: 5,
                     category: categories[0]?.name || "Royal & Destination Weddings",
-                    image: "https://res.cloudinary.com/tridevsosync/image/upload/v1790838237/confianza_portfolio/testimonial_ananya_rohit_roy.jpg",
+                    image: "https://res.cloudinary.com/kipl0jjw/image/upload/v1791962075/confianza_portfolio/testimonial_ananya_rohit_roy.jpg",
                     videoUrl: "",
                     text: "",
                     featured: true,
@@ -10199,11 +10199,11 @@ function TestimonialsEditorModule({ site, showSaved }) {
                       <div className="flex items-center justify-between pb-3 border-b border-border/60">
                         <div className="flex items-center gap-3">
                           <img
-                            src={t.image || "https://res.cloudinary.com/tridevsosync/image/upload/v1790838237/confianza_portfolio/testimonial_ananya_rohit_roy.jpg"}
+                            src={t.image || "https://res.cloudinary.com/kipl0jjw/image/upload/v1791962075/confianza_portfolio/testimonial_ananya_rohit_roy.jpg"}
                             alt={t.name}
                             className="h-12 w-12 rounded-full object-cover ring-2 ring-secondary/50"
                             onError={(e) => {
-                              e.currentTarget.src = "https://res.cloudinary.com/tridevsosync/image/upload/v1790838237/confianza_portfolio/testimonial_ananya_rohit_roy.jpg";
+                              e.currentTarget.src = "https://res.cloudinary.com/kipl0jjw/image/upload/v1791962075/confianza_portfolio/testimonial_ananya_rohit_roy.jpg";
                             }}
                           />
                           <div>
@@ -10385,7 +10385,7 @@ function TestimonialsEditorModule({ site, showSaved }) {
 
               <ImageUploadField
                 label="Header Background Cover Image"
-                value={headerData.image || "https://res.cloudinary.com/tridevsosync/image/upload/v1790838224/confianza_portfolio/portfolio_hero_banner.jpg"}
+                value={headerData.image || "https://res.cloudinary.com/kipl0jjw/image/upload/v1791962068/confianza_portfolio/portfolio_hero_banner.jpg"}
                 onChange={(url) => setHeaderData({ ...headerData, image: url })}
               />
 
@@ -10469,12 +10469,12 @@ function TestimonialsEditorModule({ site, showSaved }) {
               <div className="relative bg-ink rounded-3xl p-8 sm:p-10 text-background overflow-hidden border border-secondary/30 shadow-2xl text-center">
                 <div className="absolute inset-0 z-0 opacity-25">
                   <img
-                    src={headerData.image || "https://res.cloudinary.com/tridevsosync/image/upload/v1790838224/confianza_portfolio/portfolio_hero_banner.jpg"}
+                    src={headerData.image || "https://res.cloudinary.com/kipl0jjw/image/upload/v1791962068/confianza_portfolio/portfolio_hero_banner.jpg"}
                     alt="Testimonials Preview"
                     className="h-full w-full object-cover"
                     onError={(e) => {
                       e.currentTarget.src =
-                        "https://res.cloudinary.com/tridevsosync/image/upload/v1790838224/confianza_portfolio/portfolio_hero_banner.jpg";
+                        "https://res.cloudinary.com/kipl0jjw/image/upload/v1791962068/confianza_portfolio/portfolio_hero_banner.jpg";
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/80 to-ink/40" />
